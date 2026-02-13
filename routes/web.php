@@ -12,8 +12,10 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+
     Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
     Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store');
+
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

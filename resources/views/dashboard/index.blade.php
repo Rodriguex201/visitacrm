@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
     <section class="space-y-5">
         <div class="flex items-start justify-between gap-3">
             <div>
@@ -10,15 +11,19 @@
 
             <button type="button" class="hidden items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 md:inline-flex">
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
                 </svg>
                 Nueva Visita
             </button>
 
+
             <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-lg font-semibold text-white shadow-sm transition hover:bg-blue-700 md:hidden">
+
                 +
             </button>
         </div>
+
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
             <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
@@ -69,20 +74,25 @@
                     <a href="#" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">
                         Ver todas
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
                         </svg>
                     </a>
                 </div>
 
+
                 <div class="flex min-h-40 items-center justify-center py-6 text-center text-base text-slate-500">
+
                     No hay visitas programadas
                 </div>
             </section>
+
 
             <section class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
                 <h2 class="text-2xl font-bold text-slate-950">Visitas Recientes</h2>
 
                 <div class="mt-3 space-y-2.5">
+
                     @php
                         $recentVisits = [
                             ['company' => 'Mundial armenia', 'date' => '21 ene 2026', 'status' => 'No disponible', 'status_class' => 'bg-gray-200 text-gray-700'],
@@ -94,12 +104,14 @@
                     @endphp
 
                     @foreach ($recentVisits as $visit)
+
                         <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">
                             <div>
                                 <p class="text-xl font-semibold leading-tight text-slate-950">{{ $visit['company'] }}</p>
                                 <p class="mt-0.5 text-sm text-slate-600">{{ $visit['date'] }}</p>
                             </div>
                             <span class="inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold {{ $visit['status_class'] }}">
+
                                 {{ $visit['status'] }}
                             </span>
                         </article>
