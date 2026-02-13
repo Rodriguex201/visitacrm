@@ -89,7 +89,7 @@
 
         <div class="space-y-3 pb-2">
             @foreach ($empresas as $empresa)
-                <article class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                <article x-data="{ empresa: @js($empresa) }" class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                     <div class="flex min-w-0 items-center gap-3">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -123,7 +123,9 @@
                     <div class="flex shrink-0 items-center gap-1">
                         <button
                             type="button"
-                            @click='openEditModal(@js($empresa))'
+
+                            @click="openEditModal(empresa)"
+
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                         >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
