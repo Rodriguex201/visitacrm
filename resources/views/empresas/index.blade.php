@@ -123,7 +123,9 @@
                     <div class="flex shrink-0 items-center gap-1">
                         <button
                             type="button"
+
                             @click="openEditModal(empresa)"
+
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                         >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
