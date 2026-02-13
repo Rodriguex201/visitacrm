@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .bg-brand {
+        @apply bg-[#2f68df];
+    }
+
+    .border-brand {
+        @apply border-[#2f68df];
+    }
+}
