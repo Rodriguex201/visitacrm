@@ -13,9 +13,6 @@
                 @click="openModal = true"
                 class="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5" />
-                </svg>
                 + Nueva
             </button>
         </div>
@@ -54,7 +51,7 @@
                         </div>
 
                         <div class="min-w-0">
-                            <p class="truncate text-xl font-semibold text-slate-950">{{ $empresa['nombre'] }}</p>
+                            <p class="truncate text-base font-semibold text-slate-950">{{ $empresa['nombre'] }}</p>
                             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
                                 <span class="inline-flex items-center gap-1">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -162,3 +159,4 @@
         </div>
     </section>
 @endsection
+
