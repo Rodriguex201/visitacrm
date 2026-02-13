@@ -12,7 +12,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen bg-[#e5e7eb] font-sans antialiased text-slate-900">
+    <body class="min-h-screen bg-white font-sans antialiased text-slate-900">
         <main class="flex min-h-screen items-center justify-center px-4 py-8">
             <section class="w-full max-w-xl text-center">
                 <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand shadow-lg shadow-blue-500/30">
