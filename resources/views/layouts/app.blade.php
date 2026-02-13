@@ -13,6 +13,12 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen bg-gray-50 font-sans antialiased text-slate-900">
+
+        @php
+            $isDashboard = request()->routeIs('dashboard');
+            $isEmpresas = request()->routeIs('empresas.*');
+        @endphp
+
         <div class="min-h-screen">
             <aside class="hidden md:fixed md:inset-y-0 md:flex md:w-[260px] md:flex-col md:border-r md:border-slate-200 md:bg-white">
 
@@ -22,7 +28,8 @@
                 </div>
 
                 <nav class="flex-1 space-y-1.5 px-3 py-4 text-sm">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg bg-blue-600 px-3 py-2.5 font-semibold text-white">
+
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isDashboard ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.75 4.75h6.5v6.5h-6.5zM12.75 4.75h6.5v6.5h-6.5zM4.75 12.75h6.5v6.5h-6.5zM12.75 12.75h6.5v6.5h-6.5z"/>
@@ -31,7 +38,7 @@
                     </a>
 
 
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                    <a href="{{ route('empresas.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isEmpresas ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
 
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
@@ -97,7 +104,7 @@
 
         <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-2 py-1.5 md:hidden">
             <div class="grid grid-cols-6 gap-1">
-                <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-semibold text-blue-600">
+                <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-semibold {{ $isDashboard ? 'text-blue-600' : 'text-slate-500' }}">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.75 4.75h6.5v6.5h-6.5zM12.75 4.75h6.5v6.5h-6.5zM4.75 12.75h6.5v6.5h-6.5zM12.75 12.75h6.5v6.5h-6.5z"/>
@@ -105,7 +112,7 @@
                     Inicio
                 </a>
 
-                <a href="#" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-medium text-slate-500">
+                <a href="{{ route('empresas.index') }}" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-semibold {{ $isEmpresas ? 'text-blue-600' : 'text-slate-500' }}">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
 
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
