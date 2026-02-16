@@ -79,11 +79,11 @@
 
         @php
             $empresas = [
-                ['nombre' => 'Lalanela', 'nit' => null, 'ciudad' => 'Pereira', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
-                ['nombre' => 'Mazda minuto', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3206304066', 'email' => null, 'sector' => null],
-                ['nombre' => 'Mundial armenia', 'nit' => null, 'ciudad' => 'armenia', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
-                ['nombre' => 'NANCY ASOCIADOS', 'nit' => null, 'ciudad' => 'PEREIRA', 'direccion' => null, 'telefono' => '33813801', 'email' => null, 'sector' => null],
-                ['nombre' => 'Pintura centro color Quindío', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3154076241', 'email' => null, 'sector' => null],
+                ['id' => 1, 'nombre' => 'Lalanela', 'nit' => null, 'ciudad' => 'Pereira', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
+                ['id' => 2, 'nombre' => 'Mazda minuto', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3206304066', 'email' => null, 'sector' => null],
+                ['id' => 3, 'nombre' => 'Mundial armenia', 'nit' => null, 'ciudad' => 'armenia', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
+                ['id' => 4, 'nombre' => 'NANCY ASOCIADOS', 'nit' => null, 'ciudad' => 'PEREIRA', 'direccion' => null, 'telefono' => '33813801', 'email' => null, 'sector' => null],
+                ['id' => 5, 'nombre' => 'Pintura centro color Quindío', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3154076241', 'email' => null, 'sector' => null],
             ];
         @endphp
 
@@ -132,11 +132,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
                             </svg>
                         </button>
-                        <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                        <a href="{{ route('empresas.show', $empresa['id']) }}" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" aria-label="Ver detalle de {{ $empresa['nombre'] }}">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
                             </svg>
-                        </button>
+                        </a>
                     </div>
                 </article>
             @endforeach
