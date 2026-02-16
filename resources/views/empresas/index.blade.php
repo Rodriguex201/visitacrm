@@ -12,15 +12,19 @@
                 nombre: @js(old('nombre', '')),
                 nit: @js(old('nit', '')),
                 ciudad: @js(old('ciudad', '')),
+                ciudad_codigo: @js(old('ciudad_codigo', '')),
                 direccion: @js(old('direccion', '')),
                 telefono: @js(old('telefono', '')),
                 email: @js(old('email', '')),
             },
+            cityResults: [],
+            cityLoading: false,
             emptyForm() {
                 return {
                     nombre: '',
                     nit: '',
                     ciudad: '',
+                    ciudad_codigo: '',
                     direccion: '',
                     telefono: '',
                     email: '',
@@ -31,6 +35,8 @@
                 this.editId = null
                 this.form = this.emptyForm()
                 this.formAction = '{{ route('empresas.store') }}'
+                this.cityResults = []
+                this.cityLoading = false
                 this.openModal = true
             },
             openEditModal(empresa) {
@@ -40,15 +46,54 @@
                     nombre: empresa.nombre ?? '',
                     nit: empresa.nit ?? '',
                     ciudad: empresa.ciudad ?? '',
+                    ciudad_codigo: '',
                     direccion: empresa.direccion ?? '',
                     telefono: empresa.telefono ?? '',
                     email: empresa.email ?? '',
                 }
                 this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
+                this.cityResults = []
+                this.cityLoading = false
                 this.openModal = true
             },
             closeModal() {
                 this.openModal = false
+                this.cityResults = []
+                this.cityLoading = false
+            },
+            async searchCity() {
+                const query = (this.form.ciudad ?? '').trim()
+
+                if (query.length === 0) {
+                    this.cityResults = []
+                    return
+                }
+
+                this.cityLoading = true
+
+                try {
+                    const response = await fetch(`/api/ciudades?query=${encodeURIComponent(query)}`, {
+                        headers: {
+                            Accept: 'application/json',
+                        },
+                    })
+
+                    if (!response.ok) {
+                        this.cityResults = []
+                        return
+                    }
+
+                    this.cityResults = await response.json()
+                } catch (error) {
+                    this.cityResults = []
+                } finally {
+                    this.cityLoading = false
+                }
+            },
+            selectCity(city) {
+                this.form.ciudad = city.citynomb ?? ''
+                this.form.ciudad_codigo = city.citycodigo ?? ''
+                this.cityResults = []
             },
         }"
         class="space-y-4"
@@ -216,9 +261,56 @@
                             <label class="mb-1.5 block font-semibold text-slate-700">NIT</label>
                             <input x-model="form.nit" name="nit" type="text" placeholder="NIT" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
-                        <div>
+                        <div class="relative">
                             <label class="mb-1.5 block font-semibold text-slate-700">Ciudad *</label>
-                            <input x-model="form.ciudad" name="ciudad" type="text" placeholder="Ciudad" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <div class="flex items-center gap-2">
+                                <input
+                                    x-model="form.ciudad"
+                                    name="ciudad"
+                                    type="text"
+                                    placeholder="Ciudad"
+                                    class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    @keydown.enter.prevent="searchCity()"
+                                    @input="form.ciudad_codigo = ''"
+                                    autocomplete="off"
+                                >
+                                <button
+                                    type="button"
+                                    @click="searchCity()"
+                                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+                                    aria-label="Buscar ciudad"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <input type="hidden" name="ciudad_codigo" :value="form.ciudad_codigo">
+
+                            <div
+                                x-show="cityLoading"
+                                class="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm"
+                                x-cloak
+                            >
+                                Buscando ciudades...
+                            </div>
+
+                            <div
+                                x-show="cityResults.length"
+                                class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"
+                                x-cloak
+                            >
+                                <template x-for="city in cityResults" :key="city.citycodigo">
+                                    <button
+                                        type="button"
+                                        @click="selectCity(city)"
+                                        class="flex w-full flex-col items-start gap-0.5 border-b border-slate-100 px-3 py-2 text-left last:border-b-0 hover:bg-slate-50"
+                                    >
+                                        <span class="text-sm font-semibold text-slate-800" x-text="city.citynomb"></span>
+                                        <span class="text-xs text-slate-500" x-text="city.cityNdepto ?? city.citydepto"></span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                     </div>
 
