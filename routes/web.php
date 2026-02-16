@@ -13,10 +13,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
-    Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
-    Route::get('/empresas/{id}', [EmpresaController::class, 'show'])->name('empresas.show');
-    Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store');
+    Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update']);
 
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 

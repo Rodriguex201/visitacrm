@@ -2,34 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Empresa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class EmpresaController extends Controller
 {
     public function index(): View
     {
-        return view('empresas.index');
+        $empresas = Empresa::query()
+            ->latest('id')
+            ->paginate(10);
+
+        return view('empresas.index', compact('empresas'));
     }
 
-    public function show(int $id): View
+    public function show(Empresa $empresa): View
     {
-        $empresas = [
-            1 => ['id' => 1, 'nombre' => 'Lalanela', 'ciudad' => 'Pereira', 'sector' => null, 'fecha' => '21/01/2026'],
-            2 => ['id' => 2, 'nombre' => 'Mazda minuto', 'ciudad' => 'Armenia', 'sector' => null, 'fecha' => '22/01/2026'],
-            3 => ['id' => 3, 'nombre' => 'Mundial armenia', 'ciudad' => 'Armenia', 'sector' => null, 'fecha' => '23/01/2026'],
-        ];
-
-        abort_unless(isset($empresas[$id]), 404);
-
-        $empresa = $empresas[$id];
-
         return view('empresas.show', compact('empresa'));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        return redirect()->route('empresas.index')->with('status', 'Empresa creada (demo).');
+        $data = $this->validateEmpresa($request);
+
+        Empresa::query()->create($data);
+
+        return redirect()
+            ->route('empresas.index')
+            ->with('status', 'Empresa creada correctamente.');
+    }
+
+    public function update(Request $request, Empresa $empresa): RedirectResponse
+    {
+        $data = $this->validateEmpresa($request);
+
+        $empresa->update($data);
+
+        return redirect()
+            ->route('empresas.index')
+            ->with('status', 'Empresa actualizada correctamente.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateEmpresa(Request $request): array
+    {
+        $validated = $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'nit' => ['nullable', 'string', 'max:255'],
+            'ciudad' => ['required', 'string', 'max:255'],
+            'telefono' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'direccion' => ['nullable', 'string'],
+            'modal_mode' => ['nullable', Rule::in(['create', 'edit'])],
+            'empresa_id' => ['nullable', 'integer'],
+        ]);
+
+        unset($validated['modal_mode'], $validated['empresa_id']);
+
+        return $validated;
     }
 }
