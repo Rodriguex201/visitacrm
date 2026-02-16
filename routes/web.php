@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/empresas/{id}', [EmpresaController::class, 'show'])->name('empresas.show');
     Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store');
 
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
