@@ -26,6 +26,7 @@
         </header>
 
         <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+
             <div class="space-y-3 text-slate-600">
                 <p class="inline-flex items-center gap-2 text-sm">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -69,6 +70,7 @@
                     {{ $empresa->ciudad }}
                 </p>
             </div>
+
         </article>
 
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
