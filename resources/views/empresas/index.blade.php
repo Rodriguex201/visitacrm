@@ -134,12 +134,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
                             </svg>
                         </button>
+
                         <a
                             href="{{ route('empresas.show', $empresa['id']) }}"
                             @click.stop
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                             aria-label="Ver detalle de {{ $empresa['nombre'] }}"
                         >
+
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
                             </svg>
