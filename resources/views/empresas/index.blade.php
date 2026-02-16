@@ -79,19 +79,23 @@
 
         @php
             $empresas = [
-                ['nombre' => 'Lalanela', 'nit' => null, 'ciudad' => 'Pereira', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
-                ['nombre' => 'Mazda minuto', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3206304066', 'email' => null, 'sector' => null],
-                ['nombre' => 'Mundial armenia', 'nit' => null, 'ciudad' => 'armenia', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
-                ['nombre' => 'NANCY ASOCIADOS', 'nit' => null, 'ciudad' => 'PEREIRA', 'direccion' => null, 'telefono' => '33813801', 'email' => null, 'sector' => null],
-                ['nombre' => 'Pintura centro color Quindío', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3154076241', 'email' => null, 'sector' => null],
+                ['id' => 1, 'nombre' => 'Lalanela', 'nit' => null, 'ciudad' => 'Pereira', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
+                ['id' => 2, 'nombre' => 'Mazda minuto', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3206304066', 'email' => null, 'sector' => null],
+                ['id' => 3, 'nombre' => 'Mundial armenia', 'nit' => null, 'ciudad' => 'armenia', 'direccion' => null, 'telefono' => null, 'email' => null, 'sector' => null],
+                ['id' => 4, 'nombre' => 'NANCY ASOCIADOS', 'nit' => null, 'ciudad' => 'PEREIRA', 'direccion' => null, 'telefono' => '33813801', 'email' => null, 'sector' => null],
+                ['id' => 5, 'nombre' => 'Pintura centro color Quindío', 'nit' => null, 'ciudad' => 'Armenia', 'direccion' => null, 'telefono' => '3154076241', 'email' => null, 'sector' => null],
             ];
         @endphp
 
         <div class="space-y-3 pb-2">
             @foreach ($empresas as $empresa)
-                <article x-data="{ empresa: @js($empresa) }" class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                <article
+                    x-data="{ empresa: @js($empresa) }"
+                    @click="window.location.href='{{ route('empresas.show', $empresa['id']) }}'"
+                    class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                >
                     <div class="flex min-w-0 items-center gap-3">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
                             </svg>
@@ -123,20 +127,23 @@
                     <div class="flex shrink-0 items-center gap-1">
                         <button
                             type="button"
-
-                            @click="openEditModal(empresa)"
-
+                            @click.stop="openEditModal(empresa)"
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                         >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
                             </svg>
                         </button>
-                        <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                        <a
+                            href="{{ route('empresas.show', $empresa['id']) }}"
+                            @click.stop
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                            aria-label="Ver detalle de {{ $empresa['nombre'] }}"
+                        >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
                             </svg>
-                        </button>
+                        </a>
                     </div>
                 </article>
             @endforeach

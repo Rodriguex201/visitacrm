@@ -14,6 +14,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
+    Route::get('/empresas/{id}', [EmpresaController::class, 'show'])->name('empresas.show');
     Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store');
 
 
