@@ -12,10 +12,12 @@
 
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <h1 class="truncate text-2xl font-bold text-slate-950">{{ $empresa['nombre'] }}</h1>
+
+                        <h1 class="truncate text-xl font-bold md:text-2xl text-slate-950">{{ $empresa['nombre'] }}</h1>
                         <span class="text-sm text-slate-500">{{ $empresa['fecha'] }}</span>
                     </div>
-                    <p class="text-xl text-slate-600">{{ $empresa['sector'] ?: 'Sin sector' }}</p>
+                    <p class="text-sm text-slate-600">{{ $empresa['sector'] ?: 'Sin sector' }}</p>
+
                 </div>
             </div>
 
@@ -37,30 +39,38 @@
 
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-3xl font-bold text-slate-950">Actividad (0)</h2>
+
+                <h2 class="text-xl font-semibold text-slate-950">Actividad (0)</h2>
+
                 <div class="flex items-center gap-2 text-sm font-semibold">
                     <span class="rounded-xl bg-blue-600 px-4 py-2 text-white">Hoy</span>
                     <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-800">7 días</span>
                     <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-800">Todo</span>
                 </div>
             </div>
-            <p class="text-xl text-slate-600">Sin actividad aún</p>
+
+            <p class="text-sm text-slate-600">Sin actividad aún</p>
+
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-3xl font-bold text-slate-950">Contactos</h2>
+
+                <h2 class="text-xl font-semibold text-slate-950">Contactos</h2>
+
                 <button type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <span class="text-base leading-none">+</span>
                     Agregar
                 </button>
             </div>
-            <p class="text-center text-xl text-slate-500">Sin contactos registrados</p>
+
+            <p class="text-center text-sm text-slate-500">Sin contactos registrados</p>
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-            <h2 class="text-3xl font-bold text-slate-950">Historial de Visitas</h2>
-            <p class="text-center text-xl text-slate-500">Sin visitas registradas</p>
+            <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas</h2>
+            <p class="text-center text-sm text-slate-500">Sin visitas registradas</p>
+
         </article>
     </section>
 @endsection
