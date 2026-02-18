@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
     <section
         x-data="{
             openCreateModal: false,
@@ -37,6 +38,7 @@
         "
         class="space-y-4"
     >
+
         <div class="flex items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-slate-950">Usuarios</h1>
@@ -60,7 +62,9 @@
 
         <div class="rounded-xl bg-white shadow-sm">
             <div class="overflow-x-auto">
+
                 <table class="w-full min-w-[920px] text-left text-sm text-slate-700">
+
                     <thead class="bg-gray-50 text-slate-600">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-semibold">Fecha de ingreso</th>
@@ -81,6 +85,7 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 tracking-wider">********</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
+
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <button
                                         type="button"
@@ -105,6 +110,7 @@
                             <tr>
                                 <td colspan="7" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
                             </tr>
+
                         @endforelse
                     </tbody>
                 </table>
@@ -143,10 +149,12 @@
                     </button>
                 </div>
 
+
                 @if ($errors->createUser->any())
                     <div class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
                         <ul class="list-inside list-disc space-y-1">
                             @foreach ($errors->createUser->all() as $error)
+
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
@@ -157,9 +165,11 @@
                     @csrf
 
                     <div>
+
                         <label for="create_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
                         <input
                             id="create_name"
+
                             name="name"
                             type="text"
                             value="{{ old('name') }}"
@@ -172,7 +182,9 @@
                     <div>
                         <label for="create_telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
                         <input
+
                             id="create_telefono"
+
                             name="telefono"
                             type="text"
                             value="{{ old('telefono') }}"
@@ -182,9 +194,11 @@
                     </div>
 
                     <div>
+
                         <label for="create_email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
                         <input
                             id="create_email"
+
                             name="email"
                             type="email"
                             value="{{ old('email') }}"
@@ -195,9 +209,11 @@
                     </div>
 
                     <div>
+
                         <label for="create_password" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
                         <input
                             id="create_password"
+
                             name="password"
                             type="password"
                             placeholder="••••••••"
@@ -209,7 +225,9 @@
                     <div>
                         <label for="create_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
                         <select
+
                             id="create_tipo_usuario"
+
                             name="tipo_usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             required
@@ -218,6 +236,7 @@
                             <option value="freelance" @selected(old('tipo_usuario') === 'freelance')>freelance</option>
                             <option value="vinculado" @selected(old('tipo_usuario') === 'vinculado')>vinculado</option>
                             <option value="administracion" @selected(old('tipo_usuario') === 'administracion')>administracion</option>
+
                         </select>
                     </div>
 
@@ -335,6 +354,7 @@
                             <option value="freelance">freelance</option>
                             <option value="vinculado">vinculado</option>
                             <option value="administracion">administracion</option>
+
                         </select>
                     </div>
 

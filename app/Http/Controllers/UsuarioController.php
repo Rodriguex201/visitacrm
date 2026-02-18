@@ -6,12 +6,15 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Validation\Rule;
+
 use Illuminate\View\View;
 
 class UsuarioController extends Controller
 {
     public function index(): View
+
     {
         $usuarios = User::orderByDesc('created_at')->paginate(10);
 
@@ -65,5 +68,6 @@ class UsuarioController extends Controller
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente.');
+
     }
 }
