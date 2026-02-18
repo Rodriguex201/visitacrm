@@ -6,10 +6,11 @@
         x-data="{
             openCreateModal: false,
             openEditModal: false,
-            editingUser: { id: null, name: '', telefono: '', email: '', tipo_usuario: 'freelance', password: '' },
+            editingUser: { id: null, codigo: '', name: '', telefono: '', email: '', tipo_usuario: 'freelance', password: '' },
             startEdit(user) {
                 this.editingUser = {
                     id: user.id,
+                    codigo: user.codigo ?? '',
                     name: user.name ?? '',
                     telefono: user.telefono ?? '',
                     email: user.email ?? '',
@@ -27,6 +28,7 @@
             if (@js($errors->updateUser->any())) {
                 editingUser = {
                     id: @js(old('edit_id')),
+                    codigo: @js(old('codigo', '')),
                     name: @js(old('name', '')),
                     telefono: @js(old('telefono', '')),
                     email: @js(old('email', '')),
@@ -68,6 +70,7 @@
                     <thead class="bg-gray-50 text-slate-600">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-semibold">Fecha de ingreso</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Código</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Correo</th>
@@ -80,6 +83,7 @@
                         @forelse ($usuarios as $u)
                             <tr class="hover:bg-slate-50/70">
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->created_at?->format('d/m/Y') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->codigo }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
@@ -91,6 +95,7 @@
     type="button"
     @click="startEdit(@js([
         'id' => $u->id,
+        'codigo' => $u->codigo,
         'name' => $u->name,
         'telefono' => $u->telefono,
         'email' => $u->email,
@@ -109,7 +114,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                                <td colspan="8" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
                             </tr>
 
                         @endforelse
@@ -164,6 +169,19 @@
 
                 <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-3 text-sm">
                     @csrf
+
+                    <div>
+                        <label for="create_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                        <input
+                            id="create_codigo"
+                            name="codigo"
+                            type="text"
+                            value="{{ old('codigo') }}"
+                            placeholder="Ej: B092"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            required
+                        >
+                    </div>
 
                     <div>
 
@@ -293,6 +311,19 @@
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="edit_id" :value="editingUser.id">
+
+                    <div>
+                        <label for="edit_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                        <input
+                            id="edit_codigo"
+                            name="codigo"
+                            type="text"
+                            x-model="editingUser.codigo"
+                            placeholder="Ej: B092"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            required
+                        >
+                    </div>
 
                     <div>
                         <label for="edit_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>

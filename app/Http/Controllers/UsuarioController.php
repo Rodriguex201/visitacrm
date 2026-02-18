@@ -24,6 +24,7 @@ class UsuarioController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validateWithBag('createUser', [
+            'codigo' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9]+$/', 'unique:users,codigo'],
             'name' => ['required', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -32,6 +33,7 @@ class UsuarioController extends Controller
         ]);
 
         User::create([
+            'codigo' => strtoupper($validated['codigo']),
             'name' => $validated['name'],
             'telefono' => $validated['telefono'] ?? null,
             'email' => $validated['email'],
@@ -47,6 +49,13 @@ class UsuarioController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validateWithBag('updateUser', [
+            'codigo' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[A-Za-z0-9]+$/',
+                Rule::unique('users', 'codigo')->ignore($user->id),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
@@ -54,6 +63,7 @@ class UsuarioController extends Controller
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
         ]);
 
+        $user->codigo = strtoupper($validated['codigo']);
         $user->name = $validated['name'];
         $user->telefono = $validated['telefono'] ?? null;
         $user->email = $validated['email'];
