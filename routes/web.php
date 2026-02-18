@@ -16,6 +16,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update']);
 
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+    Route::put('/usuarios/{user}', [UsuarioController::class, 'update'])->name('usuarios.update');
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
