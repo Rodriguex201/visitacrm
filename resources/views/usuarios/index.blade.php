@@ -6,12 +6,14 @@
         x-data="{
             openCreateModal: false,
             openEditModal: false,
-            editingUser: { id: null, name: '', telefono: '', email: '', tipo_usuario: 'freelance', password: '' },
+            editingUser: { id: null, codigo: '', name: '', telefono: '', direccion: '', email: '', tipo_usuario: 'freelance', password: '' },
             startEdit(user) {
                 this.editingUser = {
                     id: user.id,
+                    codigo: user.codigo ?? '',
                     name: user.name ?? '',
                     telefono: user.telefono ?? '',
+                    direccion: user.direccion ?? '',
                     email: user.email ?? '',
                     tipo_usuario: user.tipo_usuario ?? 'freelance',
                     password: '',
@@ -27,8 +29,10 @@
             if (@js($errors->updateUser->any())) {
                 editingUser = {
                     id: @js(old('edit_id')),
+                    codigo: @js(old('codigo', '')),
                     name: @js(old('name', '')),
                     telefono: @js(old('telefono', '')),
+                    direccion: @js(old('direccion', '')),
                     email: @js(old('email', '')),
                     tipo_usuario: @js(old('tipo_usuario', 'freelance')),
                     password: '',
@@ -68,9 +72,11 @@
                     <thead class="bg-gray-50 text-slate-600">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-semibold">Fecha de ingreso</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Código</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Correo</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Dirección</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Clave</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
@@ -80,9 +86,11 @@
                         @forelse ($usuarios as $u)
                             <tr class="hover:bg-slate-50/70">
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->created_at?->format('d/m/Y') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->codigo }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->direccion ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 tracking-wider">********</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
 
@@ -91,8 +99,10 @@
     type="button"
     @click="startEdit(@js([
         'id' => $u->id,
+        'codigo' => $u->codigo,
         'name' => $u->name,
         'telefono' => $u->telefono,
+        'direccion' => $u->direccion,
         'email' => $u->email,
         'tipo_usuario' => $u->tipo_usuario,
     ]))"
@@ -109,7 +119,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                                <td colspan="9" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
                             </tr>
 
                         @endforelse
@@ -166,6 +176,19 @@
                     @csrf
 
                     <div>
+                        <label for="create_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                        <input
+                            id="create_codigo"
+                            name="codigo"
+                            type="text"
+                            value="{{ old('codigo') }}"
+                            placeholder="Ej: B092"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            required
+                        >
+                    </div>
+
+                    <div>
 
                         <label for="create_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
                         <input
@@ -190,6 +213,18 @@
                             type="text"
                             value="{{ old('telefono') }}"
                             placeholder="Ej: 3001234567"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="create_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                        <input
+                            id="create_direccion"
+                            name="direccion"
+                            type="text"
+                            value="{{ old('direccion') }}"
+                            placeholder="Dirección del usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                     </div>
@@ -295,6 +330,19 @@
                     <input type="hidden" name="edit_id" :value="editingUser.id">
 
                     <div>
+                        <label for="edit_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                        <input
+                            id="edit_codigo"
+                            name="codigo"
+                            type="text"
+                            x-model="editingUser.codigo"
+                            placeholder="Ej: B092"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            required
+                        >
+                    </div>
+
+                    <div>
                         <label for="edit_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
                         <input
                             id="edit_name"
@@ -315,6 +363,18 @@
                             type="text"
                             x-model="editingUser.telefono"
                             placeholder="Ej: 3001234567"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                        <input
+                            id="edit_direccion"
+                            name="direccion"
+                            type="text"
+                            x-model="editingUser.direccion"
+                            placeholder="Dirección del usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                     </div>
