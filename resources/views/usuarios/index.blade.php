@@ -87,23 +87,24 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
 
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <button
-                                        type="button"
-                                        @click='startEdit(@json([
-                                            "id" => $u->id,
-                                            "name" => $u->name,
-                                            "telefono" => $u->telefono,
-                                            "email" => $u->email,
-                                            "tipo_usuario" => $u->tipo_usuario,
-                                        ]))'
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
-                                        title="Editar usuario"
-                                    >
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                        </svg>
-                                    </button>
+<button
+    type="button"
+    @click="startEdit(@js([
+        'id' => $u->id,
+        'name' => $u->name,
+        'telefono' => $u->telefono,
+        'email' => $u->email,
+        'tipo_usuario' => $u->tipo_usuario,
+    ]))"
+    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+    title="Editar usuario"
+>
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+</button>
+
                                 </td>
                             </tr>
                         @empty
