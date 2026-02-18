@@ -1,36 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @php
-        $usuarios = [
-            [
-                'fecha_ingreso' => '20/01/2026',
-                'nombre' => 'Ana María López',
-                'telefono' => '3104567890',
-                'correo' => 'ana.lopez@visitacrm.com',
-                'clave' => 'Ana12345',
-                'tipo_usuario' => 'freelance',
-            ],
-            [
-                'fecha_ingreso' => '11/02/2026',
-                'nombre' => 'Carlos Gómez',
-                'telefono' => '3209876543',
-                'correo' => 'carlos.gomez@visitacrm.com',
-                'clave' => 'Car!2026',
-                'tipo_usuario' => 'vinculado',
-            ],
-            [
-                'fecha_ingreso' => '05/03/2026',
-                'nombre' => 'Luisa Fernández',
-                'telefono' => '3001122334',
-                'correo' => 'luisa.fernandez@visitacrm.com',
-                'clave' => 'Lui$Pass9',
-                'tipo_usuario' => 'administracion',
-            ],
-        ];
-    @endphp
-
-    <section x-data="{ openModal: false }" class="space-y-4">
+    <section x-data="{ openModal: false }" x-init="if (@js($errors->any())) openModal = true" class="space-y-4">
         <div class="flex items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-slate-950">Usuarios</h1>
@@ -46,9 +17,15 @@
             </button>
         </div>
 
-        <div class="rounded-xl border border-slate-100 bg-white shadow-sm">
+        @if (session('success'))
+            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="rounded-xl bg-white shadow-sm">
             <div class="overflow-x-auto">
-                <table class="min-w-[820px] w-full text-left text-sm text-slate-700">
+                <table class="w-full min-w-[820px] text-left text-sm text-slate-700">
                     <thead class="bg-gray-50 text-slate-600">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-semibold">Fecha de ingreso</th>
@@ -60,18 +37,26 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @foreach ($usuarios as $usuario)
+                        @forelse ($usuarios as $u)
                             <tr class="hover:bg-slate-50/70">
-                                <td class="whitespace-nowrap px-4 py-3">{{ $usuario['fecha_ingreso'] }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $usuario['nombre'] }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $usuario['telefono'] }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $usuario['correo'] }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 tracking-wider">••••••••</td>
-                                <td class="whitespace-nowrap px-4 py-3 capitalize">{{ $usuario['tipo_usuario'] }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->created_at?->format('d/m/Y') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 tracking-wider">********</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="border-t border-slate-100 px-4 py-3">
+                {{ $usuarios->links() }}
             </div>
         </div>
 
@@ -103,12 +88,26 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="openModal = false" class="space-y-3 text-sm">
+                @if ($errors->any())
+                    <div class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                        <ul class="list-inside list-disc space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-3 text-sm">
+                    @csrf
+
                     <div>
-                        <label for="nombre" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
+                        <label for="name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
                         <input
-                            id="nombre"
+                            id="name"
+                            name="name"
                             type="text"
+                            value="{{ old('name') }}"
                             placeholder="Nombre completo"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             required
@@ -119,17 +118,21 @@
                         <label for="telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
                         <input
                             id="telefono"
+                            name="telefono"
                             type="text"
+                            value="{{ old('telefono') }}"
                             placeholder="Ej: 3001234567"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                     </div>
 
                     <div>
-                        <label for="correo" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
+                        <label for="email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
                         <input
-                            id="correo"
+                            id="email"
+                            name="email"
                             type="email"
+                            value="{{ old('email') }}"
                             placeholder="usuario@correo.com"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             required
@@ -137,35 +140,29 @@
                     </div>
 
                     <div>
-                        <label for="clave" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
-                        <div class="relative">
-                            <input
-                                id="clave"
-                                type="password"
-                                placeholder="••••••••"
-                                class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                required
-                            >
-                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                </svg>
-                            </span>
-                        </div>
+                        <label for="password" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="••••••••"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            required
+                        >
                     </div>
 
                     <div>
                         <label for="tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
                         <select
                             id="tipo_usuario"
+                            name="tipo_usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             required
                         >
                             <option value="">Selecciona una opción</option>
-                            <option value="freelance">freelance</option>
-                            <option value="vinculado">vinculado</option>
-                            <option value="administracion">administracion</option>
+                            <option value="freelance" @selected(old('tipo_usuario') === 'freelance')>freelance</option>
+                            <option value="vinculado" @selected(old('tipo_usuario') === 'vinculado')>vinculado</option>
+                            <option value="administracion" @selected(old('tipo_usuario') === 'administracion')>administracion</option>
                         </select>
                     </div>
 
