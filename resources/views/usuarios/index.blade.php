@@ -6,13 +6,16 @@
         x-data="{
             openCreateModal: false,
             openEditModal: false,
-            editingUser: { id: null, codigo: '', name: '', telefono: '', email: '', tipo_usuario: 'freelance', password: '' },
+
+            editingUser: { id: null, codigo: '', name: '', telefono: '', direccion: '', email: '', tipo_usuario: 'freelance', password: '' },
+
             startEdit(user) {
                 this.editingUser = {
                     id: user.id,
                     codigo: user.codigo ?? '',
                     name: user.name ?? '',
                     telefono: user.telefono ?? '',
+                    direccion: user.direccion ?? '',
                     email: user.email ?? '',
                     tipo_usuario: user.tipo_usuario ?? 'freelance',
                     password: '',
@@ -31,6 +34,7 @@
                     codigo: @js(old('codigo', '')),
                     name: @js(old('name', '')),
                     telefono: @js(old('telefono', '')),
+                    direccion: @js(old('direccion', '')),
                     email: @js(old('email', '')),
                     tipo_usuario: @js(old('tipo_usuario', 'freelance')),
                     password: '',
@@ -74,6 +78,7 @@
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Correo</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Dirección</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Clave</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
@@ -87,6 +92,7 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->direccion ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 tracking-wider">********</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
 
@@ -98,6 +104,7 @@
         'codigo' => $u->codigo,
         'name' => $u->name,
         'telefono' => $u->telefono,
+        'direccion' => $u->direccion,
         'email' => $u->email,
         'tipo_usuario' => $u->tipo_usuario,
     ]))"
@@ -114,7 +121,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
+                                <td colspan="9" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
                             </tr>
 
                         @endforelse
@@ -208,6 +217,18 @@
                             type="text"
                             value="{{ old('telefono') }}"
                             placeholder="Ej: 3001234567"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="create_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                        <input
+                            id="create_direccion"
+                            name="direccion"
+                            type="text"
+                            value="{{ old('direccion') }}"
+                            placeholder="Dirección del usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                     </div>
@@ -346,6 +367,18 @@
                             type="text"
                             x-model="editingUser.telefono"
                             placeholder="Ej: 3001234567"
+                            class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                        <input
+                            id="edit_direccion"
+                            name="direccion"
+                            type="text"
+                            x-model="editingUser.direccion"
+                            placeholder="Dirección del usuario"
                             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                     </div>
