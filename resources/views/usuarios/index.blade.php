@@ -6,7 +6,9 @@
         x-data="{
             openCreateModal: false,
             openEditModal: false,
+
             editingUser: { id: null, codigo: '', name: '', telefono: '', direccion: '', email: '', tipo_usuario: 'freelance', password: '' },
+
             startEdit(user) {
                 this.editingUser = {
                     id: user.id,
@@ -119,7 +121,9 @@
                             </tr>
                         @empty
                             <tr>
+
                                 <td colspan="9" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
                             </tr>
 
                         @endforelse
