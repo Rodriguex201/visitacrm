@@ -58,15 +58,6 @@
                     </a>
 
 
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
-                        </svg>
-                        Nueva
-                    </a>
-
-
                     @if ($isAdmin)
                         <a href="{{ route('usuarios.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isUsuarios ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -76,6 +67,15 @@
                             Usuarios
                         </a>
                     @endif
+
+
+                    <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
+                        </svg>
+                        Nueva
+                    </a>
                 </nav>
 
 
@@ -132,14 +132,6 @@
                     Agenda
                 </a>
 
-                <a href="#" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-medium text-slate-500">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
-                    </svg>
-                    Nueva
-                </a>
-
                 @if ($isAdmin)
                     <a href="{{ route('usuarios.index') }}" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-semibold {{ $isUsuarios ? 'text-blue-600' : 'text-slate-500' }}">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -149,6 +141,14 @@
                         Usuarios
                     </a>
                 @endif
+
+                <a href="#" class="flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-0.5 text-[11px] font-medium text-slate-500">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
+                    </svg>
+                    Nueva
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="flex">
                     @csrf
 
