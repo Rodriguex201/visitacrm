@@ -72,6 +72,7 @@
         @endif
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+
             <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
                 <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -111,10 +112,12 @@
                 <p class="text-2xl font-bold leading-none text-slate-950">{{ $countEmpresas }}</p>
                 <p class="mt-1 text-sm text-slate-600">Empresas</p>
             </article>
+
         </div>
 
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-5">
             <section class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:col-span-2">
+
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-xl font-semibold text-slate-950">Próximas Visitas</h2>
                 </div>
@@ -176,6 +179,7 @@
                         @endforeach
                     </div>
                 @endif
+
             </section>
         </div>
 
@@ -203,6 +207,7 @@
                             <p class="mt-1 text-xs text-slate-500" x-show="selectedEmpresa">Seleccionada: <span x-text="selectedEmpresa"></span></p>
                             <p class="mt-1 text-xs text-rose-600">@error('empresa_id') {{ $message }} @enderror</p>
 
+
                             <div x-show="empresaLoading" class="mt-2 text-xs text-slate-500">Buscando...</div>
                             <div x-show="empresaResults.length > 0" class="mt-2 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white shadow-sm">
                                 <template x-for="empresa in empresaResults" :key="empresa.id">
@@ -215,6 +220,7 @@
                                 </template>
                             </div>
                         </div>
+
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
