@@ -110,8 +110,45 @@
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas</h2>
-            <p class="text-center text-sm text-slate-500">Sin visitas registradas</p>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas ({{ $visitas->count() }})</h2>
+
+                <div class="flex items-center gap-2 text-sm font-semibold">
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $range === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => '7d']) }}" class="rounded-xl px-4 py-2 {{ $range === '7d' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $range === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+                </div>
+            </div>
+
+            @if ($visitas->isEmpty())
+                <p class="text-center text-sm text-slate-500">Sin visitas registradas</p>
+            @else
+                <div class="space-y-3">
+                    @foreach ($visitas as $visita)
+                        @php
+                            $badgeClass = match ($visita->estado) {
+                                'realizada' => 'bg-emerald-100 text-emerald-700',
+                                'cancelada' => 'bg-rose-100 text-rose-700',
+                                default => 'bg-blue-100 text-blue-700',
+                            };
+                        @endphp
+                        <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="text-sm font-semibold text-slate-900">{{ $visita->fecha_hora?->format('d/m/Y H:i') }}</p>
+                                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $badgeClass }}">{{ ucfirst($visita->estado) }}</span>
+                            </div>
+
+                            @if ($visita->resultado)
+                                <p class="mt-2 text-sm text-slate-700"><span class="font-medium">Resultado:</span> {{ $visita->resultado }}</p>
+                            @endif
+
+                            @if ($visita->notas)
+                                <p class="mt-2 text-sm text-slate-600">{{ \Illuminate\Support\Str::limit($visita->notas, 180) }}</p>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
         </article>
     </section>
 @endsection

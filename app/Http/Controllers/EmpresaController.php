@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
+use Carbon\Carbon;
 use App\Models\Sector;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -25,11 +27,55 @@ class EmpresaController extends Controller
         return view('empresas.index', compact('empresas', 'sectores'));
     }
 
-    public function show(Empresa $empresa): View
+    public function show(Request $request, Empresa $empresa): View
     {
+        $range = $request->query('range', 'todo');
+
+        if (!in_array($range, ['hoy', '7d', 'todo'], true)) {
+            $range = 'todo';
+        }
+
         $empresa->load('sector');
 
-        return view('empresas.show', compact('empresa'));
+        $visitasQuery = $empresa->visitas()->latest('fecha_hora');
+
+        if ($range === 'hoy') {
+            $visitasQuery->whereBetween('fecha_hora', [
+                Carbon::now()->startOfDay(),
+                Carbon::now()->endOfDay(),
+            ]);
+        }
+
+        if ($range === '7d') {
+            $visitasQuery->where('fecha_hora', '>=', Carbon::now()->subDays(6)->startOfDay());
+        }
+
+        $visitas = $visitasQuery->get();
+
+        return view('empresas.show', compact('empresa', 'visitas', 'range'));
+    }
+
+
+    public function search(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('query', ''));
+
+        if ($query === '') {
+            return response()->json([]);
+        }
+
+        $empresas = Empresa::query()
+            ->select(['id', 'nombre', 'nit', 'ciudad'])
+            ->where(function ($q) use ($query) {
+                $q->where('nombre', 'like', "%{$query}%")
+                    ->orWhere('nit', 'like', "%{$query}%")
+                    ->orWhere('ciudad', 'like', "%{$query}%");
+            })
+            ->orderBy('nombre')
+            ->limit(15)
+            ->get();
+
+        return response()->json($empresas);
     }
 
     public function store(Request $request): RedirectResponse
