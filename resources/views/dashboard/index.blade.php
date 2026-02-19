@@ -61,7 +61,7 @@
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
                 </svg>
-                + Nueva Visita
+                 Nueva Visita
             </button>
 
             <button type="button" @click="openVisitModal = true" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-lg font-semibold text-white shadow-sm transition hover:bg-blue-700 md:hidden">+</button>
@@ -71,49 +71,74 @@
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ session('status') }}</div>
         @endif
 
-        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
-                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75v3M15.75 3.75v3M4.5 9h15M5.25 6.75h13.5A.75.75 0 0119.5 7.5v11.25a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V7.5a.75.75 0 01.75-.75z"/>
-                    </svg>
-                </div>
-                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countHoy }}</p>
+    {{-- Visitas hoy --}}
+    <article class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 min-h-[92px]">
+        <div class="flex items-center gap-4 h-full">
+            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75v3M15.75 3.75v3M4.5 9h15M5.25 6.75h13.5A.75.75 0 0119.5 7.5v11.25a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V7.5a.75.75 0 01.75-.75z"/>
+                </svg>
+            </div>
+
+            <div>
+                <p class="text-2xl font-bold text-slate-950 leading-none">{{ $countHoy }}</p>
                 <p class="mt-1 text-sm text-slate-600">Visitas hoy</p>
-            </article>
-
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
-                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-600">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75L10.5 9.75l3.75 3.75 5.25-5.25M19.5 8.25h-4.5V3.75"/>
-                    </svg>
-                </div>
-                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countSemana }}</p>
-                <p class="mt-1 text-sm text-slate-600">Esta semana</p>
-            </article>
-
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
-                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4.5 2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <p class="text-2xl font-bold leading-none text-slate-950">0</p>
-                <p class="mt-1 text-sm text-slate-600">En seguimiento</p>
-            </article>
-
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
-                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
-                    </svg>
-                </div>
-                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countEmpresas }}</p>
-                <p class="mt-1 text-sm text-slate-600">Empresas</p>
-            </article>
-
+            </div>
         </div>
+    </article>
+
+    {{-- Esta semana --}}
+    <article class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 min-h-[92px]">
+        <div class="flex items-center gap-4 h-full">
+            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75L10.5 9.75l3.75 3.75 5.25-5.25M19.5 8.25h-4.5V3.75"/>
+                </svg>
+            </div>
+
+            <div>
+                <p class="text-2xl font-bold text-slate-950 leading-none">{{ $countSemana }}</p>
+                <p class="mt-1 text-sm text-slate-600">Esta semana</p>
+            </div>
+        </div>
+    </article>
+
+    {{-- En seguimiento --}}
+    <article class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 min-h-[92px]">
+        <div class="flex items-center gap-4 h-full">
+            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4.5 2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+
+            <div>
+                <p class="text-2xl font-bold text-slate-950 leading-none">0</p>
+                <p class="mt-1 text-sm text-slate-600">En seguimiento</p>
+            </div>
+        </div>
+    </article>
+
+    {{-- Empresas --}}
+    <article class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 min-h-[92px]">
+        <div class="flex items-center gap-4 h-full">
+            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
+                </svg>
+            </div>
+
+            <div>
+                <p class="text-2xl font-bold text-slate-950 leading-none">{{ $countEmpresas }}</p>
+                <p class="mt-1 text-sm text-slate-600">Empresas</p>
+            </div>
+        </div>
+    </article>
+
+</div>
+
 
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-5">
             <section class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:col-span-2">
