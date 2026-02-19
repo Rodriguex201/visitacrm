@@ -15,7 +15,7 @@
                         <h1 class="truncate text-xl font-bold md:text-2xl text-slate-950">{{ $empresa->nombre }}</h1>
                         <span class="text-sm text-slate-500">{{ $empresa->created_at?->format('d/m/Y') }}</span>
                     </div>
-                    <p class="text-sm text-slate-600">Sin sector</p>
+                    <p class="text-sm text-slate-600">{{ $empresa->sector?->nombre ?: 'Sin sector' }}</p>
                 </div>
             </div>
 

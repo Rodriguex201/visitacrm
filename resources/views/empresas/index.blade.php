@@ -16,6 +16,7 @@
                 direccion: @js(old('direccion', '')),
                 telefono: @js(old('telefono', '')),
                 email: @js(old('email', '')),
+                sector_id: @js(old('sector_id', '')),
             },
             cityResults: [],
             cityLoading: false,
@@ -28,6 +29,7 @@
                     direccion: '',
                     telefono: '',
                     email: '',
+                    sector_id: '',
                 }
             },
             openCreateModal() {
@@ -50,6 +52,7 @@
                     direccion: empresa.direccion ?? '',
                     telefono: empresa.telefono ?? '',
                     email: empresa.email ?? '',
+                    sector_id: empresa.sector_id ?? '',
                 }
                 this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
                 this.cityResults = []
@@ -143,6 +146,7 @@
                         'direccion' => $empresa->direccion,
                         'telefono' => $empresa->telefono,
                         'email' => $empresa->email,
+                        'sector_id' => $empresa->sector_id,
                     ]) }"
                     @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
                     class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
@@ -170,6 +174,12 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 4.5h6" />
                                     </svg>
                                     {{ $empresa->nit ?: 'Sin NIT' }}
+                                </span>
+                                <span class="inline-flex items-center gap-1">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
+                                    </svg>
+                                    {{ $empresa->sector?->nombre ?: 'Sin sector' }}
                                 </span>
                             </div>
                         </div>
@@ -312,6 +322,16 @@
                                 </template>
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block font-semibold text-slate-700">Sector</label>
+                        <select x-model="form.sector_id" name="sector_id" class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <option value="">Seleccionar sector</option>
+                            @foreach ($sectores as $sector)
+                                <option value="{{ $sector->id }}">{{ $sector->nombre }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div>

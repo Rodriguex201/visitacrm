@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
+use App\Models\Sector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,14 +14,21 @@ class EmpresaController extends Controller
     public function index(): View
     {
         $empresas = Empresa::query()
+            ->with('sector')
             ->latest('id')
             ->paginate(10);
 
-        return view('empresas.index', compact('empresas'));
+        $sectores = Sector::query()
+            ->orderBy('nombre')
+            ->get();
+
+        return view('empresas.index', compact('empresas', 'sectores'));
     }
 
     public function show(Empresa $empresa): View
     {
+        $empresa->load('sector');
+
         return view('empresas.show', compact('empresa'));
     }
 
@@ -58,6 +66,7 @@ class EmpresaController extends Controller
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
+            'sector_id' => ['nullable', 'exists:sectores,id'],
             'modal_mode' => ['nullable', Rule::in(['create', 'edit'])],
             'empresa_id' => ['nullable', 'integer'],
         ]);
