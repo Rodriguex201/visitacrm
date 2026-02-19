@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'telefono',
         'direccion',
+        'cta_banco',
+        'ciudad',
         'email',
         'password',
         'tipo_usuario',
