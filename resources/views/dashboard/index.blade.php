@@ -72,20 +72,114 @@
         @endif
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4"><p class="text-sm text-slate-600">Visitas hoy</p></article>
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4"><p class="text-sm text-slate-600">Esta semana</p></article>
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4"><p class="text-sm text-slate-600">En seguimiento</p></article>
-            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4"><p class="text-sm text-slate-600">Empresas</p></article>
+
+            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
+                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75v3M15.75 3.75v3M4.5 9h15M5.25 6.75h13.5A.75.75 0 0119.5 7.5v11.25a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V7.5a.75.75 0 01.75-.75z"/>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countHoy }}</p>
+                <p class="mt-1 text-sm text-slate-600">Visitas hoy</p>
+            </article>
+
+            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
+                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75L10.5 9.75l3.75 3.75 5.25-5.25M19.5 8.25h-4.5V3.75"/>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countSemana }}</p>
+                <p class="mt-1 text-sm text-slate-600">Esta semana</p>
+            </article>
+
+            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
+                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4.5 2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold leading-none text-slate-950">0</p>
+                <p class="mt-1 text-sm text-slate-600">En seguimiento</p>
+            </article>
+
+            <article class="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100 md:p-4">
+                <div class="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold leading-none text-slate-950">{{ $countEmpresas }}</p>
+                <p class="mt-1 text-sm text-slate-600">Empresas</p>
+            </article>
+
         </div>
 
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-5">
             <section class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:col-span-2">
-                <h2 class="text-2xl font-bold text-slate-950">Próximas Visitas</h2>
-                <div class="flex min-h-40 items-center justify-center py-6 text-center text-base text-slate-500">No hay visitas programadas</div>
+
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-xl font-semibold text-slate-950">Próximas Visitas</h2>
+                </div>
+
+                @if ($proximasVisitas->isEmpty())
+                    <div class="flex min-h-40 items-center justify-center py-6 text-center text-sm text-slate-500">No hay visitas programadas</div>
+                @else
+                    <div class="mt-3 space-y-2.5">
+                        @foreach ($proximasVisitas as $visita)
+                            @php
+                                $badgeClass = match ($visita->estado) {
+                                    'realizada' => 'bg-emerald-100 text-emerald-700',
+                                    'cancelada' => 'bg-rose-100 text-rose-700',
+                                    'programada' => 'bg-blue-100 text-blue-700',
+                                    default => 'bg-gray-200 text-gray-700',
+                                };
+                                $badgeText = $visita->estado ? ucfirst($visita->estado) : 'No disponible';
+                            @endphp
+                            <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">
+                                <div>
+                                    <p class="text-sm font-semibold leading-tight text-slate-950">{{ $visita->empresa?->nombre ?? 'Empresa no disponible' }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-600">{{ $visita->fecha_hora?->format('d/m/Y H:i') }}</p>
+                                </div>
+                                <span class="inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold {{ $badgeClass }}">{{ $badgeText }}</span>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
             </section>
+
             <section class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-                <h2 class="text-2xl font-bold text-slate-950">Visitas Recientes</h2>
-                <p class="mt-3 text-sm text-slate-500">Sin visitas recientes</p>
+                <h2 class="text-xl font-semibold text-slate-950">Visitas Recientes</h2>
+
+                @if ($visitasRecientes->isEmpty())
+                    <p class="mt-3 text-sm text-slate-500">Sin visitas recientes</p>
+                @else
+                    <div class="mt-3 space-y-2.5">
+                        @foreach ($visitasRecientes as $visita)
+                            @php
+                                $badgeClass = $visita->resultado
+                                    ? 'bg-green-600 text-white'
+                                    : match ($visita->estado) {
+                                        'realizada' => 'bg-emerald-100 text-emerald-700',
+                                        'cancelada' => 'bg-rose-100 text-rose-700',
+                                        'programada' => 'bg-blue-100 text-blue-700',
+                                        default => 'bg-gray-200 text-gray-700',
+                                    };
+
+                                $badgeText = $visita->resultado ?: ($visita->estado ? ucfirst($visita->estado) : 'No disponible');
+                            @endphp
+
+                            <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">
+                                <div>
+                                    <p class="text-sm font-semibold leading-tight text-slate-950">{{ $visita->empresa?->nombre ?? 'Empresa no disponible' }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-600">{{ $visita->fecha_hora?->format('d/m/Y H:i') }}</p>
+                                </div>
+                                <span class="inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold {{ $badgeClass }}">{{ $badgeText }}</span>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+
             </section>
         </div>
 
@@ -113,6 +207,7 @@
                             <p class="mt-1 text-xs text-slate-500" x-show="selectedEmpresa">Seleccionada: <span x-text="selectedEmpresa"></span></p>
                             <p class="mt-1 text-xs text-rose-600">@error('empresa_id') {{ $message }} @enderror</p>
 
+
                             <div x-show="empresaLoading" class="mt-2 text-xs text-slate-500">Buscando...</div>
                             <div x-show="empresaResults.length > 0" class="mt-2 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white shadow-sm">
                                 <template x-for="empresa in empresaResults" :key="empresa.id">
@@ -125,6 +220,7 @@
                                 </template>
                             </div>
                         </div>
+
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
