@@ -17,7 +17,11 @@
                 telefono: @js(old('telefono', '')),
                 email: @js(old('email', '')),
                 sector_id: @js(old('sector_id', '')),
+                notas: @js(old('notas', '')),
             },
+            notesModalOpen: false,
+            notesModalCompanyName: '',
+            notesModalContent: '',
             cityResults: [],
             cityLoading: false,
             emptyForm() {
@@ -30,6 +34,7 @@
                     telefono: '',
                     email: '',
                     sector_id: '',
+                    notas: '',
                 }
             },
             openCreateModal() {
@@ -53,6 +58,7 @@
                     telefono: empresa.telefono ?? '',
                     email: empresa.email ?? '',
                     sector_id: empresa.sector_id ?? '',
+                    notas: empresa.notas ?? '',
                 }
                 this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
                 this.cityResults = []
@@ -63,6 +69,20 @@
                 this.openModal = false
                 this.cityResults = []
                 this.cityLoading = false
+            },
+            openNotesModal(empresa) {
+                if (!empresa.notas) {
+                    return
+                }
+
+                this.notesModalCompanyName = empresa.nombre ?? ''
+                this.notesModalContent = empresa.notas ?? ''
+                this.notesModalOpen = true
+            },
+            closeNotesModal() {
+                this.notesModalOpen = false
+                this.notesModalCompanyName = ''
+                this.notesModalContent = ''
             },
             async searchCity() {
                 const query = (this.form.ciudad ?? '').trim()
@@ -147,6 +167,7 @@
                         'telefono' => $empresa->telefono,
                         'email' => $empresa->email,
                         'sector_id' => $empresa->sector_id,
+                        'notas' => $empresa->notas,
                     ]) }"
                     @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
                     class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
@@ -196,6 +217,20 @@
                             </svg>
                         </button>
 
+                        <button
+                            type="button"
+                            @click.stop="openNotesModal(empresa)"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition {{ $empresa->notas ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' : 'cursor-not-allowed text-slate-300' }}"
+                            @if (!$empresa->notas) disabled @endif
+                            title="{{ $empresa->notas ? 'Ver notas' : 'Sin notas' }}"
+                            aria-label="{{ $empresa->notas ? 'Ver notas de ' . $empresa->nombre : 'Sin notas para ' . $empresa->nombre }}"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5" />
+                            </svg>
+                        </button>
+
                         <a
                             href="{{ route('empresas.show', $empresa) }}"
                             @click.stop
@@ -217,6 +252,36 @@
 
         <div>
             {{ $empresas->links() }}
+        </div>
+
+        <div
+            x-show="notesModalOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-40 bg-slate-900/45"
+            @click="closeNotesModal()"
+            x-cloak
+        ></div>
+
+        <div
+            x-show="notesModalOpen"
+            x-transition
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+            <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" @click.stop>
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-900" x-text="`Notas de ${notesModalCompanyName}`"></h2>
+                    <button type="button" @click="closeNotesModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm whitespace-pre-line text-slate-700" x-text="notesModalContent"></div>
+
+                <button type="button" @click="closeNotesModal()" class="mt-4 inline-flex h-10 w-full items-center justify-center rounded-lg bg-slate-900 text-sm font-semibold text-white transition hover:bg-slate-700">Cerrar</button>
+            </div>
         </div>
 
         <div
@@ -348,6 +413,11 @@
                             <label class="mb-1.5 block font-semibold text-slate-700">Email</label>
                             <input x-model="form.email" name="email" type="email" placeholder="Email" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block font-semibold text-slate-700">Notas</label>
+                        <textarea x-model="form.notas" name="notas" rows="3" placeholder="Notas de la empresa" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
                     </div>
 
                     <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700" x-text="openEdit ? 'Guardar cambios' : 'Crear Empresa'"></button>

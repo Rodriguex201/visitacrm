@@ -16,6 +16,7 @@ class Empresa extends Model
         'telefono',
         'email',
         'direccion',
+        'notas',
         'sector_id',
     ];
 
@@ -24,4 +25,3 @@ class Empresa extends Model
         return $this->belongsTo(Sector::class, 'sector_id');
     }
 }
-

@@ -73,6 +73,15 @@
 
         </article>
 
+        <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+            <h2 class="text-xl font-semibold text-slate-950">Notas</h2>
+            @if ($empresa->notas)
+                <p class="text-sm text-slate-600 whitespace-pre-line">{{ $empresa->notas }}</p>
+            @else
+                <p class="text-sm text-slate-500">Sin notas</p>
+            @endif
+        </article>
+
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Actividad (0)</h2>
