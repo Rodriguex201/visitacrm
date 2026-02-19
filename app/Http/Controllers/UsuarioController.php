@@ -31,6 +31,8 @@ class UsuarioController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'cta_banco' => ['nullable', 'string', 'max:60'],
+            'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
 
         User::create([
@@ -41,6 +43,8 @@ class UsuarioController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'tipo_usuario' => $validated['tipo_usuario'],
+            'cta_banco' => $validated['cta_banco'] ?? null,
+            'ciudad' => $validated['ciudad'] ?? null,
         ]);
 
         return redirect()
@@ -64,6 +68,8 @@ class UsuarioController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'cta_banco' => ['nullable', 'string', 'max:60'],
+            'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user->codigo = strtoupper($validated['codigo']);
@@ -72,6 +78,8 @@ class UsuarioController extends Controller
         $user->direccion = $validated['direccion'] ?? null;
         $user->email = $validated['email'];
         $user->tipo_usuario = $validated['tipo_usuario'];
+        $user->cta_banco = $validated['cta_banco'] ?? null;
+        $user->ciudad = $validated['ciudad'] ?? null;
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
