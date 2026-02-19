@@ -66,6 +66,7 @@ class EmpresaController extends Controller
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
+            'notas' => ['nullable', 'string', 'max:5000'],
             'sector_id' => ['nullable', 'exists:sectores,id'],
             'modal_mode' => ['nullable', Rule::in(['create', 'edit'])],
             'empresa_id' => ['nullable', 'integer'],
