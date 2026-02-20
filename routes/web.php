@@ -16,6 +16,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update']);
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
+    Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');

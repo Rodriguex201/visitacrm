@@ -115,7 +115,7 @@
             </div>
 
             <div>
-                <p class="text-2xl font-bold text-slate-950 leading-none">0</p>
+                <p class="text-2xl font-bold text-slate-950 leading-none">{{ $enSeguimientoCount }}</p>
                 <p class="mt-1 text-sm text-slate-600">En seguimiento</p>
             </div>
         </div>
