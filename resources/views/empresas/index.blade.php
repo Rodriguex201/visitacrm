@@ -10,7 +10,7 @@
             formAction: '{{ old('modal_mode') === 'edit' && old('empresa_id') ? route('empresas.update', ['empresa' => old('empresa_id')]) : route('empresas.store') }}',
             form: {
                 nombre: @js(old('nombre', '')),
-                nit: @js(old('nit', '')),
+                // nit: @js(old('nit', '')),
                 ciudad: @js(old('ciudad', '')),
                 ciudad_codigo: @js(old('ciudad_codigo', '')),
                 direccion: @js(old('direccion', '')),
@@ -27,7 +27,7 @@
             emptyForm() {
                 return {
                     nombre: '',
-                    nit: '',
+                    // nit: '',
                     ciudad: '',
                     ciudad_codigo: '',
                     direccion: '',
@@ -51,7 +51,7 @@
                 this.editId = empresa.id
                 this.form = {
                     nombre: empresa.nombre ?? '',
-                    nit: empresa.nit ?? '',
+                    // nit: empresa.nit ?? '',
                     ciudad: empresa.ciudad ?? '',
                     ciudad_codigo: '',
                     direccion: empresa.direccion ?? '',
@@ -150,7 +150,7 @@
             </span>
             <input
                 type="text"
-                placeholder="Buscar por nombre, NIT o ciudad..."
+                placeholder="Buscar por nombre o ciudad..."
                 class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             >
         </div>
@@ -161,7 +161,7 @@
                     x-data="{ empresa: @js([
                         'id' => $empresa->id,
                         'nombre' => $empresa->nombre,
-                        'nit' => $empresa->nit,
+                        // 'nit' => $empresa->nit,
                         'ciudad' => $empresa->ciudad,
                         'direccion' => $empresa->direccion,
                         'telefono' => $empresa->telefono,
@@ -189,6 +189,7 @@
                                     </svg>
                                     {{ $empresa->ciudad }}
                                 </span>
+                                {{--
                                 <span class="inline-flex items-center gap-1">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v13.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V5.25z" />
@@ -196,6 +197,7 @@
                                     </svg>
                                     {{ $empresa->nit ?: 'Sin NIT' }}
                                 </span>
+                                --}}
                                 <span class="inline-flex items-center gap-1">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
@@ -332,10 +334,12 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {{--
                         <div>
                             <label class="mb-1.5 block font-semibold text-slate-700">NIT</label>
                             <input x-model="form.nit" name="nit" type="text" placeholder="NIT" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
+                        --}}
                         <div class="relative">
                             <label class="mb-1.5 block font-semibold text-slate-700">Ciudad *</label>
                             <div class="flex items-center gap-2">

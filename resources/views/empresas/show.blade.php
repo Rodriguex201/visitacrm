@@ -55,12 +55,14 @@
                     {{ $empresa->telefono ?: 'Sin teléfono' }}
                 </p>
 
+                {{--
                 <p class="inline-flex items-center gap-2 text-sm">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
                     </svg>
                     NIT: {{ $empresa->nit ?: 'Sin NIT' }}
                 </p>
+                --}}
 
                 <p class="inline-flex items-center gap-2 text-sm">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

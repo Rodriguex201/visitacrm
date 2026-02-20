@@ -224,7 +224,7 @@
                         <div>
                             <label class="mb-1 block text-sm font-medium text-slate-700">Empresa</label>
                             <div class="relative flex items-center gap-2">
-                                <input type="text" name="empresa_nombre" x-model="empresaQuery" class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Buscar por nombre, NIT o ciudad">
+                                <input type="text" name="empresa_nombre" x-model="empresaQuery" class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Buscar por nombre o ciudad">
                                 <button type="button" @click="searchEmpresa()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" /></svg>
                                 </button>
@@ -239,7 +239,7 @@
                                     <button type="button" @click="selectEmpresa(empresa)" class="flex w-full items-start justify-between gap-2 border-b border-slate-100 px-3 py-2 text-left text-sm last:border-b-0 hover:bg-slate-50">
                                         <span>
                                             <span class="block font-medium text-slate-800" x-text="empresa.nombre"></span>
-                                            <span class="block text-xs text-slate-500" x-text="`NIT: ${empresa.nit ?? 'N/A'} · ${empresa.ciudad ?? ''}`"></span>
+                                            <span class="block text-xs text-slate-500" x-text="empresa.ciudad ?? ''"></span>
                                         </span>
                                     </button>
                                 </template>
