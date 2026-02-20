@@ -192,7 +192,14 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
 
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    @php
+                                        $class = $tipos[$u->tipo_usuario]->color ?? 'bg-gray-100 text-gray-700';
+                                    @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium {{ $class }}">
+                                        {{ ucfirst($u->tipo_usuario) }}
+                                    </span>
+                                </td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <button
                                         type="button"
