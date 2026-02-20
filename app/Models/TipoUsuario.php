@@ -11,6 +11,9 @@ class TipoUsuario extends Model
     protected $fillable = [
         'nombre',
         'color',
+        'bg_color',
+        'text_color',
+
     ];
 }
 

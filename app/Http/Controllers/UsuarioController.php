@@ -27,11 +27,33 @@ class UsuarioController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $tipos = TipoUsuario::query()
-            ->get()
-            ->keyBy('nombre');
 
-        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos'));
+        $tiposLista = TipoUsuario::query()
+            ->orderBy('nombre')
+            ->get();
+
+        $tipos = $tiposLista->keyBy('nombre');
+
+        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista'));
+    }
+
+
+    public function updateTipoUsuario(Request $request, TipoUsuario $tipoUsuario): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updateTipoUsuario', [
+            'bg_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'text_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+        ]);
+
+        $tipoUsuario->update([
+            'bg_color' => strtoupper($validated['bg_color']),
+            'text_color' => strtoupper($validated['text_color']),
+        ]);
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Colores del tipo de usuario actualizados correctamente.');
+
     }
 
     public function store(Request $request): RedirectResponse
