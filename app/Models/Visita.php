@@ -15,11 +15,14 @@ class Visita extends Model
         'fecha_hora',
         'estado',
         'resultado',
+        'nivel_interes',
+        'resultado_at',
         'notas',
     ];
 
     protected $casts = [
         'fecha_hora' => 'datetime',
+        'resultado_at' => 'datetime',
     ];
 
     public function empresa(): BelongsTo
