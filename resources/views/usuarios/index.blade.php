@@ -194,10 +194,12 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     @php
+
                                         $bgColor = $tipos[$u->tipo_usuario]->bg_color ?? '#E5E7EB';
                                         $textColor = $tipos[$u->tipo_usuario]->text_color ?? '#374151';
                                     @endphp
                                     <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium" style="background-color: {{ $bgColor }}; color: {{ $textColor }};">
+
                                         {{ ucfirst($u->tipo_usuario) }}
                                     </span>
                                 </td>
