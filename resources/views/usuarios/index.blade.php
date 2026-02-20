@@ -7,6 +7,7 @@
             openEditModal: false,
             createCiudad: @js(old('ciudad', '')),
             createTipoUsuario: @js(old('tipo_usuario', 'freelance')),
+            createBancoId: @js(old('banco_id', '')),
             createCityResults: [],
             createCityLoading: false,
             editCityResults: [],
@@ -17,6 +18,7 @@
                 name: '',
                 telefono: '',
                 direccion: '',
+                banco_id: '',
                 cta_banco: '',
                 ciudad: '',
                 email: '',
@@ -31,6 +33,7 @@
                     name: user.name ?? '',
                     telefono: user.telefono ?? '',
                     direccion: user.direccion ?? '',
+                    banco_id: user.banco_id ?? '',
                     cta_banco: user.cta_banco ?? '',
                     ciudad: user.ciudad ?? '',
                     email: user.email ?? '',
@@ -124,6 +127,7 @@
                     name: @js(old('name', '')),
                     telefono: @js(old('telefono', '')),
                     direccion: @js(old('direccion', '')),
+                    banco_id: @js(old('banco_id', '')),
                     cta_banco: @js(old('cta_banco', '')),
                     ciudad: @js(old('ciudad', '')),
                     email: @js(old('email', '')),
@@ -166,6 +170,10 @@
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Dirección</th>
+
+                            <th scope="col" class="px-4 py-3 font-semibold">Banco</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Cta banco</th>
+
                             <th scope="col" class="px-4 py-3 font-semibold">Ciudad</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
@@ -179,6 +187,10 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->direccion ?? '—' }}</td>
+
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->banco?->nombre ?? '—' }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
+
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
@@ -190,6 +202,7 @@
                                             'name' => $u->name,
                                             'telefono' => $u->telefono,
                                             'direccion' => $u->direccion,
+                                            'banco_id' => $u->banco_id,
                                             'cta_banco' => $u->cta_banco,
                                             'ciudad' => $u->ciudad,
                                             'email' => $u->email,
@@ -207,7 +220,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
+                                <td colspan="10" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
                             </tr>
                         @endforelse
                     </tbody>
@@ -283,6 +298,16 @@
                             <div>
                                 <label for="create_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
                                 <input id="create_direccion" name="direccion" type="text" value="{{ old('direccion') }}" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            </div>
+
+                            <div>
+                                <label for="create_banco_id" class="mb-1.5 block font-semibold text-slate-700">Banco</label>
+                                <select id="create_banco_id" name="banco_id" x-model="createBancoId" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="">Selecciona un banco</option>
+                                    @foreach ($bancos as $banco)
+                                        <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div>
@@ -402,6 +427,16 @@
                     <div>
                         <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
                         <input id="edit_direccion" name="direccion" type="text" x-model="editingUser.direccion" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                    </div>
+
+                    <div>
+                        <label for="edit_banco_id" class="mb-1.5 block font-semibold text-slate-700">Banco</label>
+                        <select id="edit_banco_id" name="banco_id" x-model="editingUser.banco_id" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <option value="">Selecciona un banco</option>
+                            @foreach ($bancos as $banco)
+                                <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div>
