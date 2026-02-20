@@ -65,10 +65,9 @@ class EmpresaController extends Controller
         }
 
         $empresas = Empresa::query()
-            ->select(['id', 'nombre', 'nit', 'ciudad'])
+            ->select(['id', 'nombre', 'ciudad'])
             ->where(function ($q) use ($query) {
                 $q->where('nombre', 'like', "%{$query}%")
-                    ->orWhere('nit', 'like', "%{$query}%")
                     ->orWhere('ciudad', 'like', "%{$query}%");
             })
             ->orderBy('nombre')
