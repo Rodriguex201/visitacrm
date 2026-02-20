@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banco;
+use App\Models\TipoUsuario;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,11 @@ class UsuarioController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return view('usuarios.index', compact('usuarios', 'bancos'));
+        $tipos = TipoUsuario::query()
+            ->get()
+            ->keyBy('nombre');
+
+        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos'));
     }
 
     public function store(Request $request): RedirectResponse
