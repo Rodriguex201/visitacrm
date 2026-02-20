@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="space-y-4 pb-24">
+    <section class="space-y-4 pb-24" x-data="historialVisitas()" x-init="init()">
         <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-transparent">
             <div class="flex min-w-0 items-start gap-3">
                 <a href="{{ route('empresas.index') }}" class="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-200/70 hover:text-slate-900" aria-label="Volver a empresas">
@@ -112,6 +112,22 @@
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+            @php
+                $resultadoLabels = [
+                    'venta_realizada' => 'Venta realizada',
+                    'en_seguimiento' => 'En seguimiento',
+                    'sin_interes' => 'Sin interés',
+                    'no_disponible' => 'No disponible',
+                ];
+
+                $nivelInteresLabels = [
+                    'alto' => 'Alto',
+                    'medio' => 'Medio',
+                    'bajo' => 'Bajo',
+                    'sin_interes' => 'Sin interés',
+                ];
+            @endphp
+
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas ({{ $visitas->count() }})</h2>
 
@@ -128,21 +144,58 @@
                 <div class="space-y-3">
                     @foreach ($visitas as $visita)
                         @php
-                            $badgeClass = match ($visita->estado) {
+                            $isProgramada = $visita->fecha_hora?->isFuture();
+                            $canUpdateResultado = ! $isProgramada && empty($visita->resultado);
+                            $estadoBadgeClass = match ($visita->estado) {
                                 'realizada' => 'bg-emerald-100 text-emerald-700',
                                 'cancelada' => 'bg-rose-100 text-rose-700',
                                 default => 'bg-blue-100 text-blue-700',
                             };
+                            $resultadoBadgeClass = match ($visita->resultado) {
+                                'venta_realizada' => 'bg-emerald-100 text-emerald-700',
+                                'en_seguimiento' => 'bg-amber-100 text-amber-700',
+                                'sin_interes' => 'bg-rose-100 text-rose-700',
+                                'no_disponible' => 'bg-slate-200 text-slate-700',
+                                default => 'bg-slate-100 text-slate-700',
+                            };
                         @endphp
-                        <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+
+                        <article id="visita-item-{{ $visita->id }}" class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm" data-visita-id="{{ $visita->id }}">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="text-sm font-semibold text-slate-900">{{ $visita->fecha_hora?->format('d/m/Y H:i') }}</p>
-                                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $badgeClass }}">{{ ucfirst($visita->estado) }}</span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $estadoBadgeClass }}">{{ ucfirst($visita->estado) }}</span>
+                                    @if ($isProgramada)
+                                        <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Programada</span>
+                                    @endif
+                                </div>
                             </div>
 
-                            @if ($visita->resultado)
-                                <p class="mt-2 text-sm text-slate-700"><span class="font-medium">Resultado:</span> {{ $visita->resultado }}</p>
-                            @endif
+                            <div class="mt-3 space-y-2">
+                                <div id="resultado-container-{{ $visita->id }}">
+                                    @if ($visita->resultado)
+                                        <div class="flex flex-wrap items-center gap-2 text-sm">
+                                            <span class="font-medium text-slate-700">Resultado:</span>
+                                            <span id="resultado-badge-{{ $visita->id }}" class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $resultadoBadgeClass }}">{{ $resultadoLabels[$visita->resultado] ?? $visita->resultado }}</span>
+                                            <span id="nivel-interes-text-{{ $visita->id }}" class="text-slate-600">
+                                                @if ($visita->nivel_interes)
+                                                    Nivel de interés: {{ $nivelInteresLabels[$visita->nivel_interes] ?? $visita->nivel_interes }}
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <button
+                                    id="btn-actualizar-{{ $visita->id }}"
+                                    type="button"
+                                    class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    @click="abrirModal({ id: {{ $visita->id }} })"
+                                    @if (! $canUpdateResultado) style="display: none;" @endif
+                                >
+                                    Actualizar resultado
+                                </button>
+                            </div>
 
                             @if ($visita->notas)
                                 <p class="mt-2 text-sm text-slate-600">{{ \Illuminate\Support\Str::limit($visita->notas, 180) }}</p>
@@ -151,6 +204,178 @@
                     @endforeach
                 </div>
             @endif
+
+            <div
+                x-cloak
+                x-show="showModal"
+                class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title-resultado"
+                @keydown.escape.window="cerrarModal()"
+            >
+                <div class="absolute inset-0 bg-slate-900/40" @click="cerrarModal()"></div>
+
+                <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 id="modal-title-resultado" class="text-lg font-semibold text-slate-900">Actualizar resultado</h3>
+                        <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" @click="cerrarModal()" aria-label="Cerrar modal">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="formError" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="formError"></div>
+
+                    <form class="space-y-4" @submit.prevent="guardarResultado()">
+                        <div>
+                            <label for="resultado" class="mb-1 block text-sm font-medium text-slate-700">Resultado de la visita*</label>
+                            <select id="resultado" x-model="form.resultado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="">Selecciona resultado</option>
+                                <option value="venta_realizada">Venta realizada</option>
+                                <option value="en_seguimiento">En seguimiento</option>
+                                <option value="sin_interes">Sin interés</option>
+                                <option value="no_disponible">No disponible</option>
+                            </select>
+                            <p x-show="errors.resultado" class="mt-1 text-xs text-rose-600" x-text="errors.resultado"></p>
+                        </div>
+
+                        <div>
+                            <label for="nivel_interes" class="mb-1 block text-sm font-medium text-slate-700">Nivel de interés</label>
+                            <select
+                                id="nivel_interes"
+                                x-model="form.nivel_interes"
+                                class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                :disabled="form.resultado === 'sin_interes'"
+                            >
+                                <option value="">Sin definir</option>
+                                <option value="alto" :disabled="form.resultado === 'sin_interes'">Alto</option>
+                                <option value="medio" :disabled="form.resultado === 'sin_interes'">Medio</option>
+                                <option value="bajo" :disabled="form.resultado === 'sin_interes'">Bajo</option>
+                                <option value="sin_interes" :disabled="['venta_realizada','en_seguimiento'].includes(form.resultado)">Sin interés</option>
+                            </select>
+                            <p x-show="errors.nivel_interes" class="mt-1 text-xs text-rose-600" x-text="errors.nivel_interes"></p>
+                            <p class="mt-1 text-xs text-slate-500">Si seleccionas "Sin interés", se guardará automáticamente ese nivel.</p>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarModal()">Cancelar</button>
+                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSubmitting">
+                                <span x-show="!isSubmitting">Guardar</span>
+                                <span x-show="isSubmitting">Guardando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </article>
     </section>
+
+
+    <script>
+        function historialVisitas() {
+            return {
+                showModal: false,
+                isSubmitting: false,
+                visitaId: null,
+                formError: '',
+                errors: {},
+                form: {
+                    resultado: '',
+                    nivel_interes: '',
+                },
+                init() {
+                    this.$watch('form.resultado', (value) => {
+                        if (value === 'sin_interes') {
+                            this.form.nivel_interes = 'sin_interes';
+                        }
+
+                        if (value === 'no_disponible') {
+                            this.form.nivel_interes = '';
+                        }
+
+                        if (['venta_realizada', 'en_seguimiento'].includes(value) && this.form.nivel_interes === 'sin_interes') {
+                            this.form.nivel_interes = '';
+                        }
+                    });
+                },
+                abrirModal(visita) {
+                    this.visitaId = visita.id;
+                    this.form.resultado = '';
+                    this.form.nivel_interes = '';
+                    this.formError = '';
+                    this.errors = {};
+                    this.showModal = true;
+                },
+                cerrarModal() {
+                    this.showModal = false;
+                    this.isSubmitting = false;
+                },
+                async guardarResultado() {
+                    if (!this.visitaId) {
+                        return;
+                    }
+
+                    this.isSubmitting = true;
+                    this.formError = '';
+                    this.errors = {};
+
+                    try {
+                        const response = await fetch(`/visitas/${this.visitaId}/resultado`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify(this.form),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            if (response.status === 422) {
+                                this.errors = Object.fromEntries(
+                                    Object.entries(data.errors || {}).map(([key, value]) => [key, value[0]])
+                                );
+                                this.formError = data.message || 'No se pudo actualizar el resultado.';
+                                return;
+                            }
+
+                            this.formError = data.message || 'Ocurrió un error inesperado.';
+                            return;
+                        }
+
+                        this.actualizarItemVisita(data.visita);
+                        this.cerrarModal();
+                    } catch (error) {
+                        this.formError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                actualizarItemVisita(visita) {
+                    const btn = document.getElementById(`btn-actualizar-${visita.id}`);
+                    if (btn) {
+                        btn.style.display = 'none';
+                    }
+
+                    const container = document.getElementById(`resultado-container-${visita.id}`);
+                    if (!container) {
+                        return;
+                    }
+
+                    const nivelTexto = visita.nivel_interes_label ? `Nivel de interés: ${visita.nivel_interes_label}` : '';
+                    container.innerHTML = `
+                        <div class="flex flex-wrap items-center gap-2 text-sm">
+                            <span class="font-medium text-slate-700">Resultado:</span>
+                            <span id="resultado-badge-${visita.id}" class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${visita.resultado_badge_class}">${visita.resultado_label}</span>
+                            <span id="nivel-interes-text-${visita.id}" class="text-slate-600">${nivelTexto}</span>
+                        </div>
+                    `;
+                },
+            };
+        }
+    </script>
 @endsection
