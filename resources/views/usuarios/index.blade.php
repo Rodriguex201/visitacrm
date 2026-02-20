@@ -259,12 +259,16 @@
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label for="create_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+
                                 <input id="create_codigo" name="codigo" type="text" :value="codigoPreviewByTipo(createTipoUsuario)" placeholder="Se genera automáticamente" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" readonly aria-readonly="true">
+
                             </div>
 
                             <div>
                                 <label for="create_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
+
                                 <select id="create_tipo_usuario" name="tipo_usuario" x-model="createTipoUsuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+
                                     <option value="">Selecciona una opción</option>
                                     <option value="freelance" @selected(old('tipo_usuario') === 'freelance')>freelance</option>
                                     <option value="vinculado" @selected(old('tipo_usuario') === 'vinculado')>vinculado</option>
