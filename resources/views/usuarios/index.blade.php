@@ -6,6 +6,7 @@
             openCreateModal: false,
             openEditModal: false,
             createCiudad: @js(old('ciudad', '')),
+            createTipoUsuario: @js(old('tipo_usuario', 'freelance')),
             createCityResults: [],
             createCityLoading: false,
             editCityResults: [],
@@ -70,6 +71,14 @@
             selectCreateCity(city) {
                 this.createCiudad = city.citynomb ?? '';
                 this.createCityResults = [];
+            },
+
+            codigoPreviewByTipo(tipoUsuario) {
+                if (tipoUsuario === 'vinculado') return 'V-####';
+                if (tipoUsuario === 'freelance') return 'F-####';
+                if (tipoUsuario === 'administracion') return 'A-####';
+
+                return '';
             },
             async searchEditCity() {
                 const query = (this.editingUser.ciudad ?? '').trim();
@@ -219,7 +228,7 @@
         <div x-show="openCreateModal" x-transition.opacity x-cloak class="fixed inset-0 z-40 bg-slate-900/45" @click="openCreateModal = false"></div>
 
         <div x-show="openCreateModal" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" @click.stop>
+            <div class="w-full max-w-3xl rounded-2xl bg-white p-5 shadow-xl" @click.stop>
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-slate-900">Crear usuario</h2>
                     <button
@@ -243,101 +252,105 @@
                     </div>
                 @endif
 
-                <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-3 text-sm">
-                    @csrf
+                <div class="max-h-[80vh] overflow-y-auto pr-1">
+                    <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-4 text-sm">
+                        @csrf
 
-                    <div>
-                        <label for="create_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
-                        <input id="create_codigo" name="codigo" type="text" value="{{ old('codigo') }}" placeholder="Ej: B092" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="create_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                                <input id="create_codigo" name="codigo" type="text" :value="codigoPreviewByTipo(createTipoUsuario)" placeholder="Se genera automáticamente" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" readonly aria-readonly="true">
+                            </div>
 
-                    <div>
-                        <label for="create_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
-                        <input id="create_name" name="name" type="text" value="{{ old('name') }}" placeholder="Nombre completo" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
+                            <div>
+                                <label for="create_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
+                                <select id="create_tipo_usuario" name="tipo_usuario" x-model="createTipoUsuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="freelance" @selected(old('tipo_usuario') === 'freelance')>freelance</option>
+                                    <option value="vinculado" @selected(old('tipo_usuario') === 'vinculado')>vinculado</option>
+                                    <option value="administracion" @selected(old('tipo_usuario') === 'administracion')>administracion</option>
+                                </select>
+                            </div>
 
-                    <div>
-                        <label for="create_telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
-                        <input id="create_telefono" name="telefono" type="text" value="{{ old('telefono') }}" placeholder="Ej: 3001234567" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
+                            <div>
+                                <label for="create_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
+                                <input id="create_name" name="name" type="text" value="{{ old('name') }}" placeholder="Nombre completo" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                            </div>
 
-                    <div>
-                        <label for="create_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
-                        <input id="create_direccion" name="direccion" type="text" value="{{ old('direccion') }}" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
+                            <div>
+                                <label for="create_telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
+                                <input id="create_telefono" name="telefono" type="text" value="{{ old('telefono') }}" placeholder="Ej: 3001234567" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            </div>
 
-                    <div>
-                        <label for="create_cta_banco" class="mb-1.5 block font-semibold text-slate-700">Cta banco</label>
-                        <input id="create_cta_banco" name="cta_banco" type="text" value="{{ old('cta_banco') }}" placeholder="Cuenta bancaria" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
+                            <div>
+                                <label for="create_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                                <input id="create_direccion" name="direccion" type="text" value="{{ old('direccion') }}" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            </div>
 
-                    <div class="relative">
-                        <label for="create_ciudad" class="mb-1.5 block font-semibold text-slate-700">Ciudad</label>
-                        <div class="flex items-center gap-2">
-                            <input
-                                id="create_ciudad"
-                                x-model="createCiudad"
-                                name="ciudad"
-                                type="text"
-                                placeholder="Ciudad"
-                                class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                @keydown.enter.prevent="searchCreateCity()"
-                                autocomplete="off"
-                            >
-                            <button
-                                type="button"
-                                @click="searchCreateCity()"
-                                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
-                                aria-label="Buscar ciudad"
-                            >
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-                                </svg>
-                            </button>
+                            <div>
+                                <label for="create_cta_banco" class="mb-1.5 block font-semibold text-slate-700">Cta banco</label>
+                                <input id="create_cta_banco" name="cta_banco" type="text" value="{{ old('cta_banco') }}" placeholder="Cuenta bancaria" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            </div>
+
+                            <div class="relative">
+                                <label for="create_ciudad" class="mb-1.5 block font-semibold text-slate-700">Ciudad</label>
+                                <div class="flex items-center gap-2">
+                                    <input
+                                        id="create_ciudad"
+                                        x-model="createCiudad"
+                                        name="ciudad"
+                                        type="text"
+                                        placeholder="Ciudad"
+                                        class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        @keydown.enter.prevent="searchCreateCity()"
+                                        autocomplete="off"
+                                    >
+                                    <button
+                                        type="button"
+                                        @click="searchCreateCity()"
+                                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+                                        aria-label="Buscar ciudad"
+                                    >
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div x-show="createCityLoading" class="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm" x-cloak>
+                                    Buscando ciudades...
+                                </div>
+
+                                <div x-show="createCityResults.length" class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg" x-cloak>
+                                    <template x-for="city in createCityResults" :key="city.citycodigo">
+                                        <button
+                                            type="button"
+                                            @click="selectCreateCity(city)"
+                                            class="flex w-full flex-col items-start gap-0.5 border-b border-slate-100 px-3 py-2 text-left last:border-b-0 hover:bg-slate-50"
+                                        >
+                                            <span class="text-sm font-semibold text-slate-800" x-text="city.citynomb"></span>
+                                            <span class="text-xs text-slate-500" x-text="city.cityNdepto ?? city.citydepto"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="create_email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
+                                <input id="create_email" name="email" type="email" value="{{ old('email') }}" placeholder="usuario@correo.com" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="create_password" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
+                                <input id="create_password" name="password" type="password" placeholder="••••••••" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                            </div>
                         </div>
 
-                        <div x-show="createCityLoading" class="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm" x-cloak>
-                            Buscando ciudades...
-                        </div>
-
-                        <div x-show="createCityResults.length" class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg" x-cloak>
-                            <template x-for="city in createCityResults" :key="city.citycodigo">
-                                <button
-                                    type="button"
-                                    @click="selectCreateCity(city)"
-                                    class="flex w-full flex-col items-start gap-0.5 border-b border-slate-100 px-3 py-2 text-left last:border-b-0 hover:bg-slate-50"
-                                >
-                                    <span class="text-sm font-semibold text-slate-800" x-text="city.citynomb"></span>
-                                    <span class="text-xs text-slate-500" x-text="city.cityNdepto ?? city.citydepto"></span>
-                                </button>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="create_email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
-                        <input id="create_email" name="email" type="email" value="{{ old('email') }}" placeholder="usuario@correo.com" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
-
-                    <div>
-                        <label for="create_password" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
-                        <input id="create_password" name="password" type="password" placeholder="••••••••" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
-
-                    <div>
-                        <label for="create_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
-                        <select id="create_tipo_usuario" name="tipo_usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                            <option value="">Selecciona una opción</option>
-                            <option value="freelance" @selected(old('tipo_usuario') === 'freelance')>freelance</option>
-                            <option value="vinculado" @selected(old('tipo_usuario') === 'vinculado')>vinculado</option>
-                            <option value="administracion" @selected(old('tipo_usuario') === 'administracion')>administracion</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700">
-                        Guardar usuario
-                    </button>
-                </form>
+                        <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700">
+                            Guardar usuario
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
