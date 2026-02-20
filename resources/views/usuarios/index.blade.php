@@ -165,11 +165,8 @@
                             <th scope="col" class="px-4 py-3 font-semibold">Código</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Correo</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Dirección</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Cta banco</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Ciudad</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Clave</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
                         </tr>
@@ -181,11 +178,8 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->codigo }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $u->email }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->direccion ?? '—' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 tracking-wider">********</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <button
@@ -213,7 +207,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                                <td colspan="8" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
                             </tr>
                         @endforelse
                     </tbody>
