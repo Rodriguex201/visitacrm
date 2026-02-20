@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banco;
+use App\Models\TipoUsuario;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,31 @@ class UsuarioController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return view('usuarios.index', compact('usuarios', 'bancos'));
+        $tiposLista = TipoUsuario::query()
+            ->orderBy('nombre')
+            ->get();
+
+        $tipos = $tiposLista->keyBy('nombre');
+
+        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista'));
+    }
+
+
+    public function updateTipoUsuario(Request $request, TipoUsuario $tipoUsuario): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updateTipoUsuario', [
+            'bg_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'text_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+        ]);
+
+        $tipoUsuario->update([
+            'bg_color' => strtoupper($validated['bg_color']),
+            'text_color' => strtoupper($validated['text_color']),
+        ]);
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Colores del tipo de usuario actualizados correctamente.');
     }
 
     public function store(Request $request): RedirectResponse
