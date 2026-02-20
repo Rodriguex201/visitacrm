@@ -204,6 +204,9 @@
                                     </svg>
                                     {{ $empresa->sector?->nombre ?: 'Sin sector' }}
                                 </span>
+                                <span class="inline-flex items-center gap-1">
+                                    Fecha creación: {{ optional($empresa->created_at)->format('d/m/Y') }}
+                                </span>
                             </div>
                         </div>
                     </div>

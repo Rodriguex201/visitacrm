@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banco;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -15,9 +16,17 @@ class UsuarioController extends Controller
 {
     public function index(): View
     {
-        $usuarios = User::orderByDesc('created_at')->paginate(10);
+        $usuarios = User::query()
+            ->with('banco')
+            ->orderByDesc('created_at')
+            ->paginate(10);
 
-        return view('usuarios.index', compact('usuarios'));
+        $bancos = Banco::query()
+            ->where('activo', 1)
+            ->orderBy('nombre')
+            ->get();
+
+        return view('usuarios.index', compact('usuarios', 'bancos'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,6 +38,7 @@ class UsuarioController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'banco_id' => ['nullable', 'exists:bancos,id'],
             'cta_banco' => ['nullable', 'string', 'max:60'],
             'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
@@ -48,6 +58,7 @@ class UsuarioController extends Controller
                         'email' => $validated['email'],
                         'password' => Hash::make($validated['password']),
                         'tipo_usuario' => $validated['tipo_usuario'],
+                        'banco_id' => $validated['banco_id'] ?? null,
                         'cta_banco' => $validated['cta_banco'] ?? null,
                         'ciudad' => $validated['ciudad'] ?? null,
                     ]);
@@ -86,6 +97,7 @@ class UsuarioController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'banco_id' => ['nullable', 'exists:bancos,id'],
             'cta_banco' => ['nullable', 'string', 'max:60'],
             'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
@@ -96,6 +108,7 @@ class UsuarioController extends Controller
         $user->direccion = $validated['direccion'] ?? null;
         $user->email = $validated['email'];
         $user->tipo_usuario = $validated['tipo_usuario'];
+        $user->banco_id = $validated['banco_id'] ?? null;
         $user->cta_banco = $validated['cta_banco'] ?? null;
         $user->ciudad = $validated['ciudad'] ?? null;
 

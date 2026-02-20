@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'name',
         'telefono',
         'direccion',
+        'banco_id',
         'cta_banco',
         'ciudad',
         'email',
@@ -44,6 +46,11 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public function banco(): BelongsTo
+    {
+        return $this->belongsTo(Banco::class);
+    }
+
     protected function casts(): array
     {
         return [
