@@ -5,6 +5,7 @@
         x-data="{
             openCreateModal: false,
             openEditModal: false,
+            openTipoColorsModal: false,
             createCiudad: @js(old('ciudad', '')),
             createTipoUsuario: @js(old('tipo_usuario', 'freelance')),
             createBancoId: @js(old('banco_id', '')),
@@ -120,6 +121,10 @@
                 openCreateModal = true;
             }
 
+            if (@js($errors->updateTipoUsuario->any())) {
+                openTipoColorsModal = true;
+            }
+
             if (@js($errors->updateUser->any())) {
                 editingUser = {
                     id: @js(old('edit_id')),
@@ -192,30 +197,48 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
 
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <button
-                                        type="button"
-                                        @click="startEdit(@js([
-                                            'id' => $u->id,
-                                            'codigo' => $u->codigo,
-                                            'name' => $u->name,
-                                            'telefono' => $u->telefono,
-                                            'direccion' => $u->direccion,
-                                            'banco_id' => $u->banco_id,
-                                            'cta_banco' => $u->cta_banco,
-                                            'ciudad' => $u->ciudad,
-                                            'email' => $u->email,
-                                            'tipo_usuario' => $u->tipo_usuario,
-                                        ]))"
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
-                                        title="Editar usuario"
-                                    >
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                        </svg>
-                                    </button>
+                                    @php
+                                        $bgColor = $tipos[$u->tipo_usuario]->bg_color ?? '#E5E7EB';
+                                        $textColor = $tipos[$u->tipo_usuario]->text_color ?? '#374151';
+                                    @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium" style="background-color: {{ $bgColor }}; color: {{ $textColor }};">
+                                        {{ ucfirst($u->tipo_usuario) }}
+                                    </span>
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <div class="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            @click="startEdit(@js([
+                                                'id' => $u->id,
+                                                'codigo' => $u->codigo,
+                                                'name' => $u->name,
+                                                'telefono' => $u->telefono,
+                                                'direccion' => $u->direccion,
+                                                'banco_id' => $u->banco_id,
+                                                'cta_banco' => $u->cta_banco,
+                                                'ciudad' => $u->ciudad,
+                                                'email' => $u->email,
+                                                'tipo_usuario' => $u->tipo_usuario,
+                                            ]))"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+                                            title="Editar usuario"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @click="openTipoColorsModal = true"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
+                                            title="Colores por tipo de usuario"
+                                        >
+                                            <span aria-hidden="true">🎨</span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -231,6 +254,29 @@
 
             <div class="border-t border-slate-100 px-4 py-3">
                 {{ $usuarios->links() }}
+            </div>
+        </div>
+
+        <div x-show="openTipoColorsModal" x-transition.opacity x-cloak class="fixed inset-0 z-40 bg-slate-900/45" @click="openTipoColorsModal = false"></div>
+
+        <div x-show="openTipoColorsModal" x-transition x-cloak x-on:keydown.escape.window="openTipoColorsModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="w-full max-w-4xl rounded-2xl bg-white p-5 shadow-xl" @click.stop>
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-900">Colores por tipo de usuario</h2>
+                    <button
+                        type="button"
+                        @click="openTipoColorsModal = false"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-h-[80vh] overflow-y-auto pr-1">
+                    @include('usuarios._colores_tipo_form')
+                </div>
             </div>
         </div>
 
