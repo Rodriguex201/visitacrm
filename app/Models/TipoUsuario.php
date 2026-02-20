@@ -13,6 +13,7 @@ class TipoUsuario extends Model
         'color',
         'bg_color',
         'text_color',
+
     ];
 }
 

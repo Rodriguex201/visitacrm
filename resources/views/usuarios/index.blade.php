@@ -197,6 +197,7 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
 
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
+
                                 <td class="whitespace-nowrap px-4 py-3">
                                     @php
                                         $bgColor = $tipos[$u->tipo_usuario]->bg_color ?? '#E5E7EB';
@@ -257,6 +258,7 @@
             </div>
         </div>
 
+
         <div x-show="openTipoColorsModal" x-transition.opacity x-cloak class="fixed inset-0 z-40 bg-slate-900/45" @click="openTipoColorsModal = false"></div>
 
         <div x-show="openTipoColorsModal" x-transition x-cloak x-on:keydown.escape.window="openTipoColorsModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -277,6 +279,7 @@
                 <div class="max-h-[80vh] overflow-y-auto pr-1">
                     @include('usuarios._colores_tipo_form')
                 </div>
+
             </div>
         </div>
 

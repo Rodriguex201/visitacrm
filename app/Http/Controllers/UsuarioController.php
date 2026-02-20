@@ -27,6 +27,7 @@ class UsuarioController extends Controller
             ->orderBy('nombre')
             ->get();
 
+
         $tiposLista = TipoUsuario::query()
             ->orderBy('nombre')
             ->get();
@@ -52,6 +53,7 @@ class UsuarioController extends Controller
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Colores del tipo de usuario actualizados correctamente.');
+
     }
 
     public function store(Request $request): RedirectResponse
