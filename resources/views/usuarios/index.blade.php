@@ -380,7 +380,7 @@
         <div x-show="openEditModal" x-transition.opacity x-cloak class="fixed inset-0 z-40 bg-slate-900/45" @click="openEditModal = false"></div>
 
         <div x-show="openEditModal" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" @click.stop>
+            <div class="w-full max-w-3xl rounded-2xl bg-white p-5 shadow-xl" @click.stop>
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-slate-900">Editar usuario</h2>
                     <button
@@ -404,112 +404,116 @@
                     </div>
                 @endif
 
-                <form :action="`${@js(url('/usuarios'))}/${editingUser.id}`" method="POST" class="space-y-3 text-sm">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="edit_id" :value="editingUser.id">
+                <div class="max-h-[80vh] overflow-y-auto pr-1">
+                    <form :action="`${@js(url('/usuarios'))}/${editingUser.id}`" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="edit_id" :value="editingUser.id">
 
-                    <div>
-                        <label for="edit_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
-                        <input id="edit_codigo" name="codigo" type="text" x-model="editingUser.codigo" placeholder="Ej: B092" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
-
-                    <div>
-                        <label for="edit_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
-                        <input id="edit_name" name="name" type="text" x-model="editingUser.name" placeholder="Nombre completo" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
-
-                    <div>
-                        <label for="edit_telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
-                        <input id="edit_telefono" name="telefono" type="text" x-model="editingUser.telefono" placeholder="Ej: 3001234567" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
-
-                    <div>
-                        <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
-                        <input id="edit_direccion" name="direccion" type="text" x-model="editingUser.direccion" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
-
-                    <div>
-                        <label for="edit_banco_id" class="mb-1.5 block font-semibold text-slate-700">Banco</label>
-                        <select id="edit_banco_id" name="banco_id" x-model="editingUser.banco_id" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                            <option value="">Selecciona un banco</option>
-                            @foreach ($bancos as $banco)
-                                <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="edit_cta_banco" class="mb-1.5 block font-semibold text-slate-700">Cta banco</label>
-                        <input id="edit_cta_banco" name="cta_banco" type="text" x-model="editingUser.cta_banco" placeholder="Cuenta bancaria" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
-
-                    <div class="relative">
-                        <label for="edit_ciudad" class="mb-1.5 block font-semibold text-slate-700">Ciudad</label>
-                        <div class="flex items-center gap-2">
-                            <input
-                                id="edit_ciudad"
-                                name="ciudad"
-                                type="text"
-                                x-model="editingUser.ciudad"
-                                placeholder="Ciudad"
-                                class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                @keydown.enter.prevent="searchEditCity()"
-                                autocomplete="off"
-                            >
-                            <button
-                                type="button"
-                                @click="searchEditCity()"
-                                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
-                                aria-label="Buscar ciudad"
-                            >
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-                                </svg>
-                            </button>
+                        <div>
+                            <label for="edit_codigo" class="mb-1.5 block font-semibold text-slate-700">Código *</label>
+                            <input id="edit_codigo" name="codigo" type="text" x-model="editingUser.codigo" placeholder="Ej: B092" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" readonly aria-readonly="true" required>
                         </div>
 
-                        <div x-show="editCityLoading" class="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm" x-cloak>
-                            Buscando ciudades...
+                        <div>
+                            <label for="edit_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
+                            <select id="edit_tipo_usuario" name="tipo_usuario" x-model="editingUser.tipo_usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                                <option value="freelance">freelance</option>
+                                <option value="vinculado">vinculado</option>
+                                <option value="administracion">administracion</option>
+                            </select>
                         </div>
 
-                        <div x-show="editCityResults.length" class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg" x-cloak>
-                            <template x-for="city in editCityResults" :key="city.citycodigo">
+                        <div>
+                            <label for="edit_name" class="mb-1.5 block font-semibold text-slate-700">Nombre *</label>
+                            <input id="edit_name" name="name" type="text" x-model="editingUser.name" placeholder="Nombre completo" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                        </div>
+
+                        <div>
+                            <label for="edit_telefono" class="mb-1.5 block font-semibold text-slate-700">Teléfono</label>
+                            <input id="edit_telefono" name="telefono" type="text" x-model="editingUser.telefono" placeholder="Ej: 3001234567" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
+
+
+                        <div>
+                            <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
+                            <input id="edit_direccion" name="direccion" type="text" x-model="editingUser.direccion" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
+
+
+                        <div>
+                            <label for="edit_banco_id" class="mb-1.5 block font-semibold text-slate-700">Banco</label>
+                            <select id="edit_banco_id" name="banco_id" x-model="editingUser.banco_id" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                <option value="">Selecciona un banco</option>
+                                @foreach ($bancos as $banco)
+                                    <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="edit_cta_banco" class="mb-1.5 block font-semibold text-slate-700">Cta banco</label>
+                            <input id="edit_cta_banco" name="cta_banco" type="text" x-model="editingUser.cta_banco" placeholder="Cuenta bancaria" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
+
+                        <div class="relative">
+                            <label for="edit_ciudad" class="mb-1.5 block font-semibold text-slate-700">Ciudad</label>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    id="edit_ciudad"
+                                    name="ciudad"
+                                    type="text"
+                                    x-model="editingUser.ciudad"
+                                    placeholder="Ciudad"
+                                    class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    @keydown.enter.prevent="searchEditCity()"
+                                    autocomplete="off"
+                                >
                                 <button
                                     type="button"
-                                    @click="selectEditCity(city)"
-                                    class="flex w-full flex-col items-start gap-0.5 border-b border-slate-100 px-3 py-2 text-left last:border-b-0 hover:bg-slate-50"
+                                    @click="searchEditCity()"
+                                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+                                    aria-label="Buscar ciudad"
                                 >
-                                    <span class="text-sm font-semibold text-slate-800" x-text="city.citynomb"></span>
-                                    <span class="text-xs text-slate-500" x-text="city.cityNdepto ?? city.citydepto"></span>
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                                    </svg>
                                 </button>
-                            </template>
+                            </div>
+
+                            <div x-show="editCityLoading" class="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm" x-cloak>
+                                Buscando ciudades...
+                            </div>
+
+                            <div x-show="editCityResults.length" class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg" x-cloak>
+                                <template x-for="city in editCityResults" :key="city.citycodigo">
+                                    <button
+                                        type="button"
+                                        @click="selectEditCity(city)"
+                                        class="flex w-full flex-col items-start gap-0.5 border-b border-slate-100 px-3 py-2 text-left last:border-b-0 hover:bg-slate-50"
+                                    >
+                                        <span class="text-sm font-semibold text-slate-800" x-text="city.citynomb"></span>
+                                        <span class="text-xs text-slate-500" x-text="city.cityNdepto ?? city.citydepto"></span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label for="edit_email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
-                        <input id="edit_email" name="email" type="email" x-model="editingUser.email" placeholder="usuario@correo.com" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                    </div>
+                        <div class="md:col-span-2">
+                            <label for="edit_email" class="mb-1.5 block font-semibold text-slate-700">Correo *</label>
+                            <input id="edit_email" name="email" type="email" x-model="editingUser.email" placeholder="usuario@correo.com" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                        </div>
 
-                    <div>
-                        <label for="edit_password" class="mb-1.5 block font-semibold text-slate-700">Clave (opcional)</label>
-                        <input id="edit_password" name="password" type="password" placeholder="Dejar vacío para mantener la clave actual" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                    </div>
+                        <div class="md:col-span-2">
+                            <label for="edit_password" class="mb-1.5 block font-semibold text-slate-700">Clave (opcional)</label>
+                            <input id="edit_password" name="password" type="password" placeholder="Dejar vacío para mantener la clave actual" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
 
-                    <div>
-                        <label for="edit_tipo_usuario" class="mb-1.5 block font-semibold text-slate-700">Tipo de usuario *</label>
-                        <select id="edit_tipo_usuario" name="tipo_usuario" x-model="editingUser.tipo_usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
-                            <option value="freelance">freelance</option>
-                            <option value="vinculado">vinculado</option>
-                            <option value="administracion">administracion</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700">
-                        Actualizar usuario
-                    </button>
-                </form>
+                        <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700 md:col-span-2">
+                            Actualizar usuario
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
