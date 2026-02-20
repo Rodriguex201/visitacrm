@@ -170,8 +170,10 @@
                             <th scope="col" class="px-4 py-3 font-semibold">Nombre</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Teléfono</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Dirección</th>
+
                             <th scope="col" class="px-4 py-3 font-semibold">Banco</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Cta banco</th>
+
                             <th scope="col" class="px-4 py-3 font-semibold">Ciudad</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
@@ -185,8 +187,10 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->telefono ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->direccion ?? '—' }}</td>
+
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->banco?->nombre ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->cta_banco ?? '—' }}</td>
+
                                 <td class="whitespace-nowrap px-4 py-3">{{ $u->ciudad ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ ucfirst($u->tipo_usuario) }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
@@ -216,7 +220,9 @@
                             </tr>
                         @empty
                             <tr>
+
                                 <td colspan="10" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+
                             </tr>
                         @endforelse
                     </tbody>
@@ -428,10 +434,12 @@
                             <input id="edit_telefono" name="telefono" type="text" x-model="editingUser.telefono" placeholder="Ej: 3001234567" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
 
+
                         <div>
                             <label for="edit_direccion" class="mb-1.5 block font-semibold text-slate-700">Dirección</label>
                             <input id="edit_direccion" name="direccion" type="text" x-model="editingUser.direccion" placeholder="Dirección del usuario" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
+
 
                         <div>
                             <label for="edit_banco_id" class="mb-1.5 block font-semibold text-slate-700">Banco</label>
