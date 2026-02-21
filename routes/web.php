@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProfileController;
@@ -15,6 +16,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update']);
+    Route::post('/empresas/{empresa}/contactos', [ContactoController::class, 'store'])->name('empresas.contactos.store');
+    Route::patch('/empresas/{empresa}/contactos/{contacto}', [ContactoController::class, 'update'])->name('empresas.contactos.update');
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 

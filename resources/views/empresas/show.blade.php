@@ -102,13 +102,79 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-xl font-semibold text-slate-950">Contactos</h2>
 
-                <button type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                <button type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900" @click="abrirModalContacto()">
                     <span class="text-base leading-none">+</span>
                     Agregar
                 </button>
             </div>
 
-            <p class="text-center text-sm text-slate-500">Sin contactos registrados</p>
+            <div id="contactos-list">
+                @include('empresas.partials.contactos-list', ['contactos' => $contactos])
+            </div>
+
+            <div
+                x-cloak
+                x-show="showContactoModal"
+                class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title-contacto"
+                @keydown.escape.window="cerrarModalContacto()"
+            >
+                <div class="absolute inset-0 bg-slate-900/40" @click="cerrarModalContacto()"></div>
+
+                <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 id="modal-title-contacto" class="text-lg font-semibold text-slate-900" x-text="isEditContacto ? 'Editar contacto' : 'Nuevo Contacto'"></h3>
+                        <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" @click="cerrarModalContacto()" aria-label="Cerrar modal">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="contactoFormError" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="contactoFormError"></div>
+
+                    <form class="space-y-4" @submit.prevent="guardarContacto()">
+                        <div>
+                            <label for="contacto_nombre" class="mb-1 block text-sm font-medium text-slate-700">Nombre*</label>
+                            <input id="contacto_nombre" x-model="contactoForm.nombre" type="text" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <p x-show="contactoErrors.nombre" class="mt-1 text-xs text-rose-600" x-text="contactoErrors.nombre"></p>
+                        </div>
+
+                        <div>
+                            <label for="contacto_cargo" class="mb-1 block text-sm font-medium text-slate-700">Cargo</label>
+                            <input id="contacto_cargo" x-model="contactoForm.cargo" type="text" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p x-show="contactoErrors.cargo" class="mt-1 text-xs text-rose-600" x-text="contactoErrors.cargo"></p>
+                        </div>
+
+                        <div>
+                            <label for="contacto_telefono" class="mb-1 block text-sm font-medium text-slate-700">Teléfono</label>
+                            <input id="contacto_telefono" x-model="contactoForm.telefono" type="text" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p x-show="contactoErrors.telefono" class="mt-1 text-xs text-rose-600" x-text="contactoErrors.telefono"></p>
+                        </div>
+
+                        <div>
+                            <label for="contacto_email" class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                            <input id="contacto_email" x-model="contactoForm.email" type="email" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p x-show="contactoErrors.email" class="mt-1 text-xs text-rose-600" x-text="contactoErrors.email"></p>
+                        </div>
+
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <input x-model="contactoForm.es_principal" type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            Contacto principal
+                        </label>
+
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarModalContacto()">Cancelar</button>
+                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSubmittingContacto">
+                                <span x-show="!isSubmittingContacto" x-text="isEditContacto ? 'Guardar cambios' : 'Agregar Contacto'"></span>
+                                <span x-show="isSubmittingContacto">Guardando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -277,15 +343,30 @@
         function historialVisitas() {
             return {
                 showModal: false,
+                showContactoModal: false,
                 isSubmitting: false,
+                isSubmittingContacto: false,
                 visitaId: null,
                 formError: '',
+                contactoFormError: '',
                 errors: {},
+                contactoErrors: {},
                 form: {
                     resultado: '',
                     nivel_interes: '',
                 },
+                contactoEditId: null,
+                isEditContacto: false,
+                contactoForm: {
+                    nombre: '',
+                    cargo: '',
+                    telefono: '',
+                    email: '',
+                    es_principal: false,
+                },
                 init() {
+                    this.bindContactoEditButtons();
+
                     this.$watch('form.resultado', (value) => {
                         if (value === 'sin_interes') {
                             this.form.nivel_interes = 'sin_interes';
@@ -311,6 +392,124 @@
                 cerrarModal() {
                     this.showModal = false;
                     this.isSubmitting = false;
+                },
+                abrirModalContacto() {
+                    this.contactoForm = {
+                        nombre: '',
+                        cargo: '',
+                        telefono: '',
+                        email: '',
+                        es_principal: false,
+                    };
+                    this.contactoEditId = null;
+                    this.isEditContacto = false;
+                    this.contactoErrors = {};
+                    this.contactoFormError = '';
+                    this.showContactoModal = true;
+                },
+                abrirModalEditarContacto(contacto) {
+                    this.contactoEditId = contacto.id;
+                    this.isEditContacto = true;
+                    this.contactoForm = {
+                        nombre: contacto.nombre ?? '',
+                        cargo: contacto.cargo ?? '',
+                        telefono: contacto.telefono ?? '',
+                        email: contacto.email ?? '',
+                        es_principal: Boolean(Number(contacto.es_principal ?? 0)),
+                    };
+                    this.contactoErrors = {};
+                    this.contactoFormError = '';
+                    this.showContactoModal = true;
+                },
+                bindContactoEditButtons() {
+                    const contenedor = document.getElementById('contactos-list');
+                    if (!contenedor || contenedor.dataset.editBound === '1') {
+                        return;
+                    }
+
+                    contenedor.addEventListener('click', (event) => {
+                        const button = event.target.closest('[data-contacto-edit]');
+                        if (!button) {
+                            return;
+                        }
+
+                        this.abrirModalEditarContacto({
+                            id: button.dataset.contactoId,
+                            nombre: button.dataset.contactoNombre,
+                            cargo: button.dataset.contactoCargo,
+                            telefono: button.dataset.contactoTelefono,
+                            email: button.dataset.contactoEmail,
+                            es_principal: button.dataset.contactoPrincipal,
+                        });
+                    });
+
+                    contenedor.dataset.editBound = '1';
+                },
+                cerrarModalContacto() {
+                    this.showContactoModal = false;
+                    this.isSubmittingContacto = false;
+                    this.contactoEditId = null;
+                    this.isEditContacto = false;
+                },
+                async guardarContacto() {
+                    this.isSubmittingContacto = true;
+                    this.contactoErrors = {};
+                    this.contactoFormError = '';
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('nombre', this.contactoForm.nombre ?? '');
+                        formData.append('cargo', this.contactoForm.cargo ?? '');
+                        formData.append('telefono', this.contactoForm.telefono ?? '');
+                        formData.append('email', this.contactoForm.email ?? '');
+                        formData.append('es_principal', this.contactoForm.es_principal ? '1' : '0');
+
+                        if (this.isEditContacto && this.contactoEditId) {
+                            formData.append('_method', 'PATCH');
+                        }
+
+                        const endpoint = this.isEditContacto && this.contactoEditId
+                            ? `{{ route('empresas.contactos.update', ['empresa' => $empresa, 'contacto' => '__CONTACTO__']) }}`.replace('__CONTACTO__', this.contactoEditId)
+                            : `{{ route('empresas.contactos.store', $empresa) }}`;
+
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: formData,
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            if (response.status === 422) {
+                                this.contactoErrors = Object.fromEntries(
+                                    Object.entries(data.errors || {}).map(([key, value]) => [key, value[0]])
+                                );
+                                this.contactoFormError = data.message || (this.isEditContacto ? 'No se pudo actualizar el contacto.' : 'No se pudo agregar el contacto.');
+                                return;
+                            }
+
+                            this.contactoFormError = data.message || 'Ocurrió un error inesperado.';
+                            return;
+                        }
+
+                        const contenedor = document.getElementById('contactos-list');
+                        if (contenedor && data.contactos_html) {
+                            contenedor.innerHTML = data.contactos_html;
+                        } else {
+                            window.location.reload();
+                            return;
+                        }
+
+                        this.cerrarModalContacto();
+                    } catch (error) {
+                        this.contactoFormError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.isSubmittingContacto = false;
+                    }
                 },
                 async guardarResultado() {
                     if (!this.visitaId) {
