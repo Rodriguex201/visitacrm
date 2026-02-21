@@ -13,18 +13,66 @@ use Illuminate\View\View;
 
 class EmpresaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $empresas = Empresa::query()
+        $request->validate([
+            'q' => ['nullable', 'string'],
+            'desde' => ['nullable', 'date'],
+            'hasta' => ['nullable', 'date'],
+        ]);
+
+        $q = trim((string) $request->query('q', ''));
+        $desdeInput = $request->query('desde');
+        $hastaInput = $request->query('hasta');
+
+        $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
+        $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
+        $usaRangoPersonalizado = $desde !== null || $hasta !== null;
+
+        $empresasQuery = Empresa::query()
             ->with('sector')
-            ->latest('id')
-            ->paginate(10);
+            ->latest('id');
+
+        if ($q !== '') {
+            $empresasQuery->where(function ($query) use ($q) {
+                $query->where('nombre', 'like', "%{$q}%")
+                    ->orWhere('ciudad', 'like', "%{$q}%");
+            });
+        }
+
+        if (! $usaRangoPersonalizado) {
+            $empresasQuery->whereBetween('created_at', [
+                Carbon::now()->startOfMonth(),
+                Carbon::now()->endOfMonth(),
+            ]);
+        } else {
+            if ($desde !== null) {
+                $empresasQuery->where('created_at', '>=', $desde);
+            }
+
+            if ($hasta !== null) {
+                $empresasQuery->where('created_at', '<=', $hasta);
+            }
+        }
+
+        $empresas = $empresasQuery
+            ->paginate(10)
+            ->appends($request->query());
 
         $sectores = Sector::query()
             ->orderBy('nombre')
             ->get();
 
-        return view('empresas.index', compact('empresas', 'sectores'));
+        return view('empresas.index', compact(
+            'empresas',
+            'sectores',
+            'q',
+            'desdeInput',
+            'hastaInput',
+            'usaRangoPersonalizado',
+            'desde',
+            'hasta',
+        ));
     }
 
     public function show(Request $request, Empresa $empresa): View

@@ -183,7 +183,13 @@
                         @foreach ($visitasRecientes as $visita)
                             @php
                                 $badgeClass = $visita->resultado
-                                    ? 'bg-green-600 text-white'
+                                    ? match ($visita->resultado) {
+                                        'venta_realizada' => 'bg-emerald-100 text-emerald-700',
+                                        'en_seguimiento' => 'bg-amber-100 text-amber-700',
+                                        'sin_interes' => 'bg-rose-100 text-rose-700',
+                                        'no_disponible' => 'bg-slate-200 text-slate-700',
+                                        default => 'bg-slate-100 text-slate-700',
+                                    }
                                     : match ($visita->estado) {
                                         'realizada' => 'bg-emerald-100 text-emerald-700',
                                         'cancelada' => 'bg-rose-100 text-rose-700',
@@ -191,7 +197,15 @@
                                         default => 'bg-gray-200 text-gray-700',
                                     };
 
-                                $badgeText = $visita->resultado ?: ($visita->estado ? ucfirst($visita->estado) : 'No disponible');
+                                $badgeText = $visita->resultado
+                                    ? match ($visita->resultado) {
+                                        'venta_realizada' => 'Venta realizada',
+                                        'en_seguimiento' => 'En seguimiento',
+                                        'sin_interes' => 'Sin interés',
+                                        'no_disponible' => 'No disponible',
+                                        default => str($visita->resultado)->replace('_', ' ')->title(),
+                                    }
+                                    : ($visita->estado ? ucfirst($visita->estado) : 'No disponible');
                             @endphp
 
                             <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">

@@ -142,18 +142,66 @@
             </div>
         @endif
 
-        <div class="relative">
-            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-                </svg>
-            </span>
-            <input
-                type="text"
-                placeholder="Buscar por nombre o ciudad..."
-                class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            >
-        </div>
+        <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
+            <div class="grid gap-2 md:grid-cols-12">
+                <div class="relative md:col-span-5">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                        </svg>
+                    </span>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ $q }}"
+                        placeholder="Buscar por nombre o ciudad..."
+                        class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    >
+                </div>
+
+                <input
+                    type="date"
+                    name="desde"
+                    value="{{ $desdeInput }}"
+                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                >
+
+                <input
+                    type="date"
+                    name="hasta"
+                    value="{{ $hastaInput }}"
+                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                >
+
+                <button
+                    type="submit"
+                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-2"
+                >
+                    Filtrar
+                </button>
+
+                <a
+                    href="{{ route('empresas.index') }}"
+                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:col-span-1"
+                >
+                    Limpiar
+                </a>
+            </div>
+        </form>
+
+        <p class="text-xs text-slate-500">
+            @if ($usaRangoPersonalizado)
+                Mostrando empresas
+                @if ($desde)
+                    desde {{ $desde->format('d/m/Y') }}
+                @endif
+                @if ($hasta)
+                    hasta {{ $hasta->format('d/m/Y') }}
+                @endif
+            @else
+                Mostrando empresas del mes actual
+            @endif
+        </p>
 
         <div class="space-y-3 pb-24">
             @forelse ($empresas as $empresa)
