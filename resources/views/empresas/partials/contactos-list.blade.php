@@ -1,6 +1,7 @@
 @if ($contactos->isEmpty())
     <p class="text-center text-sm text-slate-500">Sin contactos registrados</p>
 @else
+
     <div class="space-y-2" x-data="{ openId: null }">
         @foreach ($contactos as $contacto)
             <article class="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
@@ -42,11 +43,13 @@
                             email: @js($contacto->email),
                             es_principal: '{{ $contacto->es_principal ? '1' : '0' }}',
                         })"
+
                     >
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.1 2.1 0 113 2.97L7.5 18.82l-4.5 1.18 1.18-4.5 12.682-12.013z" />
                         </svg>
                     </button>
+
                 </div>
 
                 <div x-cloak x-show="openId === {{ $contacto->id }}" x-transition class="border-t border-slate-100 bg-slate-50/70 px-4 py-3">
@@ -73,6 +76,7 @@
                             </span>
                         </p>
                     </div>
+
                 </div>
             </article>
         @endforeach
