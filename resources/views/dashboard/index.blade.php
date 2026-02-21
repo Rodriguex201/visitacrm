@@ -53,7 +53,7 @@
     >
         <div class="flex items-start justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold leading-tight text-slate-950">Dashboard</h1>
+                <h1 class="text-2xl font-bold leading-tight text-slate-950">Menu principal</h1>
                 <p class="mt-1 text-base text-slate-600">Resumen de actividad comercial</p>
             </div>
 
