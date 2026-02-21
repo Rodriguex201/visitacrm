@@ -30,4 +30,9 @@ class Empresa extends Model
     {
         return $this->hasMany(Visita::class);
     }
+
+    public function contactos(): HasMany
+    {
+        return $this->hasMany(Contacto::class);
+    }
 }
