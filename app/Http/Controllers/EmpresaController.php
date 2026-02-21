@@ -83,7 +83,7 @@ class EmpresaController extends Controller
             $range = 'todo';
         }
 
-        $empresa->load('sector');
+        $empresa->load(['sector', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
         $visitasQuery = $empresa->visitas()->latest('fecha_hora');
 
@@ -100,7 +100,9 @@ class EmpresaController extends Controller
 
         $visitas = $visitasQuery->get();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'range'));
+        $contactos = $empresa->contactos;
+
+        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos'));
     }
 
 
