@@ -13,6 +13,7 @@ class ContactoController extends Controller
 {
     public function store(Request $request, Empresa $empresa): JsonResponse|RedirectResponse
     {
+
         $validated = $this->validateContacto($request);
         $esPrincipal = (bool) ($validated['es_principal'] ?? false);
         DB::transaction(function () use ($empresa, $validated, $esPrincipal): void {
@@ -43,13 +44,16 @@ class ContactoController extends Controller
         $esPrincipal = (bool) ($validated['es_principal'] ?? false);
 
         DB::transaction(function () use ($empresa, $contacto, $validated, $esPrincipal): void {
+
             if ($esPrincipal) {
                 Contacto::query()
                     ->where('empresa_id', $empresa->id)
                     ->update(['es_principal' => 0]);
             }
 
+
             $contacto->update([
+
                 'nombre' => $validated['nombre'],
                 'cargo' => $validated['cargo'] ?? null,
                 'telefono' => $validated['telefono'] ?? null,
@@ -57,6 +61,7 @@ class ContactoController extends Controller
                 'es_principal' => $esPrincipal,
             ]);
         });
+
 
         return $this->response($request, $empresa, 'Contacto actualizado correctamente.');
     }
@@ -77,6 +82,7 @@ class ContactoController extends Controller
 
     private function response(Request $request, Empresa $empresa, string $message): JsonResponse|RedirectResponse
     {
+
         if ($request->expectsJson()) {
             $contactos = $empresa->contactos()
                 ->orderByDesc('es_principal')
@@ -84,13 +90,17 @@ class ContactoController extends Controller
                 ->get();
 
             return response()->json([
+
                 'message' => $message,
+
                 'contactos_html' => view('empresas.partials.contactos-list', [
                     'contactos' => $contactos,
                 ])->render(),
             ]);
         }
 
+
         return redirect()->back()->with('status', $message);
+
     }
 }

@@ -125,7 +125,9 @@
 
                 <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
                     <div class="mb-4 flex items-center justify-between">
+
                         <h3 id="modal-title-contacto" class="text-lg font-semibold text-slate-900" x-text="isEditContacto ? 'Editar contacto' : 'Nuevo Contacto'"></h3>
+
                         <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" @click="cerrarModalContacto()" aria-label="Cerrar modal">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -168,7 +170,9 @@
                         <div class="flex justify-end gap-2 pt-2">
                             <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarModalContacto()">Cancelar</button>
                             <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSubmittingContacto">
+
                                 <span x-show="!isSubmittingContacto" x-text="isEditContacto ? 'Guardar cambios' : 'Agregar Contacto'"></span>
+
                                 <span x-show="isSubmittingContacto">Guardando...</span>
                             </button>
                         </div>
@@ -355,8 +359,10 @@
                     resultado: '',
                     nivel_interes: '',
                 },
+
                 contactoEditId: null,
                 isEditContacto: false,
+
                 contactoForm: {
                     nombre: '',
                     cargo: '',
@@ -401,12 +407,15 @@
                         email: '',
                         es_principal: false,
                     };
+
                     this.contactoEditId = null;
                     this.isEditContacto = false;
+
                     this.contactoErrors = {};
                     this.contactoFormError = '';
                     this.showContactoModal = true;
                 },
+
                 abrirModalEditarContacto(contacto) {
                     this.contactoEditId = contacto.id;
                     this.isEditContacto = true;
@@ -450,6 +459,7 @@
                     this.isSubmittingContacto = false;
                     this.contactoEditId = null;
                     this.isEditContacto = false;
+
                 },
                 async guardarContacto() {
                     this.isSubmittingContacto = true;
@@ -464,6 +474,7 @@
                         formData.append('email', this.contactoForm.email ?? '');
                         formData.append('es_principal', this.contactoForm.es_principal ? '1' : '0');
 
+
                         if (this.isEditContacto && this.contactoEditId) {
                             formData.append('_method', 'PATCH');
                         }
@@ -473,6 +484,7 @@
                             : `{{ route('empresas.contactos.store', $empresa) }}`;
 
                         const response = await fetch(endpoint, {
+
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -488,7 +500,9 @@
                                 this.contactoErrors = Object.fromEntries(
                                     Object.entries(data.errors || {}).map(([key, value]) => [key, value[0]])
                                 );
+
                                 this.contactoFormError = data.message || (this.isEditContacto ? 'No se pudo actualizar el contacto.' : 'No se pudo agregar el contacto.');
+
                                 return;
                             }
 

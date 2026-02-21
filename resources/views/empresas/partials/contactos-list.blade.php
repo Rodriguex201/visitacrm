@@ -6,12 +6,14 @@
             <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
+
                         <div class="flex items-center gap-2">
                             <p class="text-sm font-semibold text-slate-900">{{ $contacto->nombre }}</p>
                             @if ($contacto->es_principal)
                                 <span class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">Principal</span>
                             @endif
                         </div>
+
 
                         @if ($contacto->cargo)
                             <p class="text-sm text-slate-600">{{ $contacto->cargo }}</p>
@@ -35,6 +37,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.1 2.1 0 113 2.97L7.5 18.82l-4.5 1.18 1.18-4.5 12.682-12.013z" />
                         </svg>
                     </button>
+
                 </div>
 
                 <div class="mt-3 space-y-1 text-sm text-slate-600">
