@@ -430,30 +430,7 @@
                     this.contactoFormError = '';
                     this.showContactoModal = true;
                 },
-                bindContactoEditButtons() {
-                    const contenedor = document.getElementById('contactos-list');
-                    if (!contenedor || contenedor.dataset.editBound === '1') {
-                        return;
-                    }
 
-                    contenedor.addEventListener('click', (event) => {
-                        const button = event.target.closest('[data-contacto-edit]');
-                        if (!button) {
-                            return;
-                        }
-
-                        this.abrirModalEditarContacto({
-                            id: button.dataset.contactoId,
-                            nombre: button.dataset.contactoNombre,
-                            cargo: button.dataset.contactoCargo,
-                            telefono: button.dataset.contactoTelefono,
-                            email: button.dataset.contactoEmail,
-                            es_principal: button.dataset.contactoPrincipal,
-                        });
-                    });
-
-                    contenedor.dataset.editBound = '1';
-                },
                 cerrarModalContacto() {
                     this.showContactoModal = false;
                     this.isSubmittingContacto = false;
