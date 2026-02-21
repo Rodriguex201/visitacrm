@@ -13,24 +13,17 @@ class ContactoController extends Controller
 {
     public function store(Request $request, Empresa $empresa): JsonResponse|RedirectResponse
     {
-        $validated = $request->validate([
-            'nombre' => ['required', 'string', 'max:150'],
-            'cargo' => ['nullable', 'string', 'max:120'],
-            'telefono' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:190'],
-            'es_principal' => ['nullable', 'boolean'],
-        ]);
 
+        $validated = $this->validateContacto($request);
         $esPrincipal = (bool) ($validated['es_principal'] ?? false);
-
-        $contacto = DB::transaction(function () use ($empresa, $validated, $esPrincipal) {
+        DB::transaction(function () use ($empresa, $validated, $esPrincipal): void {
             if ($esPrincipal) {
                 Contacto::query()
                     ->where('empresa_id', $empresa->id)
                     ->update(['es_principal' => 0]);
             }
 
-            return Contacto::query()->create([
+            Contacto::query()->create([
                 'empresa_id' => $empresa->id,
                 'nombre' => $validated['nombre'],
                 'cargo' => $validated['cargo'] ?? null,
@@ -40,6 +33,56 @@ class ContactoController extends Controller
             ]);
         });
 
+        return $this->response($request, $empresa, 'Contacto agregado correctamente.');
+    }
+
+    public function update(Request $request, Empresa $empresa, Contacto $contacto): JsonResponse|RedirectResponse
+    {
+        abort_unless($contacto->empresa_id === $empresa->id, 404);
+
+        $validated = $this->validateContacto($request);
+        $esPrincipal = (bool) ($validated['es_principal'] ?? false);
+
+        DB::transaction(function () use ($empresa, $contacto, $validated, $esPrincipal): void {
+
+            if ($esPrincipal) {
+                Contacto::query()
+                    ->where('empresa_id', $empresa->id)
+                    ->update(['es_principal' => 0]);
+            }
+
+
+            $contacto->update([
+
+                'nombre' => $validated['nombre'],
+                'cargo' => $validated['cargo'] ?? null,
+                'telefono' => $validated['telefono'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'es_principal' => $esPrincipal,
+            ]);
+        });
+
+
+        return $this->response($request, $empresa, 'Contacto actualizado correctamente.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateContacto(Request $request): array
+    {
+        return $request->validate([
+            'nombre' => ['required', 'string', 'max:150'],
+            'cargo' => ['nullable', 'string', 'max:120'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:190'],
+            'es_principal' => ['nullable', 'boolean'],
+        ]);
+    }
+
+    private function response(Request $request, Empresa $empresa, string $message): JsonResponse|RedirectResponse
+    {
+
         if ($request->expectsJson()) {
             $contactos = $empresa->contactos()
                 ->orderByDesc('es_principal')
@@ -47,16 +90,17 @@ class ContactoController extends Controller
                 ->get();
 
             return response()->json([
-                'message' => 'Contacto agregado correctamente.',
-                'contacto' => $contacto,
+
+                'message' => $message,
+
                 'contactos_html' => view('empresas.partials.contactos-list', [
                     'contactos' => $contactos,
                 ])->render(),
             ]);
         }
 
-        return redirect()
-            ->back()
-            ->with('status', 'Contacto agregado correctamente.');
+
+        return redirect()->back()->with('status', $message);
+
     }
 }
