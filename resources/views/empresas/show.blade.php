@@ -170,55 +170,31 @@
             @endif
         </article>
 
-        @php
-            $actividadItems = collect();
-
-            foreach ($acciones as $item) {
-                $actividadItems->push([
-                    'tipo' => 'accion',
-                    'id' => $item->id,
-                    'titulo' => $item->accion?->nombre ?? 'Acción',
-                    'subtexto' => 'Acción · ' . $item->created_at?->format('d/m/Y H:i'),
-                    'nota' => $item->nota,
-                    'icono' => $item->accion?->icono ?? 'circle',
-                    'color' => $item->accion?->color,
-                    'created_at' => $item->created_at,
-                ]);
-            }
-
-            $actividadItems = $actividadItems->sortByDesc('created_at')->values();
-        @endphp
 
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividad.length">{{ $actividadItems->count() }}</span>)</h2>
+                <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividadCount">{{ $acciones->count() }}</span>)</h2>
 
-                <div class="flex items-center gap-2 text-sm font-semibold">
-
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'hoy', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => '7', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === '7' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'todo', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
-
+                <div class="flex items-center gap-2 text-sm font-semibold" data-target="actividad">
+                    @foreach (['hoy' => 'Hoy', '7' => '7 días', 'todo' => 'Todo'] as $rangeValue => $rangeLabel)
+                        <button
+                            type="button"
+                            data-target="actividad"
+                            data-range="{{ $rangeValue }}"
+                            @click="aplicarFiltro('actividad', '{{ $rangeValue }}')"
+                            :disabled="loadingActividad"
+                            :class="filterButtonClass('actividad', '{{ $rangeValue }}')"
+                            class="rounded-xl border px-4 py-2 transition"
+                        >
+                            <span>{{ $rangeLabel }}</span>
+                            <span x-show="loadingActividad && currentActRange === '{{ $rangeValue }}'" class="ml-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/60 border-t-white"></span>
+                        </button>
+                    @endforeach
                 </div>
             </div>
 
-            <template x-if="actividad.length === 0">
-                <p class="text-sm text-slate-600">Sin actividad aún</p>
-            </template>
-
-            <div class="space-y-3" x-show="actividad.length > 0">
-                <template x-for="item in actividad" :key="`${item.tipo}-${item.id}`">
-                    <div class="rounded-xl border border-slate-100 p-3">
-                        <div class="flex items-start gap-3">
-                            <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700" x-html="iconoSvg(item.icono, item.color)"></span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-900" x-text="item.titulo"></p>
-                                <p class="text-xs text-slate-500" x-text="item.subtexto"></p>
-                                <p x-show="item.nota" class="mt-1 text-sm text-slate-700" x-text="item.nota"></p>
-                            </div>
-                        </div>
-                    </div>
-                </template>
+            <div id="actividad-list">
+                @include('empresas.partials.actividad_list', ['acciones' => $acciones, 'empresa' => $empresa])
             </div>
         </article>
 
@@ -306,98 +282,30 @@
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-            @php
-                $resultadoLabels = [
-                    'venta_realizada' => 'Venta realizada',
-                    'en_seguimiento' => 'En seguimiento',
-                    'sin_interes' => 'Sin interés',
-                    'no_disponible' => 'No disponible',
-                ];
-
-                $nivelInteresLabels = [
-                    'alto' => 'Alto',
-                    'medio' => 'Medio',
-                    'bajo' => 'Bajo',
-                    'sin_interes' => 'Sin interés',
-                ];
-            @endphp
-
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas ({{ $visitas->count() }})</h2>
+                <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas (<span x-text="visitasCount">{{ $visitas->count() }}</span>)</h2>
 
-                <div class="flex items-center gap-2 text-sm font-semibold">
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $visRange === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => '7']) }}" class="rounded-xl px-4 py-2 {{ $visRange === '7' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $visRange === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+                <div class="flex items-center gap-2 text-sm font-semibold" data-target="visitas">
+                    @foreach (['hoy' => 'Hoy', '7' => '7 días', 'todo' => 'Todo'] as $rangeValue => $rangeLabel)
+                        <button
+                            type="button"
+                            data-target="visitas"
+                            data-range="{{ $rangeValue }}"
+                            @click="aplicarFiltro('visitas', '{{ $rangeValue }}')"
+                            :disabled="loadingVisitas"
+                            :class="filterButtonClass('visitas', '{{ $rangeValue }}')"
+                            class="rounded-xl border px-4 py-2 transition"
+                        >
+                            <span>{{ $rangeLabel }}</span>
+                            <span x-show="loadingVisitas && currentVisRange === '{{ $rangeValue }}'" class="ml-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/60 border-t-white"></span>
+                        </button>
+                    @endforeach
                 </div>
             </div>
 
-            @if ($visitas->isEmpty())
-                <p class="text-center text-sm text-slate-500">Sin visitas registradas</p>
-            @else
-                <div class="space-y-3">
-                    @foreach ($visitas as $visita)
-                        @php
-                            $isProgramada = $visita->fecha_hora?->isFuture();
-                            $canUpdateResultado = ! $isProgramada && empty($visita->resultado);
-                            $estadoBadgeClass = match ($visita->estado) {
-                                'realizada' => 'bg-emerald-100 text-emerald-700',
-                                'cancelada' => 'bg-rose-100 text-rose-700',
-                                default => 'bg-blue-100 text-blue-700',
-                            };
-                            $resultadoBadgeClass = match ($visita->resultado) {
-                                'venta_realizada' => 'bg-emerald-100 text-emerald-700',
-                                'en_seguimiento' => 'bg-amber-100 text-amber-700',
-                                'sin_interes' => 'bg-rose-100 text-rose-700',
-                                'no_disponible' => 'bg-slate-200 text-slate-700',
-                                default => 'bg-slate-100 text-slate-700',
-                            };
-                        @endphp
-
-                        <article id="visita-item-{{ $visita->id }}" class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm" data-visita-id="{{ $visita->id }}">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <p class="text-sm font-semibold text-slate-900">{{ $visita->fecha_hora?->format('d/m/Y H:i') }}</p>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $estadoBadgeClass }}">{{ ucfirst($visita->estado) }}</span>
-                                    @if ($isProgramada)
-                                        <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Programada</span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="mt-3 space-y-2">
-                                <div id="resultado-container-{{ $visita->id }}">
-                                    @if ($visita->resultado)
-                                        <div class="flex flex-wrap items-center gap-2 text-sm">
-                                            <span class="font-medium text-slate-700">Resultado:</span>
-                                            <span id="resultado-badge-{{ $visita->id }}" class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $resultadoBadgeClass }}">{{ $resultadoLabels[$visita->resultado] ?? $visita->resultado }}</span>
-                                            <span id="nivel-interes-text-{{ $visita->id }}" class="text-slate-600">
-                                                @if ($visita->nivel_interes)
-                                                    Nivel de interés: {{ $nivelInteresLabels[$visita->nivel_interes] ?? $visita->nivel_interes }}
-                                                @endif
-                                            </span>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <button
-                                    id="btn-actualizar-{{ $visita->id }}"
-                                    type="button"
-                                    class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    @click="abrirModal({ id: {{ $visita->id }} })"
-                                    @if (! $canUpdateResultado) style="display: none;" @endif
-                                >
-                                    Actualizar resultado
-                                </button>
-                            </div>
-
-                            @if ($visita->notas)
-                                <p class="mt-2 text-sm text-slate-600">{{ \Illuminate\Support\Str::limit($visita->notas, 180) }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </div>
-            @endif
+            <div id="visitas-list">
+                @include('empresas.partials.visitas_list', ['visitas' => $visitas, 'empresa' => $empresa])
+            </div>
 
             <div
                 x-cloak
@@ -668,6 +576,8 @@
                 errors: {},
                 contactoErrors: {},
                 empresaUser: @js($empresa->user ? ['id' => $empresa->user->id, 'codigo' => $empresa->user->codigo, 'name' => $empresa->user->name ?? $empresa->user->nombre, 'nombre' => $empresa->user->nombre ?? $empresa->user->name, 'telefono' => $empresa->user->telefono] : null),
+                actividadPartialUrl: @js(route('empresas.actividad.partial', $empresa)),
+                visitasPartialUrl: @js(route('empresas.visitas.partial', $empresa)),
                 usuarioQuery: '',
                 usuariosResultados: [],
                 usuarioSeleccionadoId: null,
@@ -689,7 +599,12 @@
                 newOptionError: '',
                 accionesGuardando: false,
                 accionesError: '',
-                actividad: @js($actividadItems->values()->all()),
+                currentActRange: @js($actRange),
+                currentVisRange: @js($visRange),
+                actividadCount: @js($acciones->count()),
+                visitasCount: @js($visitas->count()),
+                loadingActividad: false,
+                loadingVisitas: false,
 
                 form: {
                     resultado: '',
@@ -708,6 +623,7 @@
                 },
                 init() {
                     this.bindContactoEditButtons();
+                    this.bindVisitaActions();
 
                     this.$watch('form.resultado', (value) => {
                         if (value === 'sin_interes') {
@@ -722,6 +638,93 @@
                             this.form.nivel_interes = '';
                         }
                     });
+                },
+
+
+                bindVisitaActions() {
+                    this.$root.addEventListener('click', (event) => {
+                        const trigger = event.target.closest('[data-open-resultado="true"]');
+                        if (!trigger) {
+                            return;
+                        }
+
+                        const visitaId = Number(trigger.dataset.visitaId || 0);
+                        if (!visitaId) {
+                            return;
+                        }
+
+                        this.abrirModal({ id: visitaId });
+                    });
+                },
+
+                filterButtonClass(target, range) {
+                    const isActive = target === 'actividad'
+                        ? this.currentActRange === range
+                        : this.currentVisRange === range;
+
+                    if (isActive) {
+                        return 'bg-blue-600 text-white border-blue-600';
+                    }
+
+                    return 'bg-white text-slate-800 border-slate-200';
+                },
+
+                async aplicarFiltro(target, range) {
+                    const isActividad = target === 'actividad';
+                    const loadingKey = isActividad ? 'loadingActividad' : 'loadingVisitas';
+
+                    if (this[loadingKey]) {
+                        return;
+                    }
+
+                    this[loadingKey] = true;
+
+                    try {
+                        const url = new URL(isActividad ? this.actividadPartialUrl : this.visitasPartialUrl, window.location.origin);
+                        if (isActividad) {
+                            url.searchParams.set('act_range', range);
+                        } else {
+                            url.searchParams.set('vis_range', range);
+                        }
+
+                        const response = await fetch(url.toString(), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                Accept: 'text/html',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('No se pudo cargar el filtro');
+                        }
+
+                        const html = await response.text();
+                        const containerId = isActividad ? 'actividad-list' : 'visitas-list';
+                        const container = document.getElementById(containerId);
+
+                        if (!container) {
+                            return;
+                        }
+
+                        container.innerHTML = html;
+
+                        if (isActividad) {
+                            this.currentActRange = range;
+                            this.actividadCount = Number(container.querySelector('[data-actividad-count]')?.dataset.actividadCount ?? this.actividadCount);
+                        } else {
+                            this.currentVisRange = range;
+                            this.visitasCount = Number(container.querySelector('[data-visitas-count]')?.dataset.visitasCount ?? this.visitasCount);
+                        }
+
+                        const pageUrl = new URL(window.location.href);
+                        pageUrl.searchParams.set('act_range', this.currentActRange);
+                        pageUrl.searchParams.set('vis_range', this.currentVisRange);
+                        window.history.replaceState({}, '', pageUrl.toString());
+                    } catch (error) {
+                        console.error(error);
+                    } finally {
+                        this[loadingKey] = false;
+                    }
                 },
 
                 iconoSvg(icono, color = '') {
@@ -762,22 +765,7 @@
                             return;
                         }
 
-                        const fecha = new Date(data.empresa_accion.created_at);
-                        const dd = String(fecha.getDate()).padStart(2, '0');
-                        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
-                        const yyyy = fecha.getFullYear();
-                        const hh = String(fecha.getHours()).padStart(2, '0');
-                        const mi = String(fecha.getMinutes()).padStart(2, '0');
-
-                        this.actividad.unshift({
-                            tipo: 'accion',
-                            id: data.empresa_accion.id,
-                            titulo: data.accion.nombre,
-                            subtexto: `Acción · ${dd}/${mm}/${yyyy} ${hh}:${mi}`,
-                            nota: data.empresa_accion.nota,
-                            icono: data.accion.icono,
-                            color: data.accion.color,
-                        });
+                        await this.aplicarFiltro('actividad', this.currentActRange);
                     } catch (error) {
                         this.accionesError = 'No fue posible conectar con el servidor.';
                     } finally {
