@@ -207,9 +207,11 @@
                 <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividad.length">{{ $actividadItems->count() }}</span>)</h2>
 
                 <div class="flex items-center gap-2 text-sm font-semibold">
+
                     <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'hoy', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
                     <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => '7', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === '7' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
                     <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'todo', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+
                 </div>
             </div>
 

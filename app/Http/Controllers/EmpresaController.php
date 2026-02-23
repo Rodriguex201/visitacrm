@@ -128,14 +128,18 @@ class EmpresaController extends Controller
             ->with('accion')
             ->latest('created_at');
 
+
         if ($actRange === 'hoy') {
+
             $accionesActividadQuery->whereBetween('created_at', [
                 Carbon::now()->startOfDay(),
                 Carbon::now()->endOfDay(),
             ]);
         }
 
+
         if ($actRange === '7') {
+
             $accionesActividadQuery->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
         }
 
@@ -160,7 +164,9 @@ class EmpresaController extends Controller
 
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
+
         return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesActividad'));
+
     }
 
 
