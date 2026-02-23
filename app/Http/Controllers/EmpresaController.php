@@ -6,6 +6,8 @@ use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
 use Carbon\Carbon;
 use App\Models\Sector;
+use App\Models\Accion;
+use App\Models\EmpresaAccion;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -80,28 +82,64 @@ class EmpresaController extends Controller
 
     public function show(Request $request, Empresa $empresa): View
     {
-        $range = $request->query('range', 'todo');
+        $actRange = (string) $request->query('act_range', 'todo');
+        $visRange = (string) $request->query('vis_range', 'todo');
 
-        if (!in_array($range, ['hoy', '7d', 'todo'], true)) {
-            $range = 'todo';
+        if ($actRange === '7d') {
+            $actRange = '7';
+        }
+
+        if ($visRange === '7d') {
+            $visRange = '7';
+        }
+
+        if (!in_array($actRange, ['hoy', '7', 'todo'], true)) {
+            $actRange = 'todo';
+        }
+
+        if (!in_array($visRange, ['hoy', '7', 'todo'], true)) {
+            $visRange = 'todo';
         }
 
         $empresa->load(['sector', 'user', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
         $visitasQuery = $empresa->visitas()->latest('fecha_hora');
 
-        if ($range === 'hoy') {
+        if ($visRange === 'hoy') {
             $visitasQuery->whereBetween('fecha_hora', [
                 Carbon::now()->startOfDay(),
                 Carbon::now()->endOfDay(),
             ]);
         }
 
-        if ($range === '7d') {
+        if ($visRange === '7') {
             $visitasQuery->where('fecha_hora', '>=', Carbon::now()->subDays(6)->startOfDay());
         }
 
         $visitas = $visitasQuery->get();
+
+        $acciones = Accion::query()
+            ->where('activo', 1)
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get();
+
+        $accionesActividadQuery = $empresa->empresaAcciones()
+            ->with('accion')
+            ->latest('created_at');
+
+        if ($actRange === 'hoy') {
+            $accionesActividadQuery->whereBetween('created_at', [
+                Carbon::now()->startOfDay(),
+                Carbon::now()->endOfDay(),
+            ]);
+        }
+
+        if ($actRange === '7') {
+            $accionesActividadQuery->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
+        }
+
+        $accionesActividad = $accionesActividadQuery->get();
 
         $contactos = $empresa->contactos;
 
@@ -122,7 +160,7 @@ class EmpresaController extends Controller
 
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesActividad'));
     }
 
 
@@ -245,6 +283,51 @@ class EmpresaController extends Controller
             ->get();
 
         return response()->json($usuarios);
+    }
+
+
+    public function storeAccion(Request $request, Empresa $empresa): JsonResponse
+    {
+        $validated = $request->validate([
+            'accion_id' => ['required', 'integer', 'exists:acciones,id'],
+            'nota' => ['nullable', 'string'],
+        ]);
+
+        $accion = Accion::query()
+            ->where('id', $validated['accion_id'])
+            ->where('activo', 1)
+            ->first();
+
+        if (! $accion) {
+            return response()->json([
+                'message' => 'La acción seleccionada no está activa.',
+            ], 422);
+        }
+
+        $empresaAccion = EmpresaAccion::query()->create([
+            'empresa_id' => $empresa->id,
+            'accion_id' => $accion->id,
+            'user_id' => (int) auth()->id(),
+            'nota' => $validated['nota'] ?? null,
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'empresa_accion' => [
+                'id' => $empresaAccion->id,
+                'empresa_id' => $empresaAccion->empresa_id,
+                'accion_id' => $empresaAccion->accion_id,
+                'user_id' => $empresaAccion->user_id,
+                'nota' => $empresaAccion->nota,
+                'created_at' => $empresaAccion->created_at?->toIso8601String(),
+            ],
+            'accion' => [
+                'id' => $accion->id,
+                'nombre' => $accion->nombre,
+                'icono' => $accion->icono,
+                'color' => $accion->color,
+            ],
+        ], 201);
     }
 
     public function search(Request $request): JsonResponse
