@@ -207,9 +207,11 @@
                 <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividad.length">{{ $actividadItems->count() }}</span>)</h2>
 
                 <div class="flex items-center gap-2 text-sm font-semibold">
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $range === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => '7d']) }}" class="rounded-xl px-4 py-2 {{ $range === '7d' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $range === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'hoy', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => '7', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === '7' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => 'todo', 'vis_range' => $visRange]) }}" class="rounded-xl px-4 py-2 {{ $actRange === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+
                 </div>
             </div>
 
@@ -337,9 +339,9 @@
                 <h2 class="text-xl font-semibold text-slate-950">Historial de Visitas ({{ $visitas->count() }})</h2>
 
                 <div class="flex items-center gap-2 text-sm font-semibold">
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $range === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => '7d']) }}" class="rounded-xl px-4 py-2 {{ $range === '7d' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
-                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $range === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $visRange === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => '7']) }}" class="rounded-xl px-4 py-2 {{ $visRange === '7' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'act_range' => $actRange, 'vis_range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $visRange === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
                 </div>
             </div>
 
