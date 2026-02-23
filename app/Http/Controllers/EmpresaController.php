@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
 use Carbon\Carbon;
 use App\Models\Sector;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class EmpresaController extends Controller
@@ -103,7 +105,100 @@ class EmpresaController extends Controller
 
         $contactos = $empresa->contactos;
 
-        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos'));
+        $categoriasOpciones = [
+            'Estado Actual',
+            'Aplicativos',
+            'Procesos Electrónicos',
+            'Equipos',
+        ];
+
+        $catalogoOpciones = CatalogoOpcion::query()
+            ->whereIn('categoria', $categoriasOpciones)
+            ->where('activo', 1)
+            ->orderBy('categoria')
+            ->orderBy('nombre')
+            ->get(['id', 'categoria', 'nombre'])
+            ->groupBy('categoria');
+
+        $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
+
+        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas'));
+    }
+
+
+    public function guardarOpciones(Request $request, Empresa $empresa): JsonResponse
+    {
+        $validated = $request->validate([
+            'opciones' => ['nullable', 'array'],
+            'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
+        ]);
+
+        $opciones = collect($validated['opciones'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
+
+        if ($opciones->isNotEmpty()) {
+            $opcionesActivas = CatalogoOpcion::query()
+                ->whereIn('id', $opciones)
+                ->where('activo', 1)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->values();
+
+            if ($opcionesActivas->count() !== $opciones->count()) {
+                return response()->json([
+                    'message' => 'Una o más opciones no existen o están inactivas.',
+                ], 422);
+            }
+        }
+
+        $empresa->opciones()->sync($opciones->all());
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Opciones guardadas correctamente.',
+            'opciones' => $opciones,
+        ]);
+    }
+
+    public function storeCatalogoOpcion(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'categoria' => ['required', 'string', Rule::in(['Estado Actual', 'Aplicativos', 'Procesos Electrónicos', 'Equipos'])],
+            'nombre' => ['required', 'string', 'max:255'],
+        ]);
+
+        $nombre = trim($validated['nombre']);
+        if ($nombre === '') {
+            return response()->json([
+                'message' => 'El nombre es obligatorio.',
+                'errors' => ['nombre' => ['El nombre es obligatorio.']],
+            ], 422);
+        }
+
+        $exists = CatalogoOpcion::query()
+            ->where('categoria', $validated['categoria'])
+            ->whereRaw('LOWER(nombre) = ?', [mb_strtolower($nombre)])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Ya existe una opción con ese nombre en la categoría seleccionada.',
+                'errors' => ['nombre' => ['Ya existe una opción con ese nombre en la categoría seleccionada.']],
+            ], 422);
+        }
+
+        $opcion = DB::transaction(function () use ($validated, $nombre) {
+            return CatalogoOpcion::query()->create([
+                'categoria' => $validated['categoria'],
+                'nombre' => $nombre,
+                'activo' => 1,
+            ]);
+        });
+
+        return response()->json([
+            'id' => $opcion->id,
+            'categoria' => $opcion->categoria,
+            'nombre' => $opcion->nombre,
+        ], 201);
     }
 
     public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse

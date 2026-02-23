@@ -25,55 +25,100 @@
             </button>
         </header>
 
-        <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div class="grid gap-4 lg:grid-cols-2 lg:items-start">
+            <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+                <div class="space-y-3 text-slate-600">
+                    <p class="flex items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
+                            <circle cx="12" cy="9.75" r="2.25" />
+                        </svg>
+                        {{ $empresa->direccion ?: 'Sin dirección' }}
+                    </p>
 
-            <div class="space-y-3 text-slate-600">
-                <p class="inline-flex items-center gap-2 text-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
-                        <circle cx="12" cy="9.75" r="2.25" />
-                    </svg>
-                    {{ $empresa->direccion ?: 'Sin dirección' }}
-                </p>
+                    <p class="flex items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75A2.25 2.25 0 014.5 4.5h15a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0119.5 19.5h-15a2.25 2.25 0 01-2.25-2.25V6.75z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l9 6 9-6" />
+                        </svg>
+                        @if ($empresa->email)
+                            <a href="mailto:{{ $empresa->email }}" class="text-blue-600 hover:underline">{{ $empresa->email }}</a>
+                        @else
+                            Sin email
+                        @endif
+                    </p>
 
-                <p class="inline-flex items-center gap-2 text-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75A2.25 2.25 0 014.5 4.5h15a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0119.5 19.5h-15a2.25 2.25 0 01-2.25-2.25V6.75z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l9 6 9-6" />
-                    </svg>
-                    @if ($empresa->email)
-                        <a href="mailto:{{ $empresa->email }}" class="text-blue-600 hover:underline">{{ $empresa->email }}</a>
-                    @else
-                        Sin email
-                    @endif
-                </p>
+                    <p class="flex items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75A2.25 2.25 0 014.5 4.5h3.214a2.25 2.25 0 012.121 1.497l1.02 3.059a2.25 2.25 0 01-.518 2.314l-1.44 1.44a12.042 12.042 0 005.853 5.853l1.44-1.44a2.25 2.25 0 012.314-.518l3.06 1.02a2.25 2.25 0 011.496 2.121V19.5a2.25 2.25 0 01-2.25 2.25h-.75C9.007 21.75 2.25 14.993 2.25 6.75z" />
+                        </svg>
+                        {{ $empresa->telefono ?: 'Sin teléfono' }}
+                    </p>
 
-                <p class="inline-flex items-center gap-2 text-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75A2.25 2.25 0 014.5 4.5h3.214a2.25 2.25 0 012.121 1.497l1.02 3.059a2.25 2.25 0 01-.518 2.314l-1.44 1.44a12.042 12.042 0 005.853 5.853l1.44-1.44a2.25 2.25 0 012.314-.518l3.06 1.02a2.25 2.25 0 011.496 2.121V19.5a2.25 2.25 0 01-2.25 2.25h-.75C9.007 21.75 2.25 14.993 2.25 6.75z" />
-                    </svg>
-                    {{ $empresa->telefono ?: 'Sin teléfono' }}
-                </p>
+                    <p class="flex items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
+                            <circle cx="12" cy="9.75" r="2.25" />
+                        </svg>
+                        {{ $empresa->ciudad }}
+                    </p>
+                </div>
+            </article>
 
-                {{--
-                <p class="inline-flex items-center gap-2 text-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
-                    </svg>
-                    NIT: {{ $empresa->nit ?: 'Sin NIT' }}
-                </p>
-                --}}
+            <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-slate-950">Perfil comercial</h2>
+                    <span class="text-xs text-slate-500">Selección múltiple</span>
+                </div>
 
-                <p class="inline-flex items-center gap-2 text-sm">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
-                        <circle cx="12" cy="9.75" r="2.25" />
-                    </svg>
-                    {{ $empresa->ciudad }}
-                </p>
-            </div>
+                <template x-if="opcionesMensaje">
+                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
+                </template>
 
-        </article>
+                <template x-for="categoria in categoriasOpciones" :key="categoria">
+                    <section class="space-y-2 rounded-lg border border-slate-100 p-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-sm font-semibold text-slate-900" x-text="categoria"></h3>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
+                                title="Agregar opción"
+                                @click="abrirModalOpcion(categoria)"
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <template x-for="opcion in opcionesPorCategoria[categoria] || []" :key="opcion.id">
+                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                    <input
+                                        type="checkbox"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        :value="opcion.id"
+                                        :checked="isOpcionSeleccionada(opcion.id)"
+                                        @change="toggleOpcion(opcion.id)"
+                                    >
+                                    <span x-text="opcion.nombre"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+
+                <div class="flex justify-end">
+                    <button
+                        type="button"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                        :disabled="opcionesSaving"
+                        @click="guardarOpcionesEmpresa()"
+                    >
+                        <span x-show="!opcionesSaving">Guardar cambios</span>
+                        <span x-show="opcionesSaving">Guardando...</span>
+                    </button>
+                </div>
+            </article>
+        </div>
 
         <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
@@ -426,8 +471,61 @@
                 </div>
             </div>
 
+
+            <div
+                x-cloak
+                x-show="showCatalogoModal"
+                class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title-catalogo"
+                @keydown.escape.window="cerrarModalOpcion()"
+            >
+                <div class="absolute inset-0 bg-slate-900/40" @click="cerrarModalOpcion()"></div>
+
+                <div class="relative z-10 w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 id="modal-title-catalogo" class="text-lg font-semibold text-slate-900">Agregar opción</h3>
+                        <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="cerrarModalOpcion()" aria-label="Cerrar modal">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p class="mb-2 text-sm text-slate-600">Categoría: <span class="font-semibold text-slate-900" x-text="newOptionCategoria"></span></p>
+
+                    <div x-show="newOptionError" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="newOptionError"></div>
+
+                    <form class="space-y-4" @submit.prevent="guardarNuevaOpcion()">
+                        <div>
+                            <label for="nueva_opcion_nombre" class="mb-1 block text-sm font-medium text-slate-700">Nombre de la opción</label>
+                            <input id="nueva_opcion_nombre" x-model="newOptionNombre" type="text" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-1">
+                            <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarModalOpcion()">Cancelar</button>
+                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="newOptionSaving">
+                                <span x-show="!newOptionSaving">Guardar</span>
+                                <span x-show="newOptionSaving">Guardando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     </section>
 
+
+    @php
+        $catalogoOpcionesPayload = collect($categoriasOpciones)
+            ->mapWithKeys(fn ($categoria) => [
+                $categoria => $catalogoOpciones->get($categoria, collect())
+                    ->map(fn ($opcion) => ['id' => (int) $opcion->id, 'nombre' => $opcion->nombre])
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
+    @endphp
 
     <script>
         function historialVisitas() {
@@ -449,6 +547,16 @@
                 usuarioSeleccionadoId: null,
                 usuarioLoading: false,
                 usuarioSaving: false,
+                categoriasOpciones: @js($categoriasOpciones),
+                opcionesPorCategoria: @js($catalogoOpcionesPayload),
+                opcionesSeleccionadas: @js($opcionesSeleccionadas),
+                opcionesSaving: false,
+                opcionesMensaje: '',
+                showCatalogoModal: false,
+                newOptionCategoria: '',
+                newOptionNombre: '',
+                newOptionSaving: false,
+                newOptionError: '',
                 form: {
                     resultado: '',
                     nivel_interes: '',
@@ -664,6 +772,107 @@
                         this.contactoFormError = 'No fue posible conectar con el servidor.';
                     } finally {
                         this.isSubmittingContacto = false;
+                    }
+                },
+                isOpcionSeleccionada(id) {
+                    return this.opcionesSeleccionadas.includes(Number(id));
+                },
+                toggleOpcion(id) {
+                    const normalizedId = Number(id);
+                    if (this.isOpcionSeleccionada(normalizedId)) {
+                        this.opcionesSeleccionadas = this.opcionesSeleccionadas.filter((item) => Number(item) !== normalizedId);
+                        return;
+                    }
+
+                    this.opcionesSeleccionadas.push(normalizedId);
+                },
+                abrirModalOpcion(categoria) {
+                    this.newOptionCategoria = categoria;
+                    this.newOptionNombre = '';
+                    this.newOptionError = '';
+                    this.showCatalogoModal = true;
+                },
+                cerrarModalOpcion() {
+                    this.showCatalogoModal = false;
+                    this.newOptionSaving = false;
+                    this.newOptionError = '';
+                },
+                async guardarNuevaOpcion() {
+                    if (!this.newOptionCategoria) {
+                        return;
+                    }
+
+                    this.newOptionSaving = true;
+                    this.newOptionError = '';
+
+                    try {
+                        const response = await fetch(`{{ route('catalogo-opciones.store') }}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({
+                                categoria: this.newOptionCategoria,
+                                nombre: this.newOptionNombre,
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.newOptionError = data.message || 'No se pudo agregar la opción.';
+                            return;
+                        }
+
+                        if (!Array.isArray(this.opcionesPorCategoria[data.categoria])) {
+                            this.opcionesPorCategoria[data.categoria] = [];
+                        }
+
+                        this.opcionesPorCategoria[data.categoria].push({ id: Number(data.id), nombre: data.nombre });
+                        this.opcionesPorCategoria[data.categoria] = [...this.opcionesPorCategoria[data.categoria]];
+
+                        if (!this.isOpcionSeleccionada(Number(data.id))) {
+                            this.opcionesSeleccionadas.push(Number(data.id));
+                        }
+
+                        this.opcionesMensaje = 'Opción agregada correctamente.';
+                        this.cerrarModalOpcion();
+                    } catch (error) {
+                        this.newOptionError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.newOptionSaving = false;
+                    }
+                },
+                async guardarOpcionesEmpresa() {
+                    this.opcionesSaving = true;
+                    this.opcionesMensaje = '';
+
+                    try {
+                        const response = await fetch(`{{ route('empresas.opciones.update', $empresa) }}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ opciones: this.opcionesSeleccionadas }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.opcionesMensaje = data.message || 'No se pudieron guardar las opciones.';
+                            return;
+                        }
+
+                        this.opcionesSeleccionadas = (data.opciones || []).map((id) => Number(id));
+                        this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
+                    } catch (error) {
+                        this.opcionesMensaje = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.opcionesSaving = false;
                     }
                 },
                 async guardarResultado() {
