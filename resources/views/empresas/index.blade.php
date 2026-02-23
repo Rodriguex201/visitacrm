@@ -230,7 +230,10 @@
                         <div class="min-w-0">
                             <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
                             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                                <span class="inline-flex items-center gap-1">
+                               <span class="inline-flex items-center gap-1">
+                                     {{ optional($empresa->created_at)->format('d/m/Y') }}
+                                </span>
+                            <span class="inline-flex items-center gap-1">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
                                         <circle cx="12" cy="9.75" r="2.25" />
@@ -252,9 +255,7 @@
                                     </svg>
                                     {{ $empresa->sector?->nombre ?: 'Sin sector' }}
                                 </span>
-                                <span class="inline-flex items-center gap-1">
-                                    Fecha creación: {{ optional($empresa->created_at)->format('d/m/Y') }}
-                                </span>
+
                             </div>
                         </div>
                     </div>
