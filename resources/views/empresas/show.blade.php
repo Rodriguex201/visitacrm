@@ -25,6 +25,7 @@
             </button>
         </header>
 
+
         <div class="grid gap-4 lg:grid-cols-2 lg:items-start">
             <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
                 <div class="space-y-3 text-slate-600">
@@ -94,6 +95,7 @@
                         <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                     </template>
                 </div>
+
             </article>
         </div>
 
@@ -451,6 +453,7 @@
 
             <div
                 x-cloak
+
                 x-show="modalOpen"
                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
                 role="dialog"
@@ -533,6 +536,7 @@
 
             <div
                 x-cloak
+
                 x-show="showCatalogoModal"
                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
                 role="dialog"
@@ -608,9 +612,11 @@
                 usuarioSaving: false,
                 categoriasOpciones: @js($categoriasOpciones),
                 opcionesPorCategoria: @js($catalogoOpcionesPayload),
+
                 selectedIds: @js($opcionesSeleccionadas),
                 modalOpen: false,
                 activeTab: "Estado Actual",
+
                 opcionesSaving: false,
                 opcionesMensaje: '',
                 showCatalogoModal: false,
@@ -835,6 +841,7 @@
                         this.isSubmittingContacto = false;
                     }
                 },
+
                 abrirPerfilComercialModal() {
                     this.activeTab = this.categoriasOpciones[0] || 'Estado Actual';
                     this.opcionesMensaje = '';
@@ -852,15 +859,18 @@
                 },
                 isOpcionSeleccionada(id) {
                     return this.selectedIds.includes(Number(id));
+
                 },
                 toggleOpcion(id) {
                     const normalizedId = Number(id);
                     if (this.isOpcionSeleccionada(normalizedId)) {
+
                         this.selectedIds = this.selectedIds.filter((item) => Number(item) !== normalizedId);
                         return;
                     }
 
                     this.selectedIds.push(normalizedId);
+
                 },
                 abrirModalOpcion(categoria) {
                     this.newOptionCategoria = categoria;
@@ -910,7 +920,9 @@
                         this.opcionesPorCategoria[data.categoria] = [...this.opcionesPorCategoria[data.categoria]];
 
                         if (!this.isOpcionSeleccionada(Number(data.id))) {
+
                             this.selectedIds.push(Number(data.id));
+
                         }
 
                         this.opcionesMensaje = 'Opción agregada correctamente.';
@@ -933,7 +945,9 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 Accept: 'application/json',
                             },
+
                             body: JSON.stringify({ opciones: this.selectedIds }),
+
                         });
 
                         const data = await response.json();
@@ -944,6 +958,7 @@
                         }
 
                         this.selectedIds = (data.opciones || []).map((id) => Number(id));
+
                         this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
                     } catch (error) {
                         this.opcionesMensaje = 'No fue posible conectar con el servidor.';
