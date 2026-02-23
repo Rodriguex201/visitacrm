@@ -76,36 +76,38 @@
                     <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
                 </template>
 
-                <template x-for="categoria in categoriasOpciones" :key="categoria">
-                    <section class="space-y-2 rounded-lg border border-slate-100 p-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <h3 class="text-sm font-semibold text-slate-900" x-text="categoria"></h3>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
-                                title="Agregar opción"
-                                @click="abrirModalOpcion(categoria)"
-                            >
-                                +
-                            </button>
-                        </div>
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <template x-for="categoria in categoriasOpciones" :key="categoria">
+                        <section class="space-y-2 rounded-lg border border-slate-100 bg-white/60 p-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <h3 class="text-sm font-semibold text-slate-900" x-text="categoria"></h3>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
+                                    title="Agregar opción"
+                                    @click="abrirModalOpcion(categoria)"
+                                >
+                                    +
+                                </button>
+                            </div>
 
-                        <div class="space-y-1.5">
-                            <template x-for="opcion in opcionesPorCategoria[categoria] || []" :key="opcion.id">
-                                <label class="flex items-center gap-2 text-sm text-slate-700">
-                                    <input
-                                        type="checkbox"
-                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                        :value="opcion.id"
-                                        :checked="isOpcionSeleccionada(opcion.id)"
-                                        @change="toggleOpcion(opcion.id)"
-                                    >
-                                    <span x-text="opcion.nombre"></span>
-                                </label>
-                            </template>
-                        </div>
-                    </section>
-                </template>
+                            <div class="space-y-1.5">
+                                <template x-for="opcion in opcionesPorCategoria[categoria] || []" :key="opcion.id">
+                                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                                        <input
+                                            type="checkbox"
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                            :value="opcion.id"
+                                            :checked="isOpcionSeleccionada(opcion.id)"
+                                            @change="toggleOpcion(opcion.id)"
+                                        >
+                                        <span x-text="opcion.nombre"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+                </div>
 
 
                 <div class="flex justify-end">
