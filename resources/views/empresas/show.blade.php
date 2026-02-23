@@ -170,6 +170,7 @@
             @endif
         </article>
 
+
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividadCount">{{ $acciones->count() }}</span>)</h2>

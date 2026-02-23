@@ -1,3 +1,4 @@
+
 @php
     $buildIcon = static function (string $icono, ?string $color = null): string {
         $stroke = $color ?: 'currentColor';
@@ -18,6 +19,7 @@
     };
 @endphp
 
+
 <div class="space-y-3" data-actividad-count="{{ $acciones->count() }}">
     @if ($acciones->isEmpty())
         <p class="text-sm text-slate-600">Sin actividad aún</p>
@@ -25,7 +27,9 @@
         @foreach ($acciones as $item)
             <div class="rounded-xl border border-slate-100 p-3">
                 <div class="flex items-start gap-3">
+
                     <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
+
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
                         <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
