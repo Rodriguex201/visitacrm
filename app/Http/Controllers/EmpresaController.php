@@ -89,8 +89,10 @@ class EmpresaController extends Controller
         $actRange = $this->normalizarRango($actRange);
         $visRange = $this->normalizarRango($visRange);
 
+
         $actFrom = $this->rangoFecha($actRange);
         $visFrom = $this->rangoFecha($visRange);
+
 
         $empresa->load(['sector', 'user', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
@@ -137,6 +139,7 @@ class EmpresaController extends Controller
 
     }
 
+
     public function actividadPartial(Request $request, Empresa $empresa): View
     {
         $actRange = $this->normalizarRango((string) $request->query('act_range', '7'));
@@ -178,6 +181,7 @@ class EmpresaController extends Controller
 
         return $rango;
     }
+
 
     private function rangoFecha(string $rango): ?Carbon
     {
