@@ -66,61 +66,36 @@
                 </div>
             </article>
 
-            <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-slate-950">Perfil comercial</h2>
-                    <span class="text-xs text-slate-500">Selección múltiple</span>
+            <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-950">Perfil comercial</h2>
+                        <p class="text-xs text-slate-500">Selección múltiple</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                        @click="abrirPerfilComercialModal()"
+                    >
+                        Configurar
+                    </button>
                 </div>
 
-                <template x-if="opcionesMensaje">
-                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
-                </template>
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="nombre in selectedOptionNames().slice(0, 6)" :key="nombre">
+                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700" x-text="nombre"></span>
+                    </template>
 
-                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <template x-for="categoria in categoriasOpciones" :key="categoria">
-                        <section class="space-y-2 rounded-lg border border-slate-100 bg-white/60 p-3">
-                            <div class="flex items-center justify-between gap-2">
-                                <h3 class="text-sm font-semibold text-slate-900" x-text="categoria"></h3>
-                                <button
-                                    type="button"
-                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
-                                    title="Agregar opción"
-                                    @click="abrirModalOpcion(categoria)"
-                                >
-                                    +
-                                </button>
-                            </div>
+                    <template x-if="selectedOptionNames().length > 6">
+                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${selectedOptionNames().length - 6}`"></span>
+                    </template>
 
-                            <div class="space-y-1.5">
-                                <template x-for="opcion in opcionesPorCategoria[categoria] || []" :key="opcion.id">
-                                    <label class="flex items-center gap-2 text-sm text-slate-700">
-                                        <input
-                                            type="checkbox"
-                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                            :value="opcion.id"
-                                            :checked="isOpcionSeleccionada(opcion.id)"
-                                            @change="toggleOpcion(opcion.id)"
-                                        >
-                                        <span x-text="opcion.nombre"></span>
-                                    </label>
-                                </template>
-                            </div>
-                        </section>
+                    <template x-if="selectedOptionNames().length === 0">
+                        <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                     </template>
                 </div>
 
-
-                <div class="flex justify-end">
-                    <button
-                        type="button"
-                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-                        :disabled="opcionesSaving"
-                        @click="guardarOpcionesEmpresa()"
-                    >
-                        <span x-show="!opcionesSaving">Guardar cambios</span>
-                        <span x-show="opcionesSaving">Guardando...</span>
-                    </button>
-                </div>
             </article>
         </div>
 
@@ -478,6 +453,90 @@
 
             <div
                 x-cloak
+
+                x-show="modalOpen"
+                class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title-perfil-comercial"
+                @keydown.escape.window="cerrarPerfilComercialModal()"
+            >
+                <div class="absolute inset-0 bg-slate-900/40" @click="cerrarPerfilComercialModal()"></div>
+
+                <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white p-5 shadow-xl">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h3 id="modal-title-perfil-comercial" class="text-lg font-semibold text-slate-900">Perfil comercial</h3>
+                        <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="cerrarPerfilComercialModal()" aria-label="Cerrar modal">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-4 flex flex-wrap gap-2 border-b border-slate-100 pb-3">
+                        <template x-for="categoria in categoriasOpciones" :key="`tab-${categoria}`">
+                            <button
+                                type="button"
+                                class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                                :class="activeTab === categoria ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                @click="activeTab = categoria"
+                                x-text="categoria"
+                            ></button>
+                        </template>
+                    </div>
+
+                    <template x-if="opcionesMensaje">
+                        <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
+                    </template>
+
+                    <div class="max-h-[55vh] overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/40 p-4">
+                        <div class="mb-3 flex items-center justify-between gap-2">
+                            <h4 class="text-sm font-semibold text-slate-900" x-text="activeTab"></h4>
+                            <button
+                                type="button"
+                                class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
+                                title="Agregar opción"
+                                @click="abrirModalOpcion(activeTab)"
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <template x-for="opcion in opcionesPorCategoria[activeTab] || []" :key="`tab-option-${opcion.id}`">
+                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                    <input
+                                        type="checkbox"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        :value="opcion.id"
+                                        :checked="isOpcionSeleccionada(opcion.id)"
+                                        @change="toggleOpcion(opcion.id)"
+                                    >
+                                    <span x-text="opcion.nombre"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarPerfilComercialModal()">Cerrar</button>
+                        <button
+                            type="button"
+                            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                            :disabled="opcionesSaving"
+                            @click="guardarOpcionesEmpresa()"
+                        >
+                            <span x-show="!opcionesSaving">Guardar cambios</span>
+                            <span x-show="opcionesSaving">Guardando...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div
+                x-cloak
+
                 x-show="showCatalogoModal"
                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
                 role="dialog"
@@ -553,7 +612,11 @@
                 usuarioSaving: false,
                 categoriasOpciones: @js($categoriasOpciones),
                 opcionesPorCategoria: @js($catalogoOpcionesPayload),
-                opcionesSeleccionadas: @js($opcionesSeleccionadas),
+
+                selectedIds: @js($opcionesSeleccionadas),
+                modalOpen: false,
+                activeTab: "Estado Actual",
+
                 opcionesSaving: false,
                 opcionesMensaje: '',
                 showCatalogoModal: false,
@@ -778,17 +841,36 @@
                         this.isSubmittingContacto = false;
                     }
                 },
+
+                abrirPerfilComercialModal() {
+                    this.activeTab = this.categoriasOpciones[0] || 'Estado Actual';
+                    this.opcionesMensaje = '';
+                    this.modalOpen = true;
+                },
+                cerrarPerfilComercialModal() {
+                    this.modalOpen = false;
+                },
+                selectedOptionNames() {
+                    const selectedSet = new Set((this.selectedIds || []).map((id) => Number(id)));
+                    return this.categoriasOpciones
+                        .flatMap((categoria) => this.opcionesPorCategoria[categoria] || [])
+                        .filter((opcion) => selectedSet.has(Number(opcion.id)))
+                        .map((opcion) => opcion.nombre);
+                },
                 isOpcionSeleccionada(id) {
-                    return this.opcionesSeleccionadas.includes(Number(id));
+                    return this.selectedIds.includes(Number(id));
+
                 },
                 toggleOpcion(id) {
                     const normalizedId = Number(id);
                     if (this.isOpcionSeleccionada(normalizedId)) {
-                        this.opcionesSeleccionadas = this.opcionesSeleccionadas.filter((item) => Number(item) !== normalizedId);
+
+                        this.selectedIds = this.selectedIds.filter((item) => Number(item) !== normalizedId);
                         return;
                     }
 
-                    this.opcionesSeleccionadas.push(normalizedId);
+                    this.selectedIds.push(normalizedId);
+
                 },
                 abrirModalOpcion(categoria) {
                     this.newOptionCategoria = categoria;
@@ -838,7 +920,9 @@
                         this.opcionesPorCategoria[data.categoria] = [...this.opcionesPorCategoria[data.categoria]];
 
                         if (!this.isOpcionSeleccionada(Number(data.id))) {
-                            this.opcionesSeleccionadas.push(Number(data.id));
+
+                            this.selectedIds.push(Number(data.id));
+
                         }
 
                         this.opcionesMensaje = 'Opción agregada correctamente.';
@@ -861,7 +945,9 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 Accept: 'application/json',
                             },
-                            body: JSON.stringify({ opciones: this.opcionesSeleccionadas }),
+
+                            body: JSON.stringify({ opciones: this.selectedIds }),
+
                         });
 
                         const data = await response.json();
@@ -871,7 +957,8 @@
                             return;
                         }
 
-                        this.opcionesSeleccionadas = (data.opciones || []).map((id) => Number(id));
+                        this.selectedIds = (data.opciones || []).map((id) => Number(id));
+
                         this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
                     } catch (error) {
                         this.opcionesMensaje = 'No fue posible conectar con el servidor.';
