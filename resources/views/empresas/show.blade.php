@@ -25,6 +25,7 @@
             </button>
         </header>
 
+
         <div class="grid gap-4 lg:grid-cols-2 lg:items-start">
             <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
                 <div class="space-y-3 text-slate-600">
@@ -107,6 +108,7 @@
                         </section>
                     </template>
                 </div>
+
 
                 <div class="flex justify-end">
                     <button
