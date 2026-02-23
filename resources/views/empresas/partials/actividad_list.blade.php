@@ -1,3 +1,25 @@
+
+@php
+    $buildIcon = static function (string $icono, ?string $color = null): string {
+        $stroke = $color ?: 'currentColor';
+        $attrs = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' . e($stroke) . '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+
+        $icons = [
+            'phone' => '<svg ' . $attrs . '><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.46-1.25a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92z"/></svg>',
+            'share-2' => '<svg ' . $attrs . '><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+            'video' => '<svg ' . $attrs . '><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
+            'map-pin' => '<svg ' . $attrs . '><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+            'building-2' => '<svg ' . $attrs . '><path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/><path d="M6 12H4a1 1 0 0 0-1 1v9"/><path d="M18 9h2a1 1 0 0 1 1 1v12"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+            'user-x' => '<svg ' . $attrs . '><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>',
+            'calendar' => '<svg ' . $attrs . '><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            'circle' => '<svg ' . $attrs . '><circle cx="12" cy="12" r="10"/></svg>',
+        ];
+
+        return $icons[$icono] ?? $icons['circle'];
+    };
+@endphp
+
+
 <div class="space-y-3" data-actividad-count="{{ $acciones->count() }}">
     @if ($acciones->isEmpty())
         <p class="text-sm text-slate-600">Sin actividad aún</p>
@@ -5,7 +27,9 @@
         @foreach ($acciones as $item)
             <div class="rounded-xl border border-slate-100 p-3">
                 <div class="flex items-start gap-3">
-                    <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">•</span>
+
+                    <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
+
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
                         <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
