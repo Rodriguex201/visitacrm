@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccionesController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpresaController;
@@ -23,6 +24,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/empresas/{empresa}/opciones', [EmpresaController::class, 'guardarOpciones'])->name('empresas.opciones.update');
     Route::post('/catalogo-opciones', [EmpresaController::class, 'storeCatalogoOpcion'])->name('catalogo-opciones.store');
     Route::get('/usuarios/buscar', [EmpresaController::class, 'searchUsuarios'])->name('usuarios.buscar');
+
+    Route::post('/empresas/{empresa}/acciones', [EmpresaController::class, 'storeAccion'])->name('empresas.acciones.store');
+    Route::get('/acciones', [AccionesController::class, 'index'])->name('acciones.index');
+    Route::patch('/acciones/{accion}', [AccionesController::class, 'update'])->name('acciones.update');
 
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');

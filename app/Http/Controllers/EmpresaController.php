@@ -6,6 +6,8 @@ use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
 use Carbon\Carbon;
 use App\Models\Sector;
+use App\Models\Accion;
+use App\Models\EmpresaAccion;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -103,6 +105,29 @@ class EmpresaController extends Controller
 
         $visitas = $visitasQuery->get();
 
+        $acciones = Accion::query()
+            ->where('activo', 1)
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get();
+
+        $accionesActividadQuery = $empresa->empresaAcciones()
+            ->with('accion')
+            ->latest('created_at');
+
+        if ($range === 'hoy') {
+            $accionesActividadQuery->whereBetween('created_at', [
+                Carbon::now()->startOfDay(),
+                Carbon::now()->endOfDay(),
+            ]);
+        }
+
+        if ($range === '7d') {
+            $accionesActividadQuery->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
+        }
+
+        $accionesActividad = $accionesActividadQuery->get();
+
         $contactos = $empresa->contactos;
 
         $categoriasOpciones = [
@@ -122,7 +147,7 @@ class EmpresaController extends Controller
 
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas'));
+        return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesActividad'));
     }
 
 
@@ -245,6 +270,51 @@ class EmpresaController extends Controller
             ->get();
 
         return response()->json($usuarios);
+    }
+
+
+    public function storeAccion(Request $request, Empresa $empresa): JsonResponse
+    {
+        $validated = $request->validate([
+            'accion_id' => ['required', 'integer', 'exists:acciones,id'],
+            'nota' => ['nullable', 'string'],
+        ]);
+
+        $accion = Accion::query()
+            ->where('id', $validated['accion_id'])
+            ->where('activo', 1)
+            ->first();
+
+        if (! $accion) {
+            return response()->json([
+                'message' => 'La acción seleccionada no está activa.',
+            ], 422);
+        }
+
+        $empresaAccion = EmpresaAccion::query()->create([
+            'empresa_id' => $empresa->id,
+            'accion_id' => $accion->id,
+            'user_id' => (int) auth()->id(),
+            'nota' => $validated['nota'] ?? null,
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'empresa_accion' => [
+                'id' => $empresaAccion->id,
+                'empresa_id' => $empresaAccion->empresa_id,
+                'accion_id' => $empresaAccion->accion_id,
+                'user_id' => $empresaAccion->user_id,
+                'nota' => $empresaAccion->nota,
+                'created_at' => $empresaAccion->created_at?->toIso8601String(),
+            ],
+            'accion' => [
+                'id' => $accion->id,
+                'nombre' => $accion->nombre,
+                'icono' => $accion->icono,
+                'color' => $accion->color,
+            ],
+        ], 201);
     }
 
     public function search(Request $request): JsonResponse

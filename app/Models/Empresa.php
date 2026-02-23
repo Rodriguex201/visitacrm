@@ -47,4 +47,9 @@ class Empresa extends Model
     {
         return $this->belongsToMany(CatalogoOpcion::class, 'empresa_opcion', 'empresa_id', 'opcion_id')->withTimestamps();
     }
+
+    public function empresaAcciones(): HasMany
+    {
+        return $this->hasMany(EmpresaAccion::class, 'empresa_id');
+    }
 }
