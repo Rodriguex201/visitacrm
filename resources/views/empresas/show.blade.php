@@ -136,6 +136,31 @@
             </template>
         </article>
 
+        <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl font-semibold text-slate-950">Acciones</h2>
+                <a href="{{ route('acciones.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                @forelse($acciones as $accion)
+                    <button
+                        type="button"
+                        class="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        @click="registrarAccion({{ (int) $accion->id }})"
+                        :disabled="accionesGuardando"
+                        title="{{ $accion->nombre }}"
+                    >
+                        <span class="sr-only">{{ $accion->nombre }}</span>
+                        <span aria-hidden="true" x-html="iconoSvg('{{ $accion->icono }}', '{{ $accion->color ?: '' }}')"></span>
+                        <span class="pointer-events-none absolute -top-9 left-1/2 hidden -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-sm group-hover:block">{{ $accion->nombre }}</span>
+                    </button>
+                @empty
+                    <p class="text-sm text-slate-500">No hay acciones activas.</p>
+                @endforelse
+            </div>
+            <p x-show="accionesError" class="text-sm text-rose-600" x-text="accionesError"></p>
+        </article>
+
         <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <h2 class="text-xl font-semibold text-slate-950">Notas</h2>
             @if ($empresa->notas)
@@ -145,18 +170,67 @@
             @endif
         </article>
 
+        @php
+            $actividadItems = collect();
+
+            foreach ($visitas as $visita) {
+                $actividadItems->push([
+                    'tipo' => 'visita',
+                    'id' => $visita->id,
+                    'titulo' => 'Visita',
+                    'subtexto' => 'Visita · ' . $visita->fecha_hora?->format('d/m/Y H:i'),
+                    'nota' => $visita->notas,
+                    'icono' => 'calendar',
+                    'color' => null,
+                    'created_at' => $visita->fecha_hora,
+                ]);
+            }
+
+            foreach ($accionesActividad as $item) {
+                $actividadItems->push([
+                    'tipo' => 'accion',
+                    'id' => $item->id,
+                    'titulo' => $item->accion?->nombre ?? 'Acción',
+                    'subtexto' => 'Acción · ' . $item->created_at?->format('d/m/Y H:i'),
+                    'nota' => $item->nota,
+                    'icono' => $item->accion?->icono ?? 'circle',
+                    'color' => $item->accion?->color,
+                    'created_at' => $item->created_at,
+                ]);
+            }
+
+            $actividadItems = $actividadItems->sortByDesc('created_at')->values();
+        @endphp
+
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-xl font-semibold text-slate-950">Actividad (0)</h2>
+                <h2 class="text-xl font-semibold text-slate-950">Actividad (<span x-text="actividad.length">{{ $actividadItems->count() }}</span>)</h2>
 
                 <div class="flex items-center gap-2 text-sm font-semibold">
-                    <span class="rounded-xl bg-blue-600 px-4 py-2 text-white">Hoy</span>
-                    <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-800">7 días</span>
-                    <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-800">Todo</span>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'hoy']) }}" class="rounded-xl px-4 py-2 {{ $range === 'hoy' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Hoy</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => '7d']) }}" class="rounded-xl px-4 py-2 {{ $range === '7d' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">7 días</a>
+                    <a href="{{ route('empresas.show', ['empresa' => $empresa, 'range' => 'todo']) }}" class="rounded-xl px-4 py-2 {{ $range === 'todo' ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800' }}">Todo</a>
                 </div>
             </div>
 
-            <p class="text-sm text-slate-600">Sin actividad aún</p>
+            <template x-if="actividad.length === 0">
+                <p class="text-sm text-slate-600">Sin actividad aún</p>
+            </template>
+
+            <div class="space-y-3" x-show="actividad.length > 0">
+                <template x-for="item in actividad" :key="`${item.tipo}-${item.id}`">
+                    <div class="rounded-xl border border-slate-100 p-3">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700" x-html="iconoSvg(item.icono, item.color)"></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-900" x-text="item.titulo"></p>
+                                <p class="text-xs text-slate-500" x-text="item.subtexto"></p>
+                                <p x-show="item.nota" class="mt-1 text-sm text-slate-700" x-text="item.nota"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -624,6 +698,10 @@
                 newOptionNombre: '',
                 newOptionSaving: false,
                 newOptionError: '',
+                accionesGuardando: false,
+                accionesError: '',
+                actividad: @js($actividadItems->values()->all()),
+
                 form: {
                     resultado: '',
                     nivel_interes: '',
@@ -656,6 +734,68 @@
                         }
                     });
                 },
+
+                iconoSvg(icono, color = '') {
+                    const stroke = color || 'currentColor';
+                    const attrs = `width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+                    const icons = {
+                        'phone': `<svg ${attrs}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.46-1.25a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92z"/></svg>`,
+                        'share-2': `<svg ${attrs}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+                        'video': `<svg ${attrs}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`,
+                        'map-pin': `<svg ${attrs}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+                        'building-2': `<svg ${attrs}><path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/><path d="M6 12H4a1 1 0 0 0-1 1v9"/><path d="M18 9h2a1 1 0 0 1 1 1v12"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>`,
+                        'user-x': `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>`,
+                        'calendar': `<svg ${attrs}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+                        'circle': `<svg ${attrs}><circle cx="12" cy="12" r="10"/></svg>`,
+                    };
+
+                    return icons[icono] || icons.circle;
+                },
+                async registrarAccion(accionId) {
+                    this.accionesGuardando = true;
+                    this.accionesError = '';
+
+                    try {
+                        const response = await fetch(`{{ route('empresas.acciones.store', $empresa) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ accion_id: accionId }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.accionesError = data.message || 'No se pudo registrar la acción.';
+                            return;
+                        }
+
+                        const fecha = new Date(data.empresa_accion.created_at);
+                        const dd = String(fecha.getDate()).padStart(2, '0');
+                        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const yyyy = fecha.getFullYear();
+                        const hh = String(fecha.getHours()).padStart(2, '0');
+                        const mi = String(fecha.getMinutes()).padStart(2, '0');
+
+                        this.actividad.unshift({
+                            tipo: 'accion',
+                            id: data.empresa_accion.id,
+                            titulo: data.accion.nombre,
+                            subtexto: `Acción · ${dd}/${mm}/${yyyy} ${hh}:${mi}`,
+                            nota: data.empresa_accion.nota,
+                            icono: data.accion.icono,
+                            color: data.accion.color,
+                        });
+                    } catch (error) {
+                        this.accionesError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.accionesGuardando = false;
+                    }
+                },
+
                 abrirModal(visita) {
                     this.visitaId = visita.id;
                     this.form.resultado = '';
