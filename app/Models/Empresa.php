@@ -19,6 +19,7 @@ class Empresa extends Model
         'direccion',
         'notas',
         'sector_id',
+        'user_id',
     ];
 
     public function sector(): BelongsTo
@@ -34,5 +35,10 @@ class Empresa extends Model
     public function contactos(): HasMany
     {
         return $this->hasMany(Contacto::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
