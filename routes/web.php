@@ -19,6 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/empresas/{empresa}/contactos', [ContactoController::class, 'store'])->name('empresas.contactos.store');
 
     Route::patch('/empresas/{empresa}/contactos/{contacto}', [ContactoController::class, 'update'])->name('empresas.contactos.update');
+    Route::patch('/empresas/{empresa}/asignar-usuario', [EmpresaController::class, 'asignarUsuario'])->name('empresas.asignar-usuario');
+    Route::get('/usuarios/buscar', [EmpresaController::class, 'searchUsuarios'])->name('usuarios.buscar');
 
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');

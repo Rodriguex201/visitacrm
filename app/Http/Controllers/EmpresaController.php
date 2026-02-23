@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Empresa;
 use Carbon\Carbon;
 use App\Models\Sector;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class EmpresaController extends Controller
         $usaRangoPersonalizado = $desde !== null || $hasta !== null;
 
         $empresasQuery = Empresa::query()
-            ->with('sector')
+            ->with(['sector', 'user'])
             ->latest('id');
 
         if ($q !== '') {
@@ -83,7 +84,7 @@ class EmpresaController extends Controller
             $range = 'todo';
         }
 
-        $empresa->load(['sector', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
+        $empresa->load(['sector', 'user', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
         $visitasQuery = $empresa->visitas()->latest('fecha_hora');
 
@@ -105,6 +106,51 @@ class EmpresaController extends Controller
         return view('empresas.show', compact('empresa', 'visitas', 'range', 'contactos'));
     }
 
+    public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $empresa->user_id = $validated['user_id'] ?? null;
+        $empresa->save();
+        $empresa->load('user');
+
+        return response()->json([
+            'ok' => true,
+            'empresa' => [
+                'id' => $empresa->id,
+                'user_id' => $empresa->user_id,
+                'user' => $empresa->user ? [
+                    'id' => $empresa->user->id,
+                    'codigo' => $empresa->user->codigo,
+                    'name' => $empresa->user->name ?? $empresa->user->nombre,
+                    'nombre' => $empresa->user->nombre ?? $empresa->user->name,
+                    'telefono' => $empresa->user->telefono,
+                ] : null,
+            ],
+        ]);
+    }
+
+    public function searchUsuarios(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('query', ''));
+
+        $usuarios = User::query()
+            ->select(['id', 'codigo', 'name', 'telefono'])
+            ->when($query !== '', function ($q) use ($query) {
+                $q->where(function ($inner) use ($query) {
+                    $inner->where('codigo', 'like', "%{$query}%")
+                        ->orWhere('name', 'like', "%{$query}%")
+                        ->orWhere('telefono', 'like', "%{$query}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
+
+        return response()->json($usuarios);
+    }
 
     public function search(Request $request): JsonResponse
     {

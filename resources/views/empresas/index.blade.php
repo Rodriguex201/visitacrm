@@ -257,6 +257,15 @@
                                 </span>
 
                             </div>
+
+                            <p class="mt-1 truncate text-xs text-slate-500">
+                                Responsable:
+                                @if ($empresa->user)
+                                    {{ $empresa->user->codigo ?: 'S/C' }} - {{ strtoupper($empresa->user->name ?? $empresa->user->nombre ?? 'Sin nombre') }}
+                                @else
+                                    Sin responsable
+                                @endif
+                            </p>
                         </div>
                     </div>
 
