@@ -142,7 +142,7 @@
                 <a href="{{ route('acciones.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                @forelse($acciones as $accion)
+                @forelse($accionesCatalogo as $accion)
                     <button
                         type="button"
                         class="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
@@ -173,20 +173,7 @@
         @php
             $actividadItems = collect();
 
-            foreach ($visitas as $visita) {
-                $actividadItems->push([
-                    'tipo' => 'visita',
-                    'id' => $visita->id,
-                    'titulo' => 'Visita',
-                    'subtexto' => 'Visita · ' . $visita->fecha_hora?->format('d/m/Y H:i'),
-                    'nota' => $visita->notas,
-                    'icono' => 'calendar',
-                    'color' => null,
-                    'created_at' => $visita->fecha_hora,
-                ]);
-            }
-
-            foreach ($accionesActividad as $item) {
+            foreach ($acciones as $item) {
                 $actividadItems->push([
                     'tipo' => 'accion',
                     'id' => $item->id,
