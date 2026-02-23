@@ -20,6 +20,8 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/empresas/{empresa}/contactos/{contacto}', [ContactoController::class, 'update'])->name('empresas.contactos.update');
     Route::patch('/empresas/{empresa}/asignar-usuario', [EmpresaController::class, 'asignarUsuario'])->name('empresas.asignar-usuario');
+    Route::patch('/empresas/{empresa}/opciones', [EmpresaController::class, 'guardarOpciones'])->name('empresas.opciones.update');
+    Route::post('/catalogo-opciones', [EmpresaController::class, 'storeCatalogoOpcion'])->name('catalogo-opciones.store');
     Route::get('/usuarios/buscar', [EmpresaController::class, 'searchUsuarios'])->name('usuarios.buscar');
 
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
