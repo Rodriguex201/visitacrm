@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\Sector;
 use App\Models\Accion;
 use App\Models\EmpresaAccion;
+use App\Models\Visita;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -82,8 +83,8 @@ class EmpresaController extends Controller
 
     public function show(Request $request, Empresa $empresa): View
     {
-        $actRange = (string) $request->query('act_range', 'todo');
-        $visRange = (string) $request->query('vis_range', 'todo');
+        $actRange = (string) $request->query('act_range', '7');
+        $visRange = (string) $request->query('vis_range', '7');
 
         if ($actRange === '7d') {
             $actRange = '7';
@@ -94,56 +95,36 @@ class EmpresaController extends Controller
         }
 
         if (!in_array($actRange, ['hoy', '7', 'todo'], true)) {
-            $actRange = 'todo';
+            $actRange = '7';
         }
 
         if (!in_array($visRange, ['hoy', '7', 'todo'], true)) {
-            $visRange = 'todo';
+            $visRange = '7';
         }
+
+        $actFrom = $this->rangoFecha($actRange);
+        $visFrom = $this->rangoFecha($visRange);
 
         $empresa->load(['sector', 'user', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
-        $visitasQuery = $empresa->visitas()->latest('fecha_hora');
+        $visitas = Visita::query()
+            ->where('empresa_id', $empresa->id)
+            ->when($visFrom, fn ($query) => $query->where('fecha_hora', '>=', $visFrom))
+            ->orderByDesc('fecha_hora')
+            ->get();
 
-        if ($visRange === 'hoy') {
-            $visitasQuery->whereBetween('fecha_hora', [
-                Carbon::now()->startOfDay(),
-                Carbon::now()->endOfDay(),
-            ]);
-        }
-
-        if ($visRange === '7') {
-            $visitasQuery->where('fecha_hora', '>=', Carbon::now()->subDays(6)->startOfDay());
-        }
-
-        $visitas = $visitasQuery->get();
-
-        $acciones = Accion::query()
+        $accionesCatalogo = Accion::query()
             ->where('activo', 1)
             ->orderBy('orden')
             ->orderBy('id')
             ->get();
 
-        $accionesActividadQuery = $empresa->empresaAcciones()
+        $acciones = EmpresaAccion::query()
             ->with('accion')
-            ->latest('created_at');
-
-
-        if ($actRange === 'hoy') {
-
-            $accionesActividadQuery->whereBetween('created_at', [
-                Carbon::now()->startOfDay(),
-                Carbon::now()->endOfDay(),
-            ]);
-        }
-
-
-        if ($actRange === '7') {
-
-            $accionesActividadQuery->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
-        }
-
-        $accionesActividad = $accionesActividadQuery->get();
+            ->where('empresa_id', $empresa->id)
+            ->when($actFrom, fn ($query) => $query->where('created_at', '>=', $actFrom))
+            ->orderByDesc('created_at')
+            ->get();
 
         $contactos = $empresa->contactos;
 
@@ -165,8 +146,17 @@ class EmpresaController extends Controller
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesActividad'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo'));
 
+    }
+
+    private function rangoFecha(string $rango): ?Carbon
+    {
+        return match ($rango) {
+            'hoy' => Carbon::now()->startOfDay(),
+            '7' => Carbon::now()->subDays(7),
+            default => null,
+        };
     }
 
 
