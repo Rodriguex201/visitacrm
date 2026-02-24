@@ -83,15 +83,20 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <template x-for="nombre in savedOptionNames().slice(0, 6)" :key="nombre">
-                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700" x-text="nombre"></span>
+
+                    <template x-for="chip in savedOptionChips().slice(0, 6)" :key="chip.id">
+                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                            <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
+                            <span class="text-xs" x-text="chip.nombre"></span>
+                        </span>
                     </template>
 
-                    <template x-if="savedOptionNames().length > 6">
-                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${savedOptionNames().length - 6}`"></span>
+                    <template x-if="savedOptionChips().length > 6">
+                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${savedOptionChips().length - 6}`"></span>
                     </template>
 
-                    <template x-if="savedOptionNames().length === 0">
+                    <template x-if="savedOptionChips().length === 0">
+
                         <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                     </template>
                 </div>
@@ -461,15 +466,20 @@
                     </template>
 
                     <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
-                        <template x-for="nombre in draftOptionNames().slice(0, 8)" :key="`draft-${nombre}`">
-                            <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs text-blue-700" x-text="nombre"></span>
+
+                        <template x-for="chip in draftOptionChips().slice(0, 8)" :key="`draft-${chip.id}`">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
+                                <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
+                                <span class="text-xs" x-text="chip.nombre"></span>
+                            </span>
                         </template>
 
-                        <template x-if="draftOptionNames().length > 8">
-                            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700" x-text="`+${draftOptionNames().length - 8}`"></span>
+                        <template x-if="draftOptionChips().length > 8">
+                            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700" x-text="`+${draftOptionChips().length - 8}`"></span>
                         </template>
 
-                        <template x-if="draftOptionNames().length === 0">
+                        <template x-if="draftOptionChips().length === 0">
+
                             <span class="text-xs text-slate-500">Sin selección en borrador</span>
                         </template>
                     </div>
@@ -984,12 +994,35 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.modalOpen = false;
                 },
-                optionNamesFromIds(ids) {
+
+                categoryAbbreviation(categoria) {
+                    const aliases = {
+                        'Estado Actual': 'Estado:',
+                        'Aplicativos': 'App:',
+                        'Procesos Electrónicos': 'Electrónico:',
+                        'Equipos': 'Equipo:',
+                    };
+
+                    return aliases[categoria] || `${categoria}:`;
+                },
+                optionChipsFromIds(ids) {
                     const selectedSet = new Set((ids || []).map((id) => Number(id)));
+
+
                     return this.categoriasOpciones
-                        .flatMap((categoria) => this.opcionesPorCategoria[categoria] || [])
-                        .filter((opcion) => selectedSet.has(Number(opcion.id)))
-                        .map((opcion) => opcion.nombre);
+                        .flatMap((categoria) => (this.opcionesPorCategoria[categoria] || []).map((opcion) => ({
+                            id: Number(opcion.id),
+                            nombre: opcion.nombre,
+                            categoria,
+                            categoriaAbreviada: this.categoryAbbreviation(categoria),
+                        })))
+                        .filter((opcion) => selectedSet.has(opcion.id));
+                },
+                savedOptionChips() {
+                    return this.optionChipsFromIds(this.savedSelectedIds);
+                },
+                draftOptionChips() {
+                    return this.optionChipsFromIds(this.draftSelectedIds);
                 },
                 savedOptionNames() {
                     return this.optionNamesFromIds(this.savedSelectedIds);
