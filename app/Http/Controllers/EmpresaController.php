@@ -36,7 +36,7 @@ class EmpresaController extends Controller
         $usaRangoPersonalizado = $desde !== null || $hasta !== null;
 
         $empresasQuery = Empresa::query()
-            ->with(['sector', 'user'])
+            ->with(['sector', 'user', 'responsable'])
             ->latest('id');
 
         if ($q !== '') {
@@ -94,7 +94,7 @@ class EmpresaController extends Controller
         $visFrom = $this->rangoFecha($visRange);
 
 
-        $empresa->load(['sector', 'user', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
+        $empresa->load(['sector', 'user', 'responsable', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
         $visitas = Visita::query()
             ->where('empresa_id', $empresa->id)
@@ -268,24 +268,30 @@ class EmpresaController extends Controller
     public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse
     {
         $validated = $request->validate([
-            'user_id' => ['nullable', 'exists:users,id'],
+            'responsable_user_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        $empresa->user_id = $validated['user_id'] ?? null;
+        $empresa->responsable_user_id = $validated['responsable_user_id'] ?? null;
+
+        if ($empresa->responsable_user_id !== null && $empresa->referida_at === null) {
+            $empresa->referida_at = now();
+        }
+
         $empresa->save();
-        $empresa->load('user');
+        $empresa->load('responsable');
 
         return response()->json([
             'ok' => true,
             'empresa' => [
                 'id' => $empresa->id,
-                'user_id' => $empresa->user_id,
-                'user' => $empresa->user ? [
-                    'id' => $empresa->user->id,
-                    'codigo' => $empresa->user->codigo,
-                    'name' => $empresa->user->name ?? $empresa->user->nombre,
-                    'nombre' => $empresa->user->nombre ?? $empresa->user->name,
-                    'telefono' => $empresa->user->telefono,
+                'responsable_user_id' => $empresa->responsable_user_id,
+                'referida_at' => $empresa->referida_at?->toIso8601String(),
+                'responsable' => $empresa->responsable ? [
+                    'id' => $empresa->responsable->id,
+                    'codigo' => $empresa->responsable->codigo,
+                    'name' => $empresa->responsable->name ?? $empresa->responsable->nombre,
+                    'nombre' => $empresa->responsable->nombre ?? $empresa->responsable->name,
+                    'telefono' => $empresa->responsable->telefono,
                 ] : null,
             ],
         ]);
@@ -381,6 +387,15 @@ class EmpresaController extends Controller
     {
         $data = $this->validateEmpresa($request);
 
+        $authUser = auth()->user();
+
+        if ($authUser && $authUser->tipo_usuario !== 'administracion') {
+            $data['responsable_user_id'] = $authUser->id;
+            $data['referida_at'] = now();
+        } elseif (! empty($data['responsable_user_id'])) {
+            $data['referida_at'] = now();
+        }
+
         Empresa::query()->create($data);
 
         return redirect()
@@ -415,9 +430,14 @@ class EmpresaController extends Controller
             'sector_id' => ['nullable', 'exists:sectores,id'],
             'modal_mode' => ['nullable', Rule::in(['create', 'edit'])],
             'empresa_id' => ['nullable', 'integer'],
+            'responsable_user_id' => ['nullable', 'exists:users,id'],
         ]);
 
         unset($validated['modal_mode'], $validated['empresa_id']);
+
+        if ((auth()->user()?->tipo_usuario ?? null) !== 'administracion') {
+            unset($validated['responsable_user_id']);
+        }
 
         return $validated;
     }

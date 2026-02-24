@@ -19,6 +19,7 @@ class UsuarioController extends Controller
     {
         $usuarios = User::query()
             ->with('banco')
+            ->withCount('empresasReferidas')
             ->orderByDesc('created_at')
             ->paginate(10);
 
@@ -37,6 +38,19 @@ class UsuarioController extends Controller
         return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista'));
     }
 
+
+
+
+    public function referidos(User $user): View
+    {
+        $empresasReferidas = $user->empresasReferidas()
+            ->with(['sector'])
+            ->latest('referida_at')
+            ->latest('id')
+            ->paginate(10);
+
+        return view('usuarios.referidos', compact('user', 'empresasReferidas'));
+    }
 
     public function updateTipoUsuario(Request $request, TipoUsuario $tipoUsuario): RedirectResponse
     {

@@ -181,6 +181,7 @@
 
                             <th scope="col" class="px-4 py-3 font-semibold">Ciudad</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Referidos</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
                         </tr>
                     </thead>
@@ -206,6 +207,11 @@
                                     <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium" style="background-color: {{ $bgColor }}; color: {{ $textColor }};">
                                         {{ ucfirst($u->tipo_usuario) }}
                                     </span>
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <a href="{{ route('usuarios.referidos', $u) }}" class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
+                                        {{ $u->empresas_referidas_count }}
+                                    </a>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <div class="flex items-center gap-1">
@@ -245,7 +251,7 @@
                         @empty
                             <tr>
 
-                                <td colspan="10" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                                <td colspan="11" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
 
                             </tr>
                         @endforelse
