@@ -260,9 +260,9 @@
 
                             <p class="mt-1 truncate text-xs text-slate-500">
                                 Responsable:
-                                @if ($empresa->user)
+                                @if ($empresa->responsable)
 
-                                    {{ $empresa->user->codigo ?: 'S/C' }} - {{ strtoupper($empresa->user->name ?? $empresa->user->nombre ?? 'Sin nombre') }} - {{ $empresa->user->telefono ?: 'Sin teléfono' }}
+                                    {{ $empresa->responsable->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable->name ?? $empresa->responsable->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable->telefono ?: 'Sin teléfono' }}
 
                                 @else
                                     Sin responsable

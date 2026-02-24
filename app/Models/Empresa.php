@@ -21,6 +21,12 @@ class Empresa extends Model
         'notas',
         'sector_id',
         'user_id',
+        'responsable_user_id',
+        'referida_at',
+    ];
+
+    protected $casts = [
+        'referida_at' => 'datetime',
     ];
 
     public function sector(): BelongsTo
@@ -41,6 +47,11 @@ class Empresa extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function responsable(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsable_user_id');
     }
 
     public function opciones(): BelongsToMany

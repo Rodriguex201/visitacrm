@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+        Route::get('/usuarios/{user}/referidos', [UsuarioController::class, 'referidos'])->name('usuarios.referidos');
         Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
         Route::put('/usuarios/{user}', [UsuarioController::class, 'update'])->name('usuarios.update');
         Route::put('/usuarios/tipos/{tipoUsuario}', [UsuarioController::class, 'updateTipoUsuario'])->name('usuarios.tipos.update');

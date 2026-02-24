@@ -58,6 +58,12 @@ class User extends Authenticatable
         return $this->hasMany(Empresa::class);
     }
 
+    public function empresasReferidas(): HasMany
+    {
+        return $this->hasMany(Empresa::class, 'responsable_user_id');
+    }
+
+
     protected function casts(): array
     {
         return [

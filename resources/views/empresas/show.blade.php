@@ -599,7 +599,7 @@
                 usuarioFormError: '',
                 errors: {},
                 contactoErrors: {},
-                empresaUser: @js($empresa->user ? ['id' => $empresa->user->id, 'codigo' => $empresa->user->codigo, 'name' => $empresa->user->name ?? $empresa->user->nombre, 'nombre' => $empresa->user->nombre ?? $empresa->user->name, 'telefono' => $empresa->user->telefono] : null),
+                empresaUser: @js($empresa->responsable ? ['id' => $empresa->responsable->id, 'codigo' => $empresa->responsable->codigo, 'name' => $empresa->responsable->name ?? $empresa->responsable->nombre, 'nombre' => $empresa->responsable->nombre ?? $empresa->responsable->name, 'telefono' => $empresa->responsable->telefono] : null),
                 actividadPartialUrl: @js(route('empresas.actividad.partial', $empresa)),
                 visitasPartialUrl: @js(route('empresas.visitas.partial', $empresa)),
                 usuarioQuery: '',
@@ -857,7 +857,7 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 Accept: 'application/json',
                             },
-                            body: JSON.stringify({ user_id: userId }),
+                            body: JSON.stringify({ responsable_user_id: userId }),
                         });
 
                         const data = await response.json();
@@ -872,7 +872,7 @@
                             return;
                         }
 
-                        this.empresaUser = data.empresa?.user ?? null;
+                        this.empresaUser = data.empresa?.responsable ?? null;
                         this.cerrarModalUsuario();
                     } catch (error) {
                         this.usuarioFormError = 'No fue posible conectar con el servidor.';
