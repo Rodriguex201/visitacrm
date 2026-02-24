@@ -258,16 +258,19 @@
 
                             </div>
 
-                            <p class="mt-1 truncate text-xs text-slate-500">
-                                Responsable:
-                                @if ($empresa->responsable)
 
-                                    {{ $empresa->responsable->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable->name ?? $empresa->responsable->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable->telefono ?: 'Sin teléfono' }}
+                            @if ($empresa->responsable_user_id)
+                                @if ($empresa->referida_at)
+                                    <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                        🔁 Referido por: {{ $empresa->responsable?->codigo ?: 'S/C' }}
+                                    </span>
 
                                 @else
-                                    Sin responsable
+                                    <p class="mt-1 truncate text-xs text-slate-500">
+                                        Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
+                                    </p>
                                 @endif
-                            </p>
+                            @endif
                         </div>
                     </div>
 
