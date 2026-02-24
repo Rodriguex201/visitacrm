@@ -83,6 +83,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
+
                     <template x-for="chip in savedOptionChips().slice(0, 6)" :key="chip.id">
                         <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                             <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
@@ -95,6 +96,7 @@
                     </template>
 
                     <template x-if="savedOptionChips().length === 0">
+
                         <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                     </template>
                 </div>
@@ -464,6 +466,7 @@
                     </template>
 
                     <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
+
                         <template x-for="chip in draftOptionChips().slice(0, 8)" :key="`draft-${chip.id}`">
                             <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
                                 <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
@@ -476,6 +479,7 @@
                         </template>
 
                         <template x-if="draftOptionChips().length === 0">
+
                             <span class="text-xs text-slate-500">Sin selección en borrador</span>
                         </template>
                     </div>
@@ -990,6 +994,7 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.modalOpen = false;
                 },
+
                 categoryAbbreviation(categoria) {
                     const aliases = {
                         'Estado Actual': 'Estado:',
@@ -1002,6 +1007,7 @@
                 },
                 optionChipsFromIds(ids) {
                     const selectedSet = new Set((ids || []).map((id) => Number(id)));
+
 
                     return this.categoriasOpciones
                         .flatMap((categoria) => (this.opcionesPorCategoria[categoria] || []).map((opcion) => ({
@@ -1017,6 +1023,12 @@
                 },
                 draftOptionChips() {
                     return this.optionChipsFromIds(this.draftSelectedIds);
+                },
+                savedOptionNames() {
+                    return this.optionNamesFromIds(this.savedSelectedIds);
+                },
+                draftOptionNames() {
+                    return this.optionNamesFromIds(this.draftSelectedIds);
                 },
                 isOpcionSeleccionada(id) {
                     return this.draftSelectedIds.includes(Number(id));
