@@ -83,15 +83,15 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <template x-for="nombre in selectedOptionNames().slice(0, 6)" :key="nombre">
+                    <template x-for="nombre in savedOptionNames().slice(0, 6)" :key="nombre">
                         <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700" x-text="nombre"></span>
                     </template>
 
-                    <template x-if="selectedOptionNames().length > 6">
-                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${selectedOptionNames().length - 6}`"></span>
+                    <template x-if="savedOptionNames().length > 6">
+                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${savedOptionNames().length - 6}`"></span>
                     </template>
 
-                    <template x-if="selectedOptionNames().length === 0">
+                    <template x-if="savedOptionNames().length === 0">
                         <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                     </template>
                 </div>
@@ -460,6 +460,20 @@
                         <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
                     </template>
 
+                    <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
+                        <template x-for="nombre in draftOptionNames().slice(0, 8)" :key="`draft-${nombre}`">
+                            <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs text-blue-700" x-text="nombre"></span>
+                        </template>
+
+                        <template x-if="draftOptionNames().length > 8">
+                            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700" x-text="`+${draftOptionNames().length - 8}`"></span>
+                        </template>
+
+                        <template x-if="draftOptionNames().length === 0">
+                            <span class="text-xs text-slate-500">Sin selección en borrador</span>
+                        </template>
+                    </div>
+
                     <div class="max-h-[55vh] overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/40 p-4">
                         <div class="mb-3 flex items-center justify-between gap-2">
                             <h4 class="text-sm font-semibold text-slate-900" x-text="activeTab"></h4>
@@ -586,7 +600,8 @@
                 categoriasOpciones: @js($categoriasOpciones),
                 opcionesPorCategoria: @js($catalogoOpcionesPayload),
 
-                selectedIds: @js($opcionesSeleccionadas),
+                savedSelectedIds: @js($opcionesSeleccionadas),
+                draftSelectedIds: [],
                 modalOpen: false,
                 activeTab: "Estado Actual",
 
@@ -962,31 +977,39 @@
                 abrirPerfilComercialModal() {
                     this.activeTab = this.categoriasOpciones[0] || 'Estado Actual';
                     this.opcionesMensaje = '';
+                    this.draftSelectedIds = [...this.savedSelectedIds];
                     this.modalOpen = true;
                 },
                 cerrarPerfilComercialModal() {
+                    this.draftSelectedIds = [...this.savedSelectedIds];
                     this.modalOpen = false;
                 },
-                selectedOptionNames() {
-                    const selectedSet = new Set((this.selectedIds || []).map((id) => Number(id)));
+                optionNamesFromIds(ids) {
+                    const selectedSet = new Set((ids || []).map((id) => Number(id)));
                     return this.categoriasOpciones
                         .flatMap((categoria) => this.opcionesPorCategoria[categoria] || [])
                         .filter((opcion) => selectedSet.has(Number(opcion.id)))
                         .map((opcion) => opcion.nombre);
                 },
+                savedOptionNames() {
+                    return this.optionNamesFromIds(this.savedSelectedIds);
+                },
+                draftOptionNames() {
+                    return this.optionNamesFromIds(this.draftSelectedIds);
+                },
                 isOpcionSeleccionada(id) {
-                    return this.selectedIds.includes(Number(id));
+                    return this.draftSelectedIds.includes(Number(id));
 
                 },
                 toggleOpcion(id) {
                     const normalizedId = Number(id);
                     if (this.isOpcionSeleccionada(normalizedId)) {
 
-                        this.selectedIds = this.selectedIds.filter((item) => Number(item) !== normalizedId);
+                        this.draftSelectedIds = this.draftSelectedIds.filter((item) => Number(item) !== normalizedId);
                         return;
                     }
 
-                    this.selectedIds.push(normalizedId);
+                    this.draftSelectedIds.push(normalizedId);
 
                 },
                 abrirModalOpcion(categoria) {
@@ -1037,8 +1060,7 @@
                         this.opcionesPorCategoria[data.categoria] = [...this.opcionesPorCategoria[data.categoria]];
 
                         if (!this.isOpcionSeleccionada(Number(data.id))) {
-
-                            this.selectedIds.push(Number(data.id));
+                            this.draftSelectedIds.push(Number(data.id));
 
                         }
 
@@ -1063,7 +1085,7 @@
                                 Accept: 'application/json',
                             },
 
-                            body: JSON.stringify({ opciones: this.selectedIds }),
+                            body: JSON.stringify({ opciones: this.draftSelectedIds }),
 
                         });
 
@@ -1074,9 +1096,11 @@
                             return;
                         }
 
-                        this.selectedIds = (data.opciones || []).map((id) => Number(id));
+                        this.savedSelectedIds = (data.opciones || []).map((id) => Number(id));
+                        this.draftSelectedIds = [...this.savedSelectedIds];
 
                         this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
+                        this.modalOpen = false;
                     } catch (error) {
                         this.opcionesMensaje = 'No fue posible conectar con el servidor.';
                     } finally {
