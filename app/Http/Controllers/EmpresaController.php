@@ -42,12 +42,14 @@ class EmpresaController extends Controller
             ->latest('id');
 
         if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+
             $userId = (int) $request->user()->id;
 
             $empresasQuery->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
                     ->orWhere('responsable_user_id', $userId);
             });
+
         }
 
         if ($q !== '') {
@@ -98,11 +100,13 @@ class EmpresaController extends Controller
         $esAdministracion = ($usuario?->tipo_usuario ?? null) === 'administracion';
 
         if (! $esAdministracion) {
+
             $userId = (int) $usuario?->id;
             $esCreador = (int) $empresa->user_id === $userId;
             $esResponsable = (int) $empresa->responsable_user_id === $userId;
 
             if (! $esCreador && ! $esResponsable) {
+
                 abort(404);
             }
 
