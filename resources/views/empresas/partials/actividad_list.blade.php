@@ -25,18 +25,53 @@
         <p class="text-sm text-slate-600">Sin actividad aún</p>
     @else
         @foreach ($acciones as $item)
-            <div class="rounded-xl border border-slate-100 p-3">
-                <div class="flex items-start gap-3">
+            <div class="rounded-xl border border-slate-100 p-3" data-actividad-item="{{ (int) $item->id }}" data-accion-id="{{ (int) $item->accion_id }}">
+                <div class="flex items-start justify-between gap-3">
 
-                    <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
+                    <div class="flex items-start gap-3">
 
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
-                        <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
-                        @if ($item->nota)
-                            <p class="mt-1 text-sm text-slate-700">{{ $item->nota }}</p>
-                        @endif
+                        <span data-role="actividad-icon" class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
+
+                        <div class="min-w-0">
+                            <p data-role="actividad-nombre" class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
+                            <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
+                            @if ($item->nota)
+                                <p class="mt-1 text-sm text-slate-700">{{ $item->nota }}</p>
+                            @endif
+                        </div>
                     </div>
+
+                    @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                data-accion-edit="true"
+                                data-empresa-accion-id="{{ (int) $item->id }}"
+                                data-accion-id="{{ (int) $item->accion_id }}"
+                                title="Editar acción"
+                            >
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
+                                </svg>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="rounded-md p-1.5 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
+                                data-accion-delete="true"
+                                data-empresa-accion-id="{{ (int) $item->id }}"
+                                title="Eliminar acción"
+                            >
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a1 1 0 01-1 1H7a1 1 0 01-1-1L5 6" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                                </svg>
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
         @endforeach
