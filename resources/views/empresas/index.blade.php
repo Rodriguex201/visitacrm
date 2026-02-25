@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+    @php($esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
     <section
         x-data="{
             openModal: {{ $errors->any() ? 'true' : 'false' }},
@@ -298,6 +300,27 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5" />
                             </svg>
                         </button>
+
+                        @if ($esAdministracion)
+                            <form
+                                method="POST"
+                                action="{{ route('empresas.destroy', $empresa) }}"
+                                @click.stop
+                                onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
+                                    aria-label="Eliminar {{ $empresa->nombre }}"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
+                                    </svg>
+                                </button>
+                            </form>
+                        @endif
 
                         <a
                             href="{{ route('empresas.show', $empresa) }}"

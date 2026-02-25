@@ -453,6 +453,19 @@ class EmpresaController extends Controller
             ->with('status', 'Empresa actualizada correctamente.');
     }
 
+    public function destroy(Empresa $empresa): RedirectResponse
+    {
+        if ((auth()->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $empresa->delete();
+
+        return redirect()
+            ->route('empresas.index')
+            ->with('status', 'Empresa eliminada correctamente.');
+    }
+
     /**
      * @return array<string, mixed>
      */
