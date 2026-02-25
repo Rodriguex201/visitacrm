@@ -160,6 +160,7 @@
                 @endforelse
             </div>
             <p x-show="accionesError" class="text-sm text-rose-600" x-text="accionesError"></p>
+            <p x-show="accionSuccess" x-transition.opacity class="text-sm text-emerald-600" x-text="accionSuccess"></p>
         </article>
 
         <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -590,6 +591,51 @@
                     </form>
                 </div>
             </div>
+
+
+            <div
+                x-cloak
+                x-show="showAccionModal"
+                class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title-accion"
+                @keydown.escape.window="cerrarModalAccion()"
+            >
+                <div class="absolute inset-0 bg-slate-900/40" @click="cerrarModalAccion()"></div>
+
+                <div class="relative z-10 w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 id="modal-title-accion" class="text-lg font-semibold text-slate-900">Editar acción</h3>
+                        <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="cerrarModalAccion()" aria-label="Cerrar modal">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="accionModalError" class="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="accionModalError"></div>
+
+                    <form class="space-y-4" @submit.prevent="guardarEdicionAccion()">
+                        <div>
+                            <label for="editar_accion_id" class="mb-1 block text-sm font-medium text-slate-700">Acción</label>
+                            <select id="editar_accion_id" x-model.number="accionForm.accion_id" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <template x-for="accion in accionesCatalogo" :key="accion.id">
+                                    <option :value="accion.id" x-text="accion.nombre"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-1">
+                            <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarModalAccion()">Cancelar</button>
+                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="accionModalSaving">
+                                <span x-show="!accionModalSaving">Guardar</span>
+                                <span x-show="accionModalSaving">Guardando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     </section>
 
 
@@ -650,6 +696,19 @@
                 newOptionError: '',
                 accionesGuardando: false,
                 accionesError: '',
+                accionSuccess: '',
+                esAdministracion: @js((auth()->user()?->tipo_usuario ?? null) === 'administracion'),
+                accionesCatalogo: @js($accionesCatalogo->map(fn ($accion) => ['id' => (int) $accion->id, 'nombre' => $accion->nombre])->values()),
+                accionUpdateUrlTemplate: @js(route('empresas.acciones.update', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
+                accionDeleteUrlTemplate: @js(route('empresas.acciones.destroy', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
+                showAccionModal: false,
+                accionModalSaving: false,
+                accionModalError: '',
+                accionForm: {
+                    empresa_accion_id: null,
+                    accion_id: null,
+                },
+                actividadActionsBound: false,
                 currentActRange: @js($actRange),
                 currentVisRange: @js($visRange),
                 actividadCount: @js($acciones->count()),
@@ -675,6 +734,7 @@
                 init() {
                     this.bindContactoEditButtons();
                     this.bindVisitaActions();
+                    this.bindActividadActions();
 
                     this.$watch('form.resultado', (value) => {
                         if (value === 'sin_interes') {
@@ -762,6 +822,7 @@
                         if (isActividad) {
                             this.currentActRange = range;
                             this.actividadCount = Number(container.querySelector('[data-actividad-count]')?.dataset.actividadCount ?? this.actividadCount);
+                            this.bindActividadActions();
                         } else {
                             this.currentVisRange = range;
                             this.visitasCount = Number(container.querySelector('[data-visitas-count]')?.dataset.visitasCount ?? this.visitasCount);
@@ -775,6 +836,165 @@
                         console.error(error);
                     } finally {
                         this[loadingKey] = false;
+                    }
+                },
+
+
+
+                bindActividadActions() {
+                    if (this.actividadActionsBound) {
+                        return;
+                    }
+
+                    this.actividadActionsBound = true;
+
+                    this.$root.addEventListener('click', (event) => {
+                        if (!this.esAdministracion) {
+                            return;
+                        }
+
+                        const editTrigger = event.target.closest('[data-accion-edit="true"]');
+                        if (editTrigger) {
+                            const empresaAccionId = Number(editTrigger.dataset.empresaAccionId || 0);
+                            const accionId = Number(editTrigger.dataset.accionId || 0);
+                            if (empresaAccionId && accionId) {
+                                this.abrirModalAccion(empresaAccionId, accionId);
+                            }
+                            return;
+                        }
+
+                        const deleteTrigger = event.target.closest('[data-accion-delete="true"]');
+                        if (deleteTrigger) {
+                            const empresaAccionId = Number(deleteTrigger.dataset.empresaAccionId || 0);
+                            if (empresaAccionId) {
+                                this.eliminarAccion(empresaAccionId);
+                            }
+                        }
+                    });
+                },
+
+                abrirModalAccion(empresaAccionId, accionId) {
+                    this.accionModalError = '';
+                    this.accionForm.empresa_accion_id = empresaAccionId;
+                    this.accionForm.accion_id = accionId;
+                    this.showAccionModal = true;
+                },
+
+                cerrarModalAccion() {
+                    this.showAccionModal = false;
+                    this.accionModalSaving = false;
+                    this.accionModalError = '';
+                    this.accionForm.empresa_accion_id = null;
+                    this.accionForm.accion_id = null;
+                },
+
+                buildAccionUrl(template, empresaAccionId) {
+                    return template.replace('__ACCION__', String(empresaAccionId));
+                },
+
+                mostrarAccionSuccess(message) {
+                    this.accionSuccess = message;
+                    setTimeout(() => {
+                        this.accionSuccess = '';
+                    }, 2500);
+                },
+
+                async guardarEdicionAccion() {
+                    if (!this.accionForm.empresa_accion_id || !this.accionForm.accion_id) {
+                        return;
+                    }
+
+                    this.accionModalSaving = true;
+                    this.accionModalError = '';
+
+                    try {
+                        const response = await fetch(this.buildAccionUrl(this.accionUpdateUrlTemplate, this.accionForm.empresa_accion_id), {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ accion_id: this.accionForm.accion_id }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.accionModalError = data.message || 'No se pudo actualizar la acción.';
+                            return;
+                        }
+
+                        const item = document.querySelector(`[data-actividad-item="${this.accionForm.empresa_accion_id}"]`);
+                        if (item) {
+                            item.dataset.accionId = String(data.empresa_accion?.accion_id || this.accionForm.accion_id);
+                            const nameNode = item.querySelector('[data-role="actividad-nombre"]');
+                            if (nameNode && data.accion?.nombre) {
+                                nameNode.textContent = data.accion.nombre;
+                            }
+                            const iconNode = item.querySelector('[data-role="actividad-icon"]');
+                            if (iconNode) {
+                                iconNode.innerHTML = this.iconoSvg(data.accion?.icono || 'circle', data.accion?.color || '');
+                            }
+                            const editButton = item.querySelector('[data-accion-edit="true"]');
+                            if (editButton) {
+                                editButton.dataset.accionId = String(data.empresa_accion?.accion_id || this.accionForm.accion_id);
+                            }
+                        }
+
+                        this.cerrarModalAccion();
+                        this.mostrarAccionSuccess('Acción actualizada');
+                    } catch (error) {
+                        this.accionModalError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.accionModalSaving = false;
+                    }
+                },
+
+                async eliminarAccion(empresaAccionId) {
+                    if (!confirm('¿Eliminar este registro de actividad?')) {
+                        return;
+                    }
+
+                    this.accionesError = '';
+
+                    try {
+                        const response = await fetch(this.buildAccionUrl(this.accionDeleteUrlTemplate, empresaAccionId), {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.accionesError = data.message || 'No se pudo eliminar la acción.';
+                            return;
+                        }
+
+                        const item = document.querySelector(`[data-actividad-item="${empresaAccionId}"]`);
+                        if (item) {
+                            item.remove();
+                        }
+
+                        const listContainer = document.getElementById('actividad-list');
+                        const countNode = listContainer?.querySelector('[data-actividad-count]');
+                        if (countNode) {
+                            const currentCount = Number(countNode.dataset.actividadCount || 0);
+                            const nextCount = Math.max(currentCount - 1, 0);
+                            countNode.dataset.actividadCount = String(nextCount);
+                            this.actividadCount = nextCount;
+
+                            if (nextCount === 0) {
+                                countNode.innerHTML = '<p class="text-sm text-slate-600">Sin actividad aún</p>';
+                            }
+                        }
+
+                        this.mostrarAccionSuccess('Acción eliminada');
+                    } catch (error) {
+                        this.accionesError = 'No fue posible conectar con el servidor.';
                     }
                 },
 
