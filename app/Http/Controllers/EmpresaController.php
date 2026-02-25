@@ -284,32 +284,20 @@ class EmpresaController extends Controller
         $this->authorize('update', $empresa);
 
         $validated = $request->validate([
-            'responsable_user_id' => ['nullable', 'exists:users,id'],
+            'responsable_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         $empresa->responsable_user_id = $validated['responsable_user_id'] ?? null;
-
-        if ($empresa->responsable_user_id !== null && $empresa->referida_at === null) {
-            $empresa->referida_at = now();
-        }
+        $empresa->referida_at = null;
 
         $empresa->save();
-        $empresa->load('responsable');
 
         return response()->json([
             'ok' => true,
-            'empresa' => [
-                'id' => $empresa->id,
-                'responsable_user_id' => $empresa->responsable_user_id,
-                'referida_at' => $empresa->referida_at?->toIso8601String(),
-                'responsable' => $empresa->responsable ? [
-                    'id' => $empresa->responsable->id,
-                    'codigo' => $empresa->responsable->codigo,
-                    'name' => $empresa->responsable->name ?? $empresa->responsable->nombre,
-                    'nombre' => $empresa->responsable->nombre ?? $empresa->responsable->name,
-                    'telefono' => $empresa->responsable->telefono,
-                ] : null,
-            ],
+            'message' => $empresa->responsable_user_id
+                ? 'Usuario vinculado con éxito'
+                : 'Usuario desvinculado correctamente',
+            'empresa' => $empresa->load('responsable'),
         ]);
     }
 
