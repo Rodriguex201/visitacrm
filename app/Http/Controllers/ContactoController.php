@@ -13,6 +13,7 @@ class ContactoController extends Controller
 {
     public function store(Request $request, Empresa $empresa): JsonResponse|RedirectResponse
     {
+        $this->authorize('update', $empresa);
 
         $validated = $this->validateContacto($request);
         $esPrincipal = (bool) ($validated['es_principal'] ?? false);
@@ -38,6 +39,8 @@ class ContactoController extends Controller
 
     public function update(Request $request, Empresa $empresa, Contacto $contacto): JsonResponse|RedirectResponse
     {
+        $this->authorize('update', $empresa);
+
         abort_unless($contacto->empresa_id === $empresa->id, 404);
 
         $validated = $this->validateContacto($request);
