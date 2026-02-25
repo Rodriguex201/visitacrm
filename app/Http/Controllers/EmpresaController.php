@@ -21,6 +21,8 @@ class EmpresaController extends Controller
 {
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Empresa::class);
+
         $request->validate([
             'q' => ['nullable', 'string'],
             'desde' => ['nullable', 'date'],
@@ -38,6 +40,10 @@ class EmpresaController extends Controller
         $empresasQuery = Empresa::query()
             ->with(['sector', 'user', 'responsable'])
             ->latest('id');
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            $empresasQuery->where('responsable_user_id', (int) $request->user()->id);
+        }
 
         if ($q !== '') {
             $empresasQuery->where(function ($query) use ($q) {
@@ -83,6 +89,8 @@ class EmpresaController extends Controller
 
     public function show(Request $request, Empresa $empresa): View
     {
+        $this->authorize('view', $empresa);
+
         $actRange = (string) $request->query('act_range', '7');
         $visRange = (string) $request->query('vis_range', '7');
 
@@ -140,6 +148,8 @@ class EmpresaController extends Controller
 
     public function actividadPartial(Request $request, Empresa $empresa): View
     {
+        $this->authorize('view', $empresa);
+
         $actRange = $this->normalizarRango((string) $request->query('act_range', '7'));
         $actFrom = $this->rangoFecha($actRange);
 
@@ -155,6 +165,8 @@ class EmpresaController extends Controller
 
     public function visitasPartial(Request $request, Empresa $empresa): View
     {
+        $this->authorize('view', $empresa);
+
         $visRange = $this->normalizarRango((string) $request->query('vis_range', '7'));
         $visFrom = $this->rangoFecha($visRange);
 
@@ -192,6 +204,8 @@ class EmpresaController extends Controller
 
     public function guardarOpciones(Request $request, Empresa $empresa): JsonResponse
     {
+        $this->authorize('update', $empresa);
+
         $validated = $request->validate([
             'opciones' => ['nullable', 'array'],
             'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
@@ -267,6 +281,8 @@ class EmpresaController extends Controller
 
     public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse
     {
+        $this->authorize('update', $empresa);
+
         $validated = $request->validate([
             'responsable_user_id' => ['nullable', 'exists:users,id'],
         ]);
@@ -320,6 +336,8 @@ class EmpresaController extends Controller
 
     public function storeAccion(Request $request, Empresa $empresa): JsonResponse
     {
+        $this->authorize('update', $empresa);
+
         $validated = $request->validate([
             'accion_id' => ['required', 'integer', 'exists:acciones,id'],
             'nota' => ['nullable', 'string'],
@@ -376,6 +394,9 @@ class EmpresaController extends Controller
                 $q->where('nombre', 'like', "%{$query}%")
                     ->orWhere('ciudad', 'like', "%{$query}%");
             })
+            ->when(($request->user()?->tipo_usuario ?? null) !== 'administracion', function ($q) use ($request) {
+                $q->where('responsable_user_id', (int) $request->user()->id);
+            })
             ->orderBy('nombre')
             ->limit(15)
             ->get();
@@ -405,6 +426,8 @@ class EmpresaController extends Controller
 
     public function update(Request $request, Empresa $empresa): RedirectResponse
     {
+        $this->authorize('update', $empresa);
+
         $data = $this->validateEmpresa($request);
 
         $empresa->update($data);

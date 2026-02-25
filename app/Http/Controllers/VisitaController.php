@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Empresa;
 use App\Models\Visita;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +20,9 @@ class VisitaController extends Controller
             'notas' => ['nullable', 'string'],
         ]);
 
+        $empresa = Empresa::query()->findOrFail((int) $data['empresa_id']);
+        $this->authorize('update', $empresa);
+
         $data['user_id'] = auth()->id();
 
         Visita::query()->create($data);
@@ -28,11 +32,8 @@ class VisitaController extends Controller
 
     public function updateResultado(Request $request, Visita $visita): JsonResponse
     {
-        $user = $request->user();
-
-        if ((int) $visita->user_id !== (int) $user->id && $user->tipo_usuario !== 'administracion') {
-            abort(403, 'No tienes permisos para actualizar esta visita.');
-        }
+        $visita->loadMissing('empresa');
+        $this->authorize('update', $visita->empresa);
 
         if ($visita->fecha_hora?->isFuture()) {
             return response()->json([
