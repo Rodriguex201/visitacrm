@@ -265,6 +265,34 @@ class EmpresaController extends Controller
         ]);
     }
 
+    public function actualizarCotizacion(Request $request, Empresa $empresa): JsonResponse
+    {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'cotizacion_enviada' => ['required', 'boolean'],
+        ]);
+
+        $cotizacionEnviada = (bool) $validated['cotizacion_enviada'];
+
+        $empresa->cotizacion_enviada = $cotizacionEnviada;
+        $empresa->cotizacion_enviada_at = $cotizacionEnviada ? now() : null;
+        $empresa->save();
+
+        return response()->json([
+            'ok' => true,
+            'message' => $cotizacionEnviada
+                ? 'Cotización marcada como enviada.'
+                : 'Cotización marcada como no enviada.',
+            'empresa' => [
+                'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
+                'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),
+            ],
+        ]);
+    }
+
     public function storeCatalogoOpcion(Request $request): JsonResponse
     {
         $validated = $request->validate([

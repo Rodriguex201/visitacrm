@@ -28,6 +28,8 @@ class Empresa extends Model
 
     protected $casts = [
         'referida_at' => 'datetime',
+        'cotizacion_enviada' => 'boolean',
+        'cotizacion_enviada_at' => 'datetime',
     ];
 
     public function sector(): BelongsTo
