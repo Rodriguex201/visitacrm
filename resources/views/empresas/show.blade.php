@@ -447,13 +447,13 @@
                     </div>
 
                     <div class="mb-4 flex flex-wrap gap-2 border-b border-slate-100 pb-3">
-                        <template x-for="categoria in categoriasOpciones" :key="`tab-${categoria}`">
+                        <template x-for="tab in modalTabs" :key="`tab-${tab}`">
                             <button
                                 type="button"
                                 class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
-                                :class="activeTab === categoria ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                @click="activeTab = categoria"
-                                x-text="categoria"
+                                :class="activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                @click="activeTab = tab"
+                                x-text="tab"
                             ></button>
                         </template>
                     </div>
@@ -462,57 +462,79 @@
                         <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
                     </template>
 
-                    <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
+                    <template x-if="activeTab !== 'Cotizaciones'">
+                        <div>
+                            <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
+                                <template x-for="chip in draftOptionChips().slice(0, 8)" :key="`draft-${chip.id}`">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
+                                        <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
+                                        <span class="text-xs" x-text="chip.nombre"></span>
+                                    </span>
+                                </template>
 
-                        <template x-for="chip in draftOptionChips().slice(0, 8)" :key="`draft-${chip.id}`">
-                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
-                                <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
-                                <span class="text-xs" x-text="chip.nombre"></span>
-                            </span>
-                        </template>
+                                <template x-if="draftOptionChips().length > 8">
+                                    <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700" x-text="`+${draftOptionChips().length - 8}`"></span>
+                                </template>
 
-                        <template x-if="draftOptionChips().length > 8">
-                            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700" x-text="`+${draftOptionChips().length - 8}`"></span>
-                        </template>
+                                <template x-if="draftOptionChips().length === 0">
+                                    <span class="text-xs text-slate-500">Sin selección en borrador</span>
+                                </template>
+                            </div>
 
-                        <template x-if="draftOptionChips().length === 0">
-
-                            <span class="text-xs text-slate-500">Sin selección en borrador</span>
-                        </template>
-                    </div>
-
-                    <div class="max-h-[55vh] overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/40 p-4">
-                        <div class="mb-3 flex items-center justify-between gap-2">
-                            <h4 class="text-sm font-semibold text-slate-900" x-text="activeTab"></h4>
-                            <button
-                                type="button"
-                                class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
-                                title="Agregar opción"
-                                @click="abrirModalOpcion(activeTab)"
-                            >
-                                +
-                            </button>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <template x-for="opcion in opcionesPorCategoria[activeTab] || []" :key="`tab-option-${opcion.id}`">
-                                <label class="flex items-center gap-2 text-sm text-slate-700">
-                                    <input
-                                        type="checkbox"
-                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                        :value="opcion.id"
-                                        :checked="isOpcionSeleccionada(opcion.id)"
-                                        @change="toggleOpcion(opcion.id)"
+                            <div class="max-h-[55vh] overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/40 p-4">
+                                <div class="mb-3 flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-semibold text-slate-900" x-text="activeTab"></h4>
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100"
+                                        title="Agregar opción"
+                                        @click="abrirModalOpcion(activeTab)"
                                     >
-                                    <span x-text="opcion.nombre"></span>
-                                </label>
-                            </template>
+                                        +
+                                    </button>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <template x-for="opcion in opcionesPorCategoria[activeTab] || []" :key="`tab-option-${opcion.id}`">
+                                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                                            <input
+                                                type="checkbox"
+                                                class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                :value="opcion.id"
+                                                :checked="isOpcionSeleccionada(opcion.id)"
+                                                @change="toggleOpcion(opcion.id)"
+                                            >
+                                            <span x-text="opcion.nombre"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </template>
+
+                    <template x-if="activeTab === 'Cotizaciones'">
+                        <div class="rounded-lg border border-slate-100 bg-slate-50/40 p-4">
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                    :checked="cotizacionEnviada"
+                                    :disabled="cotizacionSaving"
+                                    @change="guardarCotizacion($event.target.checked)"
+                                >
+                                <span>Enviada</span>
+                            </label>
+
+                            <p class="mt-2 text-xs text-slate-600" x-show="cotizacionEnviada && cotizacionEnviadaAtFormateada()">
+                                Enviada el: <span class="font-semibold" x-text="cotizacionEnviadaAtFormateada()"></span>
+                            </p>
+                        </div>
+                    </template>
 
                     <div class="mt-4 flex justify-end gap-2">
                         <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarPerfilComercialModal()">Cerrar</button>
                         <button
+                            x-show="activeTab !== 'Cotizaciones'"
                             type="button"
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
                             :disabled="opcionesSaving"
@@ -607,12 +629,17 @@
                 usuarioLoading: false,
                 usuarioSaving: false,
                 categoriasOpciones: @js($categoriasOpciones),
+                modalTabs: [...@js($categoriasOpciones), 'Cotizaciones'],
                 opcionesPorCategoria: @js($catalogoOpcionesPayload),
 
                 savedSelectedIds: @js($opcionesSeleccionadas),
                 draftSelectedIds: [],
                 modalOpen: false,
                 activeTab: "Estado Actual",
+
+                cotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
+                cotizacionEnviadaAt: @js(optional($empresa->cotizacion_enviada_at)->toIso8601String()),
+                cotizacionSaving: false,
 
                 opcionesSaving: false,
                 opcionesMensaje: '',
@@ -989,7 +1016,7 @@
                 },
 
                 abrirPerfilComercialModal() {
-                    this.activeTab = this.categoriasOpciones[0] || 'Estado Actual';
+                    this.activeTab = this.modalTabs[0] || 'Estado Actual';
                     this.opcionesMensaje = '';
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.modalOpen = true;
@@ -1107,6 +1134,62 @@
                         this.newOptionError = 'No fue posible conectar con el servidor.';
                     } finally {
                         this.newOptionSaving = false;
+                    }
+                },
+                cotizacionEnviadaAtFormateada() {
+                    if (!this.cotizacionEnviadaAt) {
+                        return '';
+                    }
+
+                    const fecha = new Date(this.cotizacionEnviadaAt);
+                    if (Number.isNaN(fecha.getTime())) {
+                        return '';
+                    }
+
+                    const formato = new Intl.DateTimeFormat('es-CO', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                    });
+
+                    return formato.format(fecha).replace(',', '');
+                },
+                async guardarCotizacion(cotizacionEnviada) {
+                    if (this.cotizacionSaving) {
+                        return;
+                    }
+
+                    this.cotizacionSaving = true;
+                    this.opcionesMensaje = '';
+
+                    try {
+                        const response = await fetch(`{{ route('empresas.cotizacion', $empresa) }}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ cotizacion_enviada: cotizacionEnviada }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.opcionesMensaje = data.message || 'No se pudo actualizar la cotización.';
+                            return;
+                        }
+
+                        this.cotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
+                        this.cotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
+                        this.opcionesMensaje = data.message || 'Cotización actualizada correctamente.';
+                    } catch (error) {
+                        this.opcionesMensaje = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.cotizacionSaving = false;
                     }
                 },
                 async guardarOpcionesEmpresa() {
