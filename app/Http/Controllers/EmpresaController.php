@@ -294,9 +294,11 @@ class EmpresaController extends Controller
 
         return response()->json([
             'ok' => true,
+
             'message' => $empresa->responsable_user_id
                 ? 'Usuario vinculado con éxito'
                 : 'Usuario desvinculado correctamente',
+
             'empresa' => $empresa->load('responsable'),
         ]);
     }
