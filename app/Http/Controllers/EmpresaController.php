@@ -37,11 +37,13 @@ class EmpresaController extends Controller
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
         $usaRangoPersonalizado = $desde !== null || $hasta !== null;
 
+        $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
+
         $empresasQuery = Empresa::query()
-            ->with(['sector', 'user', 'responsable'])
+            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
             ->latest('id');
 
-        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+        if (! $esAdministracion) {
 
             $userId = (int) $request->user()->id;
 
@@ -471,8 +473,11 @@ class EmpresaController extends Controller
      */
     private function validateEmpresa(Request $request): array
     {
+        $esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion';
+
         $validated = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
+            'contacto_nombre' => $esAdministracion ? ['nullable', 'string', 'max:255'] : ['required', 'string', 'max:255'],
             'nit' => ['nullable', 'string', 'max:255'],
             'ciudad' => ['required', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
@@ -487,7 +492,7 @@ class EmpresaController extends Controller
 
         unset($validated['modal_mode'], $validated['empresa_id']);
 
-        if ((auth()->user()?->tipo_usuario ?? null) !== 'administracion') {
+        if (! $esAdministracion) {
             unset($validated['responsable_user_id']);
         }
 
