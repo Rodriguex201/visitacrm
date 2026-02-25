@@ -37,11 +37,13 @@ class EmpresaController extends Controller
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
         $usaRangoPersonalizado = $desde !== null || $hasta !== null;
 
+        $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
+
         $empresasQuery = Empresa::query()
-            ->with(['sector', 'user', 'responsable'])
+            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
             ->latest('id');
 
-        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+        if (! $esAdministracion) {
 
             $userId = (int) $request->user()->id;
 
