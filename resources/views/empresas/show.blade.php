@@ -140,7 +140,7 @@
         <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Acciones</h2>
-                <a href="{{ route('acciones.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
+                <a href="{{ route('acciones.manage') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 @forelse($accionesCatalogo as $accion)
@@ -152,7 +152,7 @@
                         title="{{ $accion->nombre }}"
                     >
                         <span class="sr-only">{{ $accion->nombre }}</span>
-                        <span aria-hidden="true" x-html="iconoSvg('{{ $accion->icono }}', '{{ $accion->color ?: '' }}')"></span>
+                        <span aria-hidden="true"><x-lucide-icon :name="$accion->icono" :color="$accion->color ?: null" /></span>
                         <span class="pointer-events-none absolute -top-9 left-1/2 hidden -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-sm group-hover:block">{{ $accion->nombre }}</span>
                     </button>
                 @empty

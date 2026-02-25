@@ -31,13 +31,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/empresas/{empresa}/acciones/{empresaAccion}', [EmpresaController::class, 'eliminarEmpresaAccion'])->name('empresas.acciones.destroy');
     Route::get('/empresas/{empresa}/actividad/partial', [EmpresaController::class, 'actividadPartial'])->name('empresas.actividad.partial');
     Route::get('/empresas/{empresa}/visitas/partial', [EmpresaController::class, 'visitasPartial'])->name('empresas.visitas.partial');
-    Route::get('/acciones', [AccionesController::class, 'index'])->name('acciones.index');
-    Route::patch('/acciones/{accion}', [AccionesController::class, 'update'])->name('acciones.update');
-
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
     Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
+        Route::patch('/acciones/{accion}', [AccionesController::class, 'update'])->name('acciones.update');
+        Route::delete('/acciones/{accion}', [AccionesController::class, 'destroy'])->name('acciones.destroy');
+
         Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
         Route::get('/usuarios/{user}/referidos', [UsuarioController::class, 'referidos'])->name('usuarios.referidos');
         Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
