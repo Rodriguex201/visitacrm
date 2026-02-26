@@ -15,13 +15,26 @@ use Illuminate\View\View;
 
 class UsuarioController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $usuarios = User::query()
+        $q = trim((string) $request->query('q', ''));
+
+        $usuariosQuery = User::query()
             ->with('banco')
             ->withCount('empresasReferidas')
-            ->orderByDesc('created_at')
-            ->paginate(10);
+            ->orderByDesc('created_at');
+
+        if ($q !== '') {
+            $usuariosQuery->where(function ($query) use ($q): void {
+                $query->where('name', 'like', "%{$q}%")
+                    ->orWhere('codigo', 'like', "%{$q}%")
+                    ->orWhere('ciudad', 'like', "%{$q}%");
+            });
+        }
+
+        $usuarios = $usuariosQuery
+            ->paginate(10)
+            ->withQueryString();
 
         $bancos = Banco::query()
             ->where('activo', 1)
