@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class VisitaController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'empresa_id' => ['required', 'exists:empresas,id'],
@@ -25,7 +25,17 @@ class VisitaController extends Controller
 
         $data['user_id'] = auth()->id();
 
-        Visita::query()->create($data);
+        $visita = Visita::query()->create($data);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Visita guardada correctamente.',
+                'visita' => [
+                    'id' => $visita->id,
+                    'empresa_id' => $visita->empresa_id,
+                ],
+            ]);
+        }
 
         return back()->with('status', 'Visita guardada correctamente.');
     }
