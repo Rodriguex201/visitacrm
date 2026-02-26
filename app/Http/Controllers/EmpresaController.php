@@ -237,6 +237,7 @@ class EmpresaController extends Controller
         $validated = $request->validate([
             'opciones' => ['nullable', 'array'],
             'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
+            'cotizacion_enviada' => ['nullable', 'boolean'],
         ]);
 
         $opciones = collect($validated['opciones'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
@@ -258,10 +259,26 @@ class EmpresaController extends Controller
 
         $empresa->opciones()->sync($opciones->all());
 
+        if (array_key_exists('cotizacion_enviada', $validated) && ($request->user()?->tipo_usuario ?? null) === 'administracion') {
+            $cotizacionEnviadaNueva = (bool) $validated['cotizacion_enviada'];
+            $cotizacionEnviadaActual = (bool) $empresa->cotizacion_enviada;
+
+            if ($cotizacionEnviadaNueva !== $cotizacionEnviadaActual) {
+                $empresa->cotizacion_enviada_at = $cotizacionEnviadaNueva ? now() : null;
+            }
+
+            $empresa->cotizacion_enviada = $cotizacionEnviadaNueva;
+            $empresa->save();
+        }
+
         return response()->json([
             'ok' => true,
             'message' => 'Opciones guardadas correctamente.',
             'opciones' => $opciones,
+            'empresa' => [
+                'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
+                'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),
+            ],
         ]);
     }
 
