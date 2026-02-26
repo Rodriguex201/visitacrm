@@ -27,8 +27,8 @@
             <div
                 class="rounded-xl border border-slate-100 p-4"
                 x-data="accionEditor({
-                    icono: @js($accion->icono),
 
+                    icono: @js(old('icono', $accion->icono)),
                     color: @js($accion->color ?: '#2563EB'),
 
                     iconos: @js($iconosPermitidos),
@@ -48,9 +48,11 @@
                             <div class="md:col-span-2">
                                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Icono</label>
                                 <select name="icono" x-model="icono" required class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <template x-for="item in iconos" :key="item">
-                                        <option :value="item" x-text="item"></option>
-                                    </template>
+
+                                    @foreach ($iconosPermitidos as $icono)
+                                        <option value="{{ $icono }}" @selected(old('icono', $accion->icono) === $icono)>{{ $icono }}</option>
+                                    @endforeach
+
                                 </select>
                             </div>
 
