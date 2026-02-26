@@ -847,15 +847,16 @@
 
                     this.actividadActionsBound = true;
 
-                    this.$root.addEventListener('click', (event) => {
+                    document.addEventListener('click', (event) => {
                         if (!this.esAdministracion) {
                             return;
                         }
 
-                        const editTrigger = event.target.closest('[data-accion-edit="true"]');
+                        const editTrigger = event.target.closest('[data-edit-actividad="1"], [data-accion-edit="true"]');
                         if (editTrigger) {
-                            const empresaAccionId = Number(editTrigger.dataset.empresaAccionId || 0);
+                            const empresaAccionId = Number(editTrigger.dataset.actividadId || editTrigger.dataset.empresaAccionId || 0);
                             const accionId = Number(editTrigger.dataset.accionId || 0);
+
                             if (empresaAccionId && accionId) {
                                 this.abrirModalAccion(empresaAccionId, accionId);
                             }
