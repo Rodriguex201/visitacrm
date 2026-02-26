@@ -165,6 +165,34 @@
             </div>
         @endif
 
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <form method="GET" action="{{ route('usuarios.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label for="q" class="sr-only">Buscar</label>
+                <input
+                    id="q"
+                    name="q"
+                    type="text"
+                    value="{{ request('q') }}"
+                    placeholder="Buscar por nombre, código o ciudad…"
+                    class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                <div class="flex items-center gap-2">
+                    <button
+                        type="submit"
+                        class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    >
+                        Buscar
+                    </button>
+                    <a
+                        href="{{ route('usuarios.index') }}"
+                        class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    >
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
         <div class="rounded-xl bg-white shadow-sm">
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[1200px] text-left text-sm text-slate-700">
