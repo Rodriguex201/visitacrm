@@ -44,7 +44,48 @@ class AccionesController extends Controller
         return view('acciones.manage', [
             'acciones' => $acciones,
             'iconosPermitidos' => self::ICONOS_PERMITIDOS,
+            'nextOrden' => ((int) (Accion::query()->max('orden') ?? 0)) + 1,
+            'defaultIcono' => self::ICONOS_PERMITIDOS[0] ?? 'phone',
         ]);
+    }
+
+    public function store(Request $request): JsonResponse|RedirectResponse
+    {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'icono' => ['required', 'string', 'max:50', Rule::in(self::ICONOS_PERMITIDOS)],
+            'color' => ['required', 'regex:/^#(?:[0-9a-fA-F]{6})$/'],
+            'orden' => ['nullable', 'integer', 'min:1'],
+            'activo' => ['nullable', 'boolean'],
+        ]);
+
+        $orden = isset($validated['orden']) && $validated['orden'] !== null
+            ? (int) $validated['orden']
+            : ((int) (Accion::query()->max('orden') ?? 0)) + 1;
+
+        $accion = Accion::query()->create([
+            'nombre' => $validated['nombre'],
+            'icono' => $validated['icono'],
+            'color' => $validated['color'],
+            'orden' => $orden,
+            'activo' => (bool) ($validated['activo'] ?? false),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Acción creada.',
+                'accion' => $accion,
+            ], 201);
+        }
+
+        return redirect()
+            ->route('acciones.manage')
+            ->with('status', 'Acción creada.');
     }
 
     public function update(Request $request, Accion $accion): JsonResponse|RedirectResponse

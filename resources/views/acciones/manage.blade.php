@@ -1,13 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="space-y-4 pb-24">
+<section class="space-y-4 pb-24" x-data="{ showCreateAccion: {{ $errors->any() ? 'true' : 'false' }} }">
     <header class="flex items-center justify-between gap-3">
         <div>
             <h1 class="text-2xl font-bold text-slate-950">Gestionar Acciones</h1>
             <p class="text-sm text-slate-500">Edita nombre, icono, color, estado y orden del catálogo.</p>
         </div>
-        <a href="{{ url()->previous() }}" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">Volver</a>
+        <div class="flex items-center gap-2">
+            <button type="button" @click="showCreateAccion = !showCreateAccion" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">+ Agregar acción</button>
+            <a href="{{ url()->previous() }}" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">Volver</a>
+        </div>
     </header>
 
     @if (session('status'))
@@ -21,6 +24,64 @@
             {{ $errors->first() }}
         </div>
     @endif
+
+    <article x-cloak x-show="showCreateAccion" x-transition class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="accionEditor({
+        icono: @js(old('icono', $defaultIcono)),
+        color: @js(old('color', '#000000')),
+        iconos: @js($iconosPermitidos),
+    })">
+        <div class="mb-3 flex items-center justify-between gap-2">
+            <h2 class="text-base font-semibold text-slate-900">Nueva acción</h2>
+        </div>
+
+        <form method="POST" action="{{ route('acciones.store') }}" class="grid gap-3 md:grid-cols-6">
+            @csrf
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
+                <input type="text" name="nombre" value="{{ old('nombre') }}" required maxlength="255" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Icono</label>
+                <select name="icono" x-model="icono" required class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    @foreach ($iconosPermitidos as $icono)
+                        <option value="{{ $icono }}" @selected(old('icono', $defaultIcono) === $icono)>{{ $icono }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="md:col-span-1">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Color</label>
+                <div class="flex items-center gap-2">
+                    <input type="color" name="color" x-model="color" value="{{ old('color', '#000000') }}" class="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-white p-1">
+                    <input type="text" x-model="color" readonly class="h-10 w-24 rounded-lg border-slate-300 bg-slate-50 px-2 text-xs text-slate-600">
+                </div>
+            </div>
+
+            <div class="md:col-span-1">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Orden</label>
+                <input type="number" min="1" name="orden" value="{{ old('orden', $nextOrden) }}" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div class="md:col-span-3 flex items-center gap-3">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input type="hidden" name="activo" value="0">
+                    <input type="checkbox" name="activo" value="1" @checked(old('activo', 1)) class="rounded border-slate-300 text-blue-600">
+                    Activo
+                </label>
+            </div>
+
+            <div class="md:col-span-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-700" x-html="iconoSvg(icono, color)"></span>
+                <span class="text-xs font-medium">Preview</span>
+            </div>
+
+            <div class="md:col-span-1 flex justify-end">
+                <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">Guardar</button>
+            </div>
+        </form>
+    </article>
 
     <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
         @foreach($acciones as $accion)

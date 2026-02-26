@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
+        Route::post('/acciones', [AccionesController::class, 'store'])->name('acciones.store');
         Route::patch('/acciones/{accion}', [AccionesController::class, 'update'])->name('acciones.update');
         Route::delete('/acciones/{accion}', [AccionesController::class, 'destroy'])->name('acciones.destroy');
 
