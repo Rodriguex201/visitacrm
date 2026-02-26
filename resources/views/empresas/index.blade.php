@@ -253,6 +253,7 @@
             @endif
         </p>
 
+
         <div class="overflow-x-auto pb-24">
             <div class="min-w-[1480px] space-y-3">
                 @forelse ($empresas as $empresa)
@@ -290,6 +291,7 @@
                                     <span class="truncate text-sm text-slate-700">Referido por: {{ $empresa->user?->codigo ?: 'S/C' }}</span>
                                 @else
                                     <span class="truncate text-sm text-slate-700">{{ $empresa->user?->codigo ?: 'S/C' }}</span>
+
                                 @endif
                             </div>
 
@@ -297,6 +299,7 @@
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Empresa</span>
                                 <span class="truncate text-sm font-semibold text-slate-900">{{ $empresa->nombre }}</span>
                             </div>
+
 
                             <div class="flex w-[150px] shrink-0 flex-col">
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Teléfono</span>
@@ -335,6 +338,7 @@
                     </article>
                 @endforelse
             </div>
+
         </div>
 
         <div>
