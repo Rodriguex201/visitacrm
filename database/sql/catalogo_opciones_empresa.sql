@@ -1,4 +1,4 @@
--- Crear catálogo de opciones para perfil comercial por empresa
+-- Crear catálogo de opciones para gestion inicial por empresa
 CREATE TABLE IF NOT EXISTS catalogo_opciones (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     categoria VARCHAR(120) NOT NULL,

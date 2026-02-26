@@ -78,7 +78,7 @@
             <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-950">Perfil comercial</h2>
+                        <h2 class="text-lg font-semibold text-slate-950">Gestion Inicial</h2>
                         <p class="text-xs text-slate-500">Selección múltiple</p>
                     </div>
 
@@ -440,7 +440,7 @@
 
                 <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white p-5 shadow-xl">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h3 id="modal-title-perfil-comercial" class="text-lg font-semibold text-slate-900">Perfil comercial</h3>
+                        <h3 id="modal-title-perfil-comercial" class="text-lg font-semibold text-slate-900">Gestion Inicial</h3>
                         <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="cerrarPerfilComercialModal()" aria-label="Cerrar modal">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
