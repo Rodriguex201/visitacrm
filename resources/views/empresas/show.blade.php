@@ -64,6 +64,15 @@
                         {{ $empresa->ciudad }}
                     </p>
                 </div>
+
+                <div class="mt-4 border-t border-slate-100 pt-4">
+                    <h3 class="text-sm font-semibold text-slate-700">Notas</h3>
+                    @if ($empresa->notas)
+                        <p class="mt-2 text-sm text-slate-600 whitespace-pre-line">{{ $empresa->notas }}</p>
+                    @else
+                        <p class="mt-2 text-sm text-slate-400 italic">Sin notas</p>
+                    @endif
+                </div>
             </article>
 
             <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -164,16 +173,6 @@
             <p x-show="accionesError" class="text-sm text-rose-600" x-text="accionesError"></p>
             <p x-show="accionSuccess" x-transition.opacity class="text-sm text-emerald-600" x-text="accionSuccess"></p>
         </article>
-
-        <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-950">Notas</h2>
-            @if ($empresa->notas)
-                <p class="text-sm text-slate-600 whitespace-pre-line">{{ $empresa->notas }}</p>
-            @else
-                <p class="text-sm text-slate-500">Sin notas</p>
-            @endif
-        </article>
-
 
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
