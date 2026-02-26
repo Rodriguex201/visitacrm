@@ -40,7 +40,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
+            ->with(['sector', 'user'])
             ->latest('id');
 
         if (! $esAdministracion) {
@@ -591,7 +591,7 @@ class EmpresaController extends Controller
 
         $validated = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
-            'contacto_nombre' => $esAdministracion ? ['nullable', 'string', 'max:255'] : ['required', 'string', 'max:255'],
+            'contacto_nombre' => ['required', 'string', 'max:255'],
             'nit' => ['nullable', 'string', 'max:255'],
             'ciudad' => ['required', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
