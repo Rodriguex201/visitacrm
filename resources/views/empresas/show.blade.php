@@ -520,15 +520,14 @@
                                 <input
                                     type="checkbox"
                                     class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                    :checked="cotizacionEnviada"
-                                    :disabled="cotizacionSaving"
-                                    @change="guardarCotizacion($event.target.checked)"
+                                    x-model="draftCotizacionEnviada"
+                                    :disabled="opcionesSaving"
                                 >
                                 <span>Enviada</span>
                             </label>
 
-                            <p class="mt-2 text-xs text-slate-600" x-show="cotizacionEnviada && cotizacionEnviadaAtFormateada()">
-                                Enviada el: <span class="font-semibold" x-text="cotizacionEnviadaAtFormateada()"></span>
+                            <p class="mt-2 text-xs text-slate-600" x-show="savedCotizacionEnviada && cotizacionEnviadaAtFormateada(savedCotizacionEnviadaAt)">
+                                Enviada el: <span class="font-semibold" x-text="cotizacionEnviadaAtFormateada(savedCotizacionEnviadaAt)"></span>
                             </p>
                         </div>
                     </template>
@@ -536,7 +535,6 @@
                     <div class="mt-4 flex justify-end gap-2">
                         <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cerrarPerfilComercialModal()">Cerrar</button>
                         <button
-                            x-show="activeTab !== 'Cotizaciones'"
                             type="button"
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
                             :disabled="opcionesSaving"
@@ -684,9 +682,9 @@
                 modalOpen: false,
                 activeTab: "Estado Actual",
 
-                cotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
-                cotizacionEnviadaAt: @js(optional($empresa->cotizacion_enviada_at)->toIso8601String()),
-                cotizacionSaving: false,
+                savedCotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
+                savedCotizacionEnviadaAt: @js(optional($empresa->cotizacion_enviada_at)->toIso8601String()),
+                draftCotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
 
                 opcionesSaving: false,
                 opcionesMensaje: '',
@@ -1240,10 +1238,12 @@
                     this.activeTab = this.modalTabs[0] || 'Estado Actual';
                     this.opcionesMensaje = '';
                     this.draftSelectedIds = [...this.savedSelectedIds];
+                    this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.modalOpen = true;
                 },
                 cerrarPerfilComercialModal() {
                     this.draftSelectedIds = [...this.savedSelectedIds];
+                    this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.modalOpen = false;
                 },
 
@@ -1357,12 +1357,12 @@
                         this.newOptionSaving = false;
                     }
                 },
-                cotizacionEnviadaAtFormateada() {
-                    if (!this.cotizacionEnviadaAt) {
+                cotizacionEnviadaAtFormateada(valor = null) {
+                    if (!valor) {
                         return '';
                     }
 
-                    const fecha = new Date(this.cotizacionEnviadaAt);
+                    const fecha = new Date(valor);
                     if (Number.isNaN(fecha.getTime())) {
                         return '';
                     }
@@ -1378,41 +1378,6 @@
 
                     return formato.format(fecha).replace(',', '');
                 },
-                async guardarCotizacion(cotizacionEnviada) {
-                    if (this.cotizacionSaving) {
-                        return;
-                    }
-
-                    this.cotizacionSaving = true;
-                    this.opcionesMensaje = '';
-
-                    try {
-                        const response = await fetch(`{{ route('empresas.cotizacion', $empresa) }}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                Accept: 'application/json',
-                            },
-                            body: JSON.stringify({ cotizacion_enviada: cotizacionEnviada }),
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            this.opcionesMensaje = data.message || 'No se pudo actualizar la cotización.';
-                            return;
-                        }
-
-                        this.cotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
-                        this.cotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
-                        this.opcionesMensaje = data.message || 'Cotización actualizada correctamente.';
-                    } catch (error) {
-                        this.opcionesMensaje = 'No fue posible conectar con el servidor.';
-                    } finally {
-                        this.cotizacionSaving = false;
-                    }
-                },
                 async guardarOpcionesEmpresa() {
                     this.opcionesSaving = true;
                     this.opcionesMensaje = '';
@@ -1426,7 +1391,10 @@
                                 Accept: 'application/json',
                             },
 
-                            body: JSON.stringify({ opciones: this.draftSelectedIds }),
+                            body: JSON.stringify({
+                                opciones: this.draftSelectedIds,
+                                cotizacion_enviada: this.draftCotizacionEnviada ? 1 : 0,
+                            }),
 
                         });
 
@@ -1439,6 +1407,9 @@
 
                         this.savedSelectedIds = (data.opciones || []).map((id) => Number(id));
                         this.draftSelectedIds = [...this.savedSelectedIds];
+                        this.savedCotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
+                        this.savedCotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
+                        this.draftCotizacionEnviada = this.savedCotizacionEnviada;
 
                         this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
                         this.modalOpen = false;
