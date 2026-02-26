@@ -40,7 +40,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
+            ->with(['sector', 'creador', 'responsable'])
             ->latest('id');
 
         if (! $esAdministracion) {
@@ -130,7 +130,7 @@ class EmpresaController extends Controller
         $visFrom = $this->rangoFecha($visRange);
 
 
-        $empresa->load(['sector', 'user', 'responsable', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
+        $empresa->load(['sector', 'creador', 'responsable', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
 
         $visitas = Visita::query()
             ->where('empresa_id', $empresa->id)
@@ -541,6 +541,7 @@ class EmpresaController extends Controller
         $data = $this->validateEmpresa($request);
 
         $authUser = auth()->user();
+        $data['user_id'] = auth()->id();
 
         if ($authUser && $authUser->tipo_usuario !== 'administracion') {
             $data['responsable_user_id'] = $authUser->id;
@@ -591,7 +592,7 @@ class EmpresaController extends Controller
 
         $validated = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
-            'contacto_nombre' => $esAdministracion ? ['nullable', 'string', 'max:255'] : ['required', 'string', 'max:255'],
+            'contacto_nombre' => ['required', 'string', 'max:255'],
             'nit' => ['nullable', 'string', 'max:255'],
             'ciudad' => ['required', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
