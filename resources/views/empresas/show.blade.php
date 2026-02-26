@@ -19,7 +19,11 @@
                 </div>
             </div>
 
-            <button type="button" class="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+            <button
+                type="button"
+                @click="openNuevaVisitaModal({ empresa_id: {{ (int) $empresa->id }}, empresa_label: @js($empresa->nombre), lock_empresa: true })"
+                class="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
                 <span class="text-base leading-none">+</span>
                 Nueva Visita
             </button>
@@ -635,6 +639,7 @@
                     </form>
                 </div>
             </div>
+        @include('visitas.partials.nueva_visita_modal')
     </section>
 
 
@@ -652,6 +657,11 @@
     <script>
         function historialVisitas() {
             return {
+                ...createNuevaVisitaModalState({
+                    onSuccess: async () => {
+                        await this.aplicarFiltro('visitas', this.currentVisRange);
+                    },
+                }),
                 showModal: false,
                 showContactoModal: false,
                 showUsuarioModal: false,
@@ -731,6 +741,7 @@
                     es_principal: false,
                 },
                 init() {
+                    this.initNuevaVisitaModal();
                     this.bindContactoEditButtons();
                     this.bindVisitaActions();
                     this.bindActividadActions();
