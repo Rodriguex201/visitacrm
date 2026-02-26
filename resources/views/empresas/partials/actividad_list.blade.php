@@ -47,8 +47,11 @@
                                 type="button"
                                 class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                                 data-accion-edit="true"
+                                data-edit-actividad="1"
                                 data-empresa-accion-id="{{ (int) $item->id }}"
+                                data-actividad-id="{{ (int) $item->id }}"
                                 data-accion-id="{{ (int) $item->accion_id }}"
+                                data-nombre="{{ $item->accion?->nombre ?? 'Acción' }}"
                                 title="Editar acción"
                             >
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
