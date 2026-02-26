@@ -9,7 +9,13 @@
             openEdit: {{ old('modal_mode') === 'edit' ? 'true' : 'false' }},
             editId: {{ old('empresa_id') ? (int) old('empresa_id') : 'null' }},
             updateRouteTemplate: @js(route('empresas.update', ['empresa' => '__ID__'])),
+            showRouteTemplate: @js(route('empresas.show', ['empresa' => '__ID__'])),
+            destroyRouteTemplate: @js(route('empresas.destroy', ['empresa' => '__ID__'])),
             formAction: '{{ old('modal_mode') === 'edit' && old('empresa_id') ? route('empresas.update', ['empresa' => old('empresa_id')]) : route('empresas.store') }}',
+            contextMenuOpen: false,
+            contextMenuX: 0,
+            contextMenuY: 0,
+            contextMenuEmpresa: null,
             form: {
                 nombre: @js(old('nombre', '')),
                 // nit: @js(old('nit', '')),
@@ -89,6 +95,43 @@
                 this.notesModalCompanyName = ''
                 this.notesModalContent = ''
             },
+            openContextMenu(event, empresa) {
+                const menuWidth = 224
+                const menuHeight = 220
+                const padding = 12
+
+                this.contextMenuEmpresa = empresa
+                this.contextMenuX = Math.min(event.clientX, window.innerWidth - menuWidth - padding)
+                this.contextMenuY = Math.min(event.clientY, window.innerHeight - menuHeight - padding)
+                this.contextMenuOpen = true
+            },
+            closeContextMenu() {
+                this.contextMenuOpen = false
+                this.contextMenuEmpresa = null
+            },
+            openEditFromMenu() {
+                if (!this.contextMenuEmpresa) {
+                    return
+                }
+
+                this.openEditModal(this.contextMenuEmpresa)
+                this.closeContextMenu()
+            },
+            openNotesFromMenu() {
+                if (!this.contextMenuEmpresa) {
+                    return
+                }
+
+                this.openNotesModal(this.contextMenuEmpresa)
+                this.closeContextMenu()
+            },
+            openShowFromMenu() {
+                if (!this.contextMenuEmpresa) {
+                    return
+                }
+
+                window.location.href = this.showRouteTemplate.replace('__ID__', this.contextMenuEmpresa.id)
+            },
             async searchCity() {
                 const query = (this.form.ciudad ?? '').trim()
 
@@ -125,6 +168,8 @@
             },
         }"
         class="space-y-4"
+        @click="closeContextMenu()"
+        @keydown.escape.window="closeContextMenu()"
     >
         <div class="flex items-start justify-between gap-3">
             <div>
@@ -214,7 +259,6 @@
                     x-data="{ empresa: @js([
                         'id' => $empresa->id,
                         'nombre' => $empresa->nombre,
-                        // 'nit' => $empresa->nit,
                         'ciudad' => $empresa->ciudad,
                         'contacto_nombre' => $empresa->contacto_nombre,
                         'direccion' => $empresa->direccion,
@@ -224,118 +268,66 @@
                         'notas' => $empresa->notas,
                     ]) }"
                     @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
-                    class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                    @contextmenu.prevent.stop="openContextMenu($event, empresa)"
+                    class="group flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
                 >
-                    <div class="flex min-w-0 items-center gap-3">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
-                            </svg>
-                        </div>
-
-                        <div class="min-w-0">
-                            <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
-                            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                               <span class="inline-flex items-center gap-1">
-                                     {{ optional($empresa->created_at)->format('d/m/Y') }}
-                                </span>
-                            <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
-                                        <circle cx="12" cy="9.75" r="2.25" />
-                                    </svg>
-                                    {{ $empresa->ciudad }}
-                                </span>
-                                {{--
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v13.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V5.25z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 4.5h6" />
-                                    </svg>
-                                    {{ $empresa->nit ?: 'Sin NIT' }}
-                                </span>
-                                --}}
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
-                                    </svg>
-                                    {{ $empresa->sector?->nombre ?: 'Sin sector' }}
-                                </span>
-
-                            </div>
-
-
-                            @if ($empresa->responsable_user_id)
-                                @if ($esAdministracion && $empresa->referida_at)
-                                    <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                        🔁 Referido por: {{ $empresa->responsable?->codigo ?: 'S/C' }}
-                                    </span>
-
-                                @elseif (! $empresa->referida_at)
-                                    <p class="mt-1 truncate text-xs text-slate-500">
-                                        Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
-                                    </p>
-                                @endif
-                            @endif
-                        </div>
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
+                        </svg>
                     </div>
 
-                    <div class="flex shrink-0 items-center gap-1">
-                        <button
-                            type="button"
-                            @click.stop="openEditModal(empresa)"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
-                            </svg>
-                        </button>
+                    <div class="min-w-0 flex-1">
+                        <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-start">
+                            <div class="flex min-w-[120px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Fecha de registro</span>
+                                <span class="text-sm text-slate-700">{{ optional($empresa->created_at)->format('d/m/Y') }}</span>
+                            </div>
 
-                        <button
-                            type="button"
-                            @click.stop="openNotesModal(empresa)"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition {{ $empresa->notas ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' : 'cursor-not-allowed text-slate-300' }}"
-                            @if (!$empresa->notas) disabled @endif
-                            title="{{ $empresa->notas ? 'Ver notas' : 'Sin notas' }}"
-                            aria-label="{{ $empresa->notas ? 'Ver notas de ' . $empresa->nombre : 'Sin notas para ' . $empresa->nombre }}"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5" />
-                            </svg>
-                        </button>
+                            <div class="flex min-w-[140px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Código</span>
+                                @if ($empresa->referida_at)
+                                    <span class="truncate text-sm text-slate-700">Referido por: {{ $empresa->user?->codigo ?: 'S/C' }}</span>
+                                @else
+                                    <span class="text-sm text-slate-700">{{ $empresa->user?->codigo ?: 'S/C' }}</span>
+                                @endif
+                            </div>
 
-                        @if ($esAdministracion)
-                            <form
-                                method="POST"
-                                action="{{ route('empresas.destroy', $empresa) }}"
-                                @click.stop
-                                onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
-                            >
-                                @csrf
-                                @method('DELETE')
-                                <button
-                                    type="submit"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
-                                    aria-label="Eliminar {{ $empresa->nombre }}"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
-                                    </svg>
-                                </button>
-                            </form>
-                        @endif
+                            <div class="flex min-w-[160px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Empresa</span>
+                                <span class="truncate text-sm font-semibold text-slate-900">{{ $empresa->nombre }}</span>
+                            </div>
 
-                        <a
-                            href="{{ route('empresas.show', $empresa) }}"
-                            @click.stop
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-                            aria-label="Ver detalle de {{ $empresa->nombre }}"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
-                            </svg>
-                        </a>
+                            <div class="flex min-w-[120px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Teléfono</span>
+                                <span class="text-sm text-slate-700">{{ $empresa->telefono ?: '—' }}</span>
+                            </div>
+
+                            <div class="flex min-w-[130px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Sector</span>
+                                <span class="truncate text-sm text-slate-700">{{ $empresa->sector?->nombre ?: 'Sin sector' }}</span>
+                            </div>
+
+                            <div class="flex min-w-[130px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Ciudad</span>
+                                <span class="truncate text-sm text-slate-700">{{ $empresa->ciudad ?: '—' }}</span>
+                            </div>
+
+                            <div class="flex min-w-[110px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Aprobado</span>
+                                <span class="inline-flex w-fit items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Pendiente</span>
+                            </div>
+
+                            <div class="flex min-w-[110px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Rechazado</span>
+                                <span class="inline-flex w-fit items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">—</span>
+                            </div>
+
+                            <div class="flex min-w-[110px] flex-col">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Comisión</span>
+                                <span class="inline-flex w-fit items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">—</span>
+                            </div>
+                        </div>
                     </div>
                 </article>
             @empty
@@ -347,6 +339,59 @@
 
         <div>
             {{ $empresas->links() }}
+        </div>
+
+        <div
+            x-show="contextMenuOpen"
+            x-transition
+            x-cloak
+            class="fixed z-[70] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+            :style="`left: ${contextMenuX}px; top: ${contextMenuY}px;`"
+            @click.stop
+        >
+            <button
+                type="button"
+                @click="openEditFromMenu()"
+                class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
+            >
+                Editar
+            </button>
+
+            <button
+                type="button"
+                @click="openNotesFromMenu()"
+                class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition"
+                :class="contextMenuEmpresa?.notas ? 'text-slate-700 hover:bg-slate-100' : 'cursor-not-allowed text-slate-300'"
+                :disabled="!contextMenuEmpresa?.notas"
+            >
+                Notas
+            </button>
+
+            @if ($esAdministracion)
+                <form
+                    method="POST"
+                    :action="destroyRouteTemplate.replace('__ID__', contextMenuEmpresa?.id ?? '')"
+                    @submit="closeContextMenu()"
+                    onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <button
+                        type="submit"
+                        class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                    >
+                        Eliminar
+                    </button>
+                </form>
+            @endif
+
+            <button
+                type="button"
+                @click="openShowFromMenu()"
+                class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
+            >
+                Ver / Abrir
+            </button>
         </div>
 
         <div
