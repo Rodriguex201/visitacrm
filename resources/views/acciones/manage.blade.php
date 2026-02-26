@@ -27,8 +27,10 @@
             <div
                 class="rounded-xl border border-slate-100 p-4"
                 x-data="accionEditor({
+
                     icono: @js(old('icono', $accion->icono)),
                     color: @js($accion->color ?: '#2563EB'),
+
                     iconos: @js($iconosPermitidos),
                 })"
             >
@@ -46,18 +48,22 @@
                             <div class="md:col-span-2">
                                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Icono</label>
                                 <select name="icono" x-model="icono" required class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+
                                     @foreach ($iconosPermitidos as $icono)
                                         <option value="{{ $icono }}" @selected(old('icono', $accion->icono) === $icono)>{{ $icono }}</option>
                                     @endforeach
+
                                 </select>
                             </div>
 
                             <div class="md:col-span-1">
                                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Color</label>
+
                                 <div class="flex items-center gap-2">
                                     <input type="color" name="color" x-model="color" value="{{ $accion->color ?: '#2563EB' }}" class="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-white p-1">
                                     <input type="text" x-model="color" readonly class="h-10 w-24 rounded-lg border-slate-300 bg-slate-50 px-2 text-xs text-slate-600">
                                 </div>
+
                             </div>
 
                             <div class="md:col-span-1">
