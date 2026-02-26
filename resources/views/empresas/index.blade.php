@@ -253,6 +253,7 @@
             @endif
         </p>
 
+
         <div class="overflow-x-auto pb-24">
             <div class="min-w-[1480px] space-y-3">
                 @forelse ($empresas as $empresa)
@@ -284,6 +285,7 @@
                                 <span class="text-sm text-slate-700">{{ optional($empresa->created_at)->format('d/m/Y') }}</span>
                             </div>
 
+
                             <div class="flex w-[190px] shrink-0 flex-col">
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Código</span>
                                 @if ($empresa->referida_at)
@@ -291,6 +293,7 @@
                                 @else
                                     <span class="truncate text-sm text-slate-700">{{ $empresa->creador?->codigo ?: 'S/C' }}</span>
                                 @endif
+
                             </div>
 
                             <div class="flex w-[220px] shrink-0 flex-col">
@@ -307,6 +310,7 @@
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Sector</span>
                                 <span class="truncate text-sm text-slate-700">{{ $empresa->sector?->nombre ?: 'Sin sector' }}</span>
                             </div>
+
 
                             <div class="flex w-[170px] shrink-0 flex-col">
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ciudad</span>
@@ -335,6 +339,7 @@
                     </article>
                 @endforelse
             </div>
+
         </div>
 
         <div>
