@@ -426,6 +426,75 @@ class EmpresaController extends Controller
         ], 201);
     }
 
+
+    public function actualizarEmpresaAccion(Request $request, Empresa $empresa, EmpresaAccion $empresaAccion): JsonResponse
+    {
+        $this->authorize('view', $empresa);
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        if ((int) $empresaAccion->empresa_id !== (int) $empresa->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'accion_id' => ['required', 'integer', 'exists:acciones,id'],
+        ]);
+
+        $accion = Accion::query()
+            ->where('id', $validated['accion_id'])
+            ->where('activo', 1)
+            ->first();
+
+        if (! $accion) {
+            return response()->json([
+                'message' => 'La acción seleccionada no está activa.',
+            ], 422);
+        }
+
+        $empresaAccion->accion_id = $accion->id;
+        $empresaAccion->save();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Acción actualizada.',
+            'empresa_accion' => [
+                'id' => $empresaAccion->id,
+                'empresa_id' => $empresaAccion->empresa_id,
+                'accion_id' => $empresaAccion->accion_id,
+                'updated_at' => $empresaAccion->updated_at?->toIso8601String(),
+            ],
+            'accion' => [
+                'id' => $accion->id,
+                'nombre' => $accion->nombre,
+                'icono' => $accion->icono,
+                'color' => $accion->color,
+            ],
+        ]);
+    }
+
+    public function eliminarEmpresaAccion(Request $request, Empresa $empresa, EmpresaAccion $empresaAccion): JsonResponse
+    {
+        $this->authorize('view', $empresa);
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        if ((int) $empresaAccion->empresa_id !== (int) $empresa->id) {
+            abort(404);
+        }
+
+        $empresaAccion->delete();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Acción eliminada.',
+        ]);
+    }
+
     public function search(Request $request): JsonResponse
     {
         $query = trim((string) $request->query('query', ''));
