@@ -293,10 +293,12 @@
                                 @endif
                             </div>
 
+
                             <div class="flex min-w-[160px] flex-col">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Empresa</span>
                                 <span class="truncate text-sm font-semibold text-slate-900">{{ $empresa->nombre }}</span>
                             </div>
+
 
                             <div class="flex min-w-[120px] flex-col">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Teléfono</span>
