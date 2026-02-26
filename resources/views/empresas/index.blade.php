@@ -253,90 +253,92 @@
             @endif
         </p>
 
-        <div class="space-y-3 pb-24">
-            @forelse ($empresas as $empresa)
-                <article
-                    x-data="{ empresa: @js([
-                        'id' => $empresa->id,
-                        'nombre' => $empresa->nombre,
-                        'ciudad' => $empresa->ciudad,
-                        'contacto_nombre' => $empresa->contacto_nombre,
-                        'direccion' => $empresa->direccion,
-                        'telefono' => $empresa->telefono,
-                        'email' => $empresa->email,
-                        'sector_id' => $empresa->sector_id,
-                        'notas' => $empresa->notas,
-                    ]) }"
-                    @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
-                    @contextmenu.prevent.stop="openContextMenu($event, empresa)"
-                    class="group flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
-                >
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
-                        </svg>
-                    </div>
 
-                    <div class="min-w-0 flex-1">
-                        <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-start">
-                            <div class="flex min-w-[120px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Fecha de registro</span>
+        <div class="overflow-x-auto pb-24">
+            <div class="min-w-[1480px] space-y-3">
+                @forelse ($empresas as $empresa)
+                    <article
+                        x-data="{ empresa: @js([
+                            'id' => $empresa->id,
+                            'nombre' => $empresa->nombre,
+                            'ciudad' => $empresa->ciudad,
+                            'contacto_nombre' => $empresa->contacto_nombre,
+                            'direccion' => $empresa->direccion,
+                            'telefono' => $empresa->telefono,
+                            'email' => $empresa->email,
+                            'sector_id' => $empresa->sector_id,
+                            'notas' => $empresa->notas,
+                        ]) }"
+                        @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
+                        @contextmenu.prevent.stop="openContextMenu($event, empresa)"
+                        class="group flex min-w-[1480px] cursor-pointer items-center gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                    >
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
+                            </svg>
+                        </div>
+
+                        <div class="flex min-w-0 flex-1 flex-nowrap items-start gap-4 overflow-x-visible">
+                            <div class="flex w-[160px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Fecha de registro</span>
                                 <span class="text-sm text-slate-700">{{ optional($empresa->created_at)->format('d/m/Y') }}</span>
                             </div>
 
-                            <div class="flex min-w-[140px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Código</span>
+                            <div class="flex w-[190px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Código</span>
                                 @if ($empresa->referida_at)
                                     <span class="truncate text-sm text-slate-700">Referido por: {{ $empresa->user?->codigo ?: 'S/C' }}</span>
                                 @else
-                                    <span class="text-sm text-slate-700">{{ $empresa->user?->codigo ?: 'S/C' }}</span>
+                                    <span class="truncate text-sm text-slate-700">{{ $empresa->user?->codigo ?: 'S/C' }}</span>
+
                                 @endif
                             </div>
 
-
-                            <div class="flex min-w-[160px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Empresa</span>
+                            <div class="flex w-[220px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Empresa</span>
                                 <span class="truncate text-sm font-semibold text-slate-900">{{ $empresa->nombre }}</span>
                             </div>
 
 
-                            <div class="flex min-w-[120px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Teléfono</span>
-                                <span class="text-sm text-slate-700">{{ $empresa->telefono ?: '—' }}</span>
+                            <div class="flex w-[150px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Teléfono</span>
+                                <span class="truncate text-sm text-slate-700">{{ $empresa->telefono ?: '—' }}</span>
                             </div>
 
-                            <div class="flex min-w-[130px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Sector</span>
+                            <div class="flex w-[170px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Sector</span>
                                 <span class="truncate text-sm text-slate-700">{{ $empresa->sector?->nombre ?: 'Sin sector' }}</span>
                             </div>
 
-                            <div class="flex min-w-[130px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Ciudad</span>
+                            <div class="flex w-[170px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Ciudad</span>
                                 <span class="truncate text-sm text-slate-700">{{ $empresa->ciudad ?: '—' }}</span>
                             </div>
 
-                            <div class="flex min-w-[110px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Aprobado</span>
+                            <div class="flex w-[120px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Aprobado</span>
                                 <span class="inline-flex w-fit items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Pendiente</span>
                             </div>
 
-                            <div class="flex min-w-[110px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Rechazado</span>
+                            <div class="flex w-[120px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Rechazado</span>
                                 <span class="inline-flex w-fit items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">—</span>
                             </div>
 
-                            <div class="flex min-w-[110px] flex-col">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Comisión</span>
+                            <div class="flex w-[120px] shrink-0 flex-col">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Comisión</span>
                                 <span class="inline-flex w-fit items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">—</span>
                             </div>
                         </div>
-                    </div>
-                </article>
-            @empty
-                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
-                    No hay empresas registradas
-                </article>
-            @endforelse
+                    </article>
+                @empty
+                    <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
+                        No hay empresas registradas
+                    </article>
+                @endforelse
+            </div>
+
         </div>
 
         <div>
