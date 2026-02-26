@@ -3,6 +3,11 @@
     <input x-model="form.nombre" name="nombre" type="text" placeholder="Nombre de la empresa" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
 </div>
 
+<div>
+    <label class="mb-1.5 block font-semibold text-slate-700">Nombre contacto *</label>
+    <input x-model="form.contacto_nombre" name="contacto_nombre" type="text" placeholder="Nombre del contacto" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+</div>
+
 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
     <div class="relative">
         <label class="mb-1.5 block font-semibold text-slate-700">Ciudad *</label>

@@ -62,6 +62,13 @@
 
                     <p class="flex items-center gap-2 text-sm">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 7.5h3a2.25 2.25 0 012.25 2.25v8.25A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V9.75A2.25 2.25 0 016 7.5h3m6 0V6A3 3 0 009 6v1.5m6 0h-6" />
+                        </svg>
+                        {{ $empresa->contacto_nombre ?: 'Sin contacto' }}
+                    </p>
+
+                    <p class="flex items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
                             <circle cx="12" cy="9.75" r="2.25" />
                         </svg>
