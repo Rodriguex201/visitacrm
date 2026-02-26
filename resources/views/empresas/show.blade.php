@@ -104,6 +104,7 @@
             </article>
         </div>
 
+        {{--
         <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Responsable</h2>
@@ -136,6 +137,7 @@
                 <p class="text-sm text-slate-600" x-text="`Responsable: ${empresaUser?.codigo || 'S/C'} - ${(empresaUser?.name || empresaUser?.nombre || 'Sin nombre').toUpperCase()} - ${empresaUser?.telefono || 'Sin teléfono'}`"></p>
             </template>
         </article>
+        --}}
 
         <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
