@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
             $brandSubtitle = "Gestión comercial";
 
             if ($user && $user->tipo_usuario !== "administracion") {
+
                 $brandTitle = $user->name ?: "Usuario";
+
                 $brandSubtitle = $user->codigo ?: "S/C";
             }
 
