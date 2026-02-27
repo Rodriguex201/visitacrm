@@ -24,6 +24,7 @@ class Empresa extends Model
         'user_id',
         'responsable_user_id',
         'referida_at',
+        'cotizacion_numero',
     ];
 
     protected $casts = [

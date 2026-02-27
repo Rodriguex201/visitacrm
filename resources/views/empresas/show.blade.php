@@ -540,6 +540,18 @@
                             <p class="mt-2 text-xs text-slate-600" x-show="savedCotizacionEnviada && cotizacionEnviadaAtFormateada(savedCotizacionEnviadaAt)">
                                 Enviada el: <span class="font-semibold" x-text="cotizacionEnviadaAtFormateada(savedCotizacionEnviadaAt)"></span>
                             </p>
+
+                            <div class="mt-3">
+                                <label for="cotizacion_numero" class="mb-1 block text-sm font-medium text-slate-700">Número de cotización</label>
+                                <input
+                                    id="cotizacion_numero"
+                                    type="text"
+                                    placeholder="Ej: COT-000123"
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                    x-model="form.cotizacion_numero"
+                                    :disabled="opcionesSaving"
+                                >
+                            </div>
                         </div>
                     </template>
 
@@ -702,6 +714,7 @@
                 savedCotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
                 savedCotizacionEnviadaAt: @js(optional($empresa->cotizacion_enviada_at)->toIso8601String()),
                 draftCotizacionEnviada: @js((bool) $empresa->cotizacion_enviada),
+                savedCotizacionNumero: @js($empresa->cotizacion_numero),
 
                 opcionesSaving: false,
                 opcionesMensaje: '',
@@ -735,6 +748,7 @@
                 form: {
                     resultado: '',
                     nivel_interes: '',
+                    cotizacion_numero: @js($empresa->cotizacion_numero),
                 },
 
                 contactoEditId: null,
@@ -1258,11 +1272,13 @@
                     this.opcionesMensaje = '';
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
+                    this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = true;
                 },
                 cerrarPerfilComercialModal() {
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
+                    this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = false;
                 },
 
@@ -1413,6 +1429,7 @@
                             body: JSON.stringify({
                                 opciones: this.draftSelectedIds,
                                 cotizacion_enviada: this.draftCotizacionEnviada ? 1 : 0,
+                                cotizacion_numero: this.form.cotizacion_numero || null,
                             }),
 
                         });
@@ -1428,7 +1445,9 @@
                         this.draftSelectedIds = [...this.savedSelectedIds];
                         this.savedCotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
                         this.savedCotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
+                        this.savedCotizacionNumero = data.empresa?.cotizacion_numero || null;
                         this.draftCotizacionEnviada = this.savedCotizacionEnviada;
+                        this.form.cotizacion_numero = this.savedCotizacionNumero;
 
                         this.opcionesMensaje = data.message || 'Cambios guardados correctamente.';
                         this.modalOpen = false;
