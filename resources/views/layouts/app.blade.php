@@ -51,8 +51,10 @@
             >
                 <div class="flex items-start justify-between border-b border-slate-200 px-5 py-5" :class="sidebarCollapsed ? 'md:px-3' : ''">
                     <div x-show="!sidebarCollapsed" x-transition class="md:block">
-                        <p class="text-3xl font-bold leading-none text-slate-950">VisitaCRM</p>
-                        <p class="mt-1 text-sm text-slate-600">Gestión comercial</p>
+
+                        <p class="text-3xl font-bold leading-none text-slate-950">{{ $sidebarBrandTitle }}</p>
+                        <p class="mt-1 text-sm text-slate-600">{{ $sidebarBrandSubtitle }}</p>
+
                     </div>
 
                     <button
