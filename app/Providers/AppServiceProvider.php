@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\Empresa;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -29,12 +29,9 @@ class AppServiceProvider extends ServiceProvider
             $brandSubtitle = "Gestión comercial";
 
             if ($user && $user->tipo_usuario !== "administracion") {
-                $mainEmpresa = Empresa::query()
-                    ->where('user_id', $user->id)
-                    ->orderBy('id', "asc")
-                    ->first();
 
-                $brandTitle = $mainEmpresa?->nombre ?: "Mis empresas";
+                $brandTitle = $user->name ?: "Usuario";
+
                 $brandSubtitle = $user->codigo ?: "S/C";
             }
 
