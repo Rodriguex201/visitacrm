@@ -238,6 +238,7 @@ class EmpresaController extends Controller
             'opciones' => ['nullable', 'array'],
             'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
             'cotizacion_enviada' => ['nullable', 'boolean'],
+            'cotizacion_numero' => ['nullable', 'string', 'max:50'],
         ]);
 
         $opciones = collect($validated['opciones'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
@@ -259,6 +260,14 @@ class EmpresaController extends Controller
 
         $empresa->opciones()->sync($opciones->all());
 
+        if (array_key_exists('cotizacion_numero', $validated)) {
+            $cotizacionNumero = $validated['cotizacion_numero'] !== null
+                ? trim($validated['cotizacion_numero'])
+                : null;
+
+            $empresa->cotizacion_numero = $cotizacionNumero !== '' ? $cotizacionNumero : null;
+        }
+
         if (array_key_exists('cotizacion_enviada', $validated) && ($request->user()?->tipo_usuario ?? null) === 'administracion') {
             $cotizacionEnviadaNueva = (bool) $validated['cotizacion_enviada'];
             $cotizacionEnviadaActual = (bool) $empresa->cotizacion_enviada;
@@ -268,6 +277,10 @@ class EmpresaController extends Controller
             }
 
             $empresa->cotizacion_enviada = $cotizacionEnviadaNueva;
+        }
+
+        if (array_key_exists('cotizacion_enviada', $validated)
+            || array_key_exists('cotizacion_numero', $validated)) {
             $empresa->save();
         }
 
@@ -278,6 +291,7 @@ class EmpresaController extends Controller
             'empresa' => [
                 'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
                 'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),
+                'cotizacion_numero' => $empresa->cotizacion_numero,
             ],
         ]);
     }
@@ -306,6 +320,7 @@ class EmpresaController extends Controller
             'empresa' => [
                 'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
                 'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),
+                'cotizacion_numero' => $empresa->cotizacion_numero,
             ],
         ]);
     }
