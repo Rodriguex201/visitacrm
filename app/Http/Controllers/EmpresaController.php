@@ -40,7 +40,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
+            ->with($esAdministracion ? ['sector', 'responsable', 'creador'] : ['sector', 'creador'])
             ->latest('id');
 
         if (! $esAdministracion) {
