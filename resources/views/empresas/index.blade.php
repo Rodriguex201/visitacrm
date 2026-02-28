@@ -273,10 +273,12 @@
                                 </p>
                             @endif
 
+                            @php($codigoCreador = optional($empresa->creador)->codigo)
+
                             @if ($empresa->responsable_user_id)
                                 @if ($esAdministracion && $empresa->referida_at)
                                     <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                        🔁 Referido por: {{ $empresa->responsable?->codigo ?: 'S/C' }}
+                                        🔁 Referido por: {{ $codigoCreador ?: 'S/C' }}
                                     </span>
 
                                 @elseif (! $empresa->referida_at)
@@ -284,6 +286,10 @@
                                         Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
                                     </p>
                                 @endif
+                            @elseif ($esAdministracion && $empresa->user_id)
+                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                    🔁 Referido por: {{ $codigoCreador ?: 'S/C' }}
+                                </span>
                             @endif
                         </div>
                     </div>

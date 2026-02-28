@@ -53,6 +53,11 @@ class Empresa extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_user_id');

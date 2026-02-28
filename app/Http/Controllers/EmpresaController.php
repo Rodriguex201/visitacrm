@@ -40,7 +40,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with($esAdministracion ? ['sector', 'responsable'] : ['sector'])
+            ->with($esAdministracion ? ['sector', 'responsable', 'creador'] : ['sector'])
             ->latest('id');
 
         if (! $esAdministracion) {
@@ -556,6 +556,10 @@ class EmpresaController extends Controller
         $data = $this->validateEmpresa($request);
 
         $authUser = auth()->user();
+
+        if ($authUser) {
+            $data['user_id'] = $authUser->id;
+        }
 
         if ($authUser && $authUser->tipo_usuario !== 'administracion') {
             $data['responsable_user_id'] = $authUser->id;
