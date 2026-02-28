@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
 use App\Models\EmpresaOpcion;
+use App\Models\ReferidoEstadoConfig;
 use Carbon\Carbon;
 use App\Models\Sector;
 use App\Models\Accion;
@@ -20,6 +21,29 @@ use Illuminate\View\View;
 
 class EmpresaController extends Controller
 {
+    /**
+     * SQL PRODUCCIÓN REFERIDOS (sin migraciones):
+     * ALTER TABLE empresas
+     *   ADD COLUMN referido_estado ENUM('pendiente','aprobado','rechazado') NOT NULL DEFAULT 'pendiente',
+     *   ADD COLUMN referido_motivo_rechazo TEXT NULL,
+     *   ADD COLUMN referido_aprobado_at DATETIME NULL,
+     *   ADD COLUMN referido_aprobado_by BIGINT UNSIGNED NULL,
+     *   ADD COLUMN comision_estado ENUM('pendiente','pagada') NOT NULL DEFAULT 'pendiente',
+     *   ADD COLUMN comision_valor DECIMAL(12,2) NULL,
+     *   ADD COLUMN comision_pagada_at DATETIME NULL;
+     *
+     * CREATE TABLE referido_estado_config (
+     *   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+     *   estado VARCHAR(30) NOT NULL UNIQUE,
+     *   color_bg VARCHAR(20) NOT NULL,
+     *   color_text VARCHAR(20) NOT NULL
+     * );
+     *
+     * INSERT INTO referido_estado_config (estado, color_bg, color_text) VALUES
+     *   ('pendiente', '#FEF3C7', '#92400E'),
+     *   ('aprobado', '#DCFCE7', '#166534'),
+     *   ('rechazado', '#FEE2E2', '#991B1B');
+     */
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Empresa::class);
@@ -85,6 +109,16 @@ class EmpresaController extends Controller
             ->orderBy('nombre')
             ->get();
 
+        $estadoConfig = $this->estadoReferidoConfigMap();
+        $resumenReferidos = (clone $empresasQuery)
+            ->reorder()
+            ->selectRaw("COALESCE(referido_estado, 'pendiente') as estado")
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado')
+            ->map(fn ($total) => (int) $total)
+            ->all();
+
         return view('empresas.index', compact(
             'empresas',
             'sectores',
@@ -94,6 +128,8 @@ class EmpresaController extends Controller
             'usaRangoPersonalizado',
             'desde',
             'hasta',
+            'estadoConfig',
+            'resumenReferidos',
         ));
     }
 
@@ -172,7 +208,9 @@ class EmpresaController extends Controller
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo'));
+        $estadoConfig = $this->estadoReferidoConfigMap();
+
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'estadoConfig'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -227,6 +265,136 @@ class EmpresaController extends Controller
             'hoy' => Carbon::now()->startOfDay(),
             '7' => Carbon::now()->subDays(7),
             default => null,
+        };
+    }
+
+
+    public function updateEstadoReferido(Request $request, Empresa $empresa): JsonResponse
+    {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'referido_estado' => ['required', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
+            'referido_motivo_rechazo' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $estado = (string) $validated['referido_estado'];
+        $motivo = isset($validated['referido_motivo_rechazo']) ? trim((string) $validated['referido_motivo_rechazo']) : null;
+
+        if ($estado === 'rechazado' && $motivo === '') {
+            return response()->json([
+                'message' => 'El motivo de rechazo es obligatorio.',
+                'errors' => ['referido_motivo_rechazo' => ['El motivo de rechazo es obligatorio.']],
+            ], 422);
+        }
+
+        if ($estado !== 'rechazado') {
+            $motivo = null;
+        }
+
+        $empresa->referido_estado = $estado;
+        $empresa->referido_motivo_rechazo = $motivo;
+
+        if ($estado === 'aprobado') {
+            $empresa->referido_aprobado_at = now();
+            $empresa->referido_aprobado_by = (int) $request->user()->id;
+        } else {
+            $empresa->referido_aprobado_at = null;
+            $empresa->referido_aprobado_by = null;
+        }
+
+        if ($estado === 'rechazado') {
+            $empresa->comision_estado = 'pendiente';
+            $empresa->comision_pagada_at = null;
+        }
+
+        $empresa->save();
+
+        $estadoConfig = $this->estadoReferidoConfigMap();
+
+        return response()->json([
+            'ok' => true,
+            'message' => $estado === 'aprobado' ? 'Referido aprobado correctamente.' : ($estado === 'rechazado' ? 'Referido rechazado correctamente.' : 'Estado actualizado.'),
+            'estado' => $empresa->referido_estado,
+            'motivo_rechazo' => $empresa->referido_motivo_rechazo,
+            'referido_aprobado_at' => optional($empresa->referido_aprobado_at)->toIso8601String(),
+            'referido_aprobado_by' => $empresa->referido_aprobado_by,
+            'comision_estado' => $empresa->comision_estado,
+            'comision_valor' => $empresa->comision_valor !== null ? number_format((float) $empresa->comision_valor, 2, '.', '') : null,
+            'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
+            'colors' => $estadoConfig[$empresa->referido_estado] ?? $this->defaultEstadoColor($empresa->referido_estado),
+        ]);
+    }
+
+    public function updateComisionReferido(Request $request, Empresa $empresa): JsonResponse
+    {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        if (($empresa->referido_estado ?? 'pendiente') !== 'aprobado') {
+            return response()->json([
+                'message' => 'Solo puedes gestionar comisión cuando el referido está aprobado.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'comision_valor' => ['nullable', 'numeric', 'min:0'],
+            'comision_estado' => ['required', Rule::in(['pendiente', 'pagada'])],
+        ]);
+
+        $empresa->comision_valor = $validated['comision_valor'] !== null
+            ? (float) $validated['comision_valor']
+            : null;
+
+        $empresa->comision_estado = (string) $validated['comision_estado'];
+        $empresa->comision_pagada_at = $empresa->comision_estado === 'pagada' ? now() : null;
+        $empresa->save();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Comisión actualizada correctamente.',
+            'comision_estado' => $empresa->comision_estado,
+            'comision_valor' => $empresa->comision_valor !== null ? number_format((float) $empresa->comision_valor, 2, '.', '') : null,
+            'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
+        ]);
+    }
+
+    private function estadoReferidoConfigMap(): array
+    {
+        $defaults = [
+            'pendiente' => $this->defaultEstadoColor('pendiente'),
+            'aprobado' => $this->defaultEstadoColor('aprobado'),
+            'rechazado' => $this->defaultEstadoColor('rechazado'),
+        ];
+
+        try {
+            $rows = ReferidoEstadoConfig::query()
+                ->whereIn('estado', array_keys($defaults))
+                ->get(['estado', 'color_bg', 'color_text']);
+
+            foreach ($rows as $row) {
+                $estado = (string) $row->estado;
+                $defaults[$estado] = [
+                    'color_bg' => $row->color_bg ?: $defaults[$estado]['color_bg'],
+                    'color_text' => $row->color_text ?: $defaults[$estado]['color_text'],
+                ];
+            }
+        } catch (\Throwable $e) {
+            // fallback silencioso cuando la tabla aún no existe en un entorno local.
+        }
+
+        return $defaults;
+    }
+
+    private function defaultEstadoColor(string $estado): array
+    {
+        return match ($estado) {
+            'aprobado' => ['color_bg' => '#DCFCE7', 'color_text' => '#166534'],
+            'rechazado' => ['color_bg' => '#FEE2E2', 'color_text' => '#991B1B'],
+            default => ['color_bg' => '#FEF3C7', 'color_text' => '#92400E'],
         };
     }
 
