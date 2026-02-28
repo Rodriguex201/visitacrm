@@ -58,6 +58,11 @@ class Empresa extends Model
         return $this->belongsTo(User::class, 'responsable_user_id');
     }
 
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function opciones(): BelongsToMany
     {
         return $this->belongsToMany(CatalogoOpcion::class, 'empresa_opcion', 'empresa_id', 'opcion_id')->withTimestamps();
