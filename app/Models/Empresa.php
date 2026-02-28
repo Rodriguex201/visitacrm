@@ -24,11 +24,21 @@ class Empresa extends Model
         'user_id',
         'responsable_user_id',
         'referida_at',
+        'referido_estado',
+        'referido_motivo_rechazo',
+        'referido_aprobado_at',
+        'referido_aprobado_by',
+        'comision_estado',
+        'comision_valor',
+        'comision_pagada_at',
         'cotizacion_numero',
     ];
 
     protected $casts = [
         'referida_at' => 'datetime',
+        'referido_aprobado_at' => 'datetime',
+        'comision_pagada_at' => 'datetime',
+        'comision_valor' => 'decimal:2',
         'cotizacion_enviada' => 'boolean',
         'cotizacion_enviada_at' => 'datetime',
     ];

@@ -36,7 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
-    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::middleware(['admin'])->group(function () {
+        Route::patch('/empresas/{empresa}/estado-referido', [EmpresaController::class, 'updateEstadoReferido'])->name('empresas.referido.estado');
+        Route::patch('/empresas/{empresa}/comision-referido', [EmpresaController::class, 'updateComisionReferido'])->name('empresas.referido.comision');
         Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
         Route::post('/acciones', [AccionesController::class, 'store'])->name('acciones.store');
         Route::patch('/acciones/{accion}', [AccionesController::class, 'update'])->name('acciones.update');

@@ -2,6 +2,7 @@
 
 @section('content')
     @php($esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion')
+    @php($estadoOrden = ['pendiente', 'aprobado', 'rechazado'])
 
     <section
         x-data="{
@@ -208,6 +209,22 @@
             @endif
         </p>
 
+        <div class="flex flex-wrap items-center gap-2">
+            @foreach ($estadoOrden as $estadoItem)
+                @php
+                    $cfg = $estadoConfig[$estadoItem] ?? [
+                        'color_bg' => $estadoItem === 'aprobado' ? '#DCFCE7' : ($estadoItem === 'rechazado' ? '#FEE2E2' : '#FEF3C7'),
+                        'color_text' => $estadoItem === 'aprobado' ? '#166534' : ($estadoItem === 'rechazado' ? '#991B1B' : '#92400E'),
+                    ];
+                    $totalEstado = (int) ($resumenReferidos[$estadoItem] ?? 0);
+                @endphp
+                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold" style="background-color: {{ $cfg['color_bg'] }}; color: {{ $cfg['color_text'] }};">
+                    <span class="h-2 w-2 rounded-full" style="background-color: {{ $cfg['color_text'] }}"></span>
+                    {{ ucfirst($estadoItem) }} ({{ $totalEstado }})
+                </span>
+            @endforeach
+        </div>
+
         <div class="space-y-3 pb-24">
             @forelse ($empresas as $empresa)
                 <article
@@ -234,7 +251,20 @@
                         </div>
 
                         <div class="min-w-0">
-                            <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
+                                @php
+                                    $empresaEstado = $empresa->referido_estado ?? 'pendiente';
+                                    $empresaCfg = $estadoConfig[$empresaEstado] ?? [
+                                        'color_bg' => $empresaEstado === 'aprobado' ? '#DCFCE7' : ($empresaEstado === 'rechazado' ? '#FEE2E2' : '#FEF3C7'),
+                                        'color_text' => $empresaEstado === 'aprobado' ? '#166534' : ($empresaEstado === 'rechazado' ? '#991B1B' : '#92400E'),
+                                    ];
+                                @endphp
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style="background-color: {{ $empresaCfg['color_bg'] }}; color: {{ $empresaCfg['color_text'] }};">
+                                    <span class="h-1.5 w-1.5 rounded-full" style="background-color: {{ $empresaCfg['color_text'] }}"></span>
+                                    {{ ucfirst($empresaEstado) }}
+                                </span>
+                            </div>
                             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
                                <span class="inline-flex items-center gap-1">
                                      {{ optional($empresa->created_at)->format('d/m/Y') }}
