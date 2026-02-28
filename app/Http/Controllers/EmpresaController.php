@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
+use App\Models\EmpresaOpcion;
 use Carbon\Carbon;
 use App\Models\Sector;
 use App\Models\Accion;
@@ -524,6 +525,34 @@ class EmpresaController extends Controller
         return response()->json([
             'ok' => true,
             'message' => 'Acción eliminada.',
+        ]);
+    }
+
+    public function updateNota(Request $request, EmpresaOpcion $empresaOpcion): JsonResponse
+    {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'nota' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $nota = isset($validated['nota'])
+            ? trim((string) $validated['nota'])
+            : null;
+
+        if ($nota === '') {
+            $nota = null;
+        }
+
+        $empresaOpcion->nota = $nota;
+        $empresaOpcion->save();
+
+        return response()->json([
+            'ok' => true,
+            'nota' => $empresaOpcion->nota,
+            'message' => 'Nota guardada',
         ]);
     }
 
