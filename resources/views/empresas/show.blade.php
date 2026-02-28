@@ -850,6 +850,10 @@
 
                         container.innerHTML = html;
 
+                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                            window.Alpine.initTree(container);
+                        }
+
                         if (isActividad) {
                             this.currentActRange = range;
                             this.actividadCount = Number(container.querySelector('[data-actividad-count]')?.dataset.actividadCount ?? this.actividadCount);
