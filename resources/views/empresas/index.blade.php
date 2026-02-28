@@ -2,6 +2,7 @@
 
 @section('content')
     @php($esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion')
+    @php($estadoOrden = ['pendiente', 'aprobado', 'rechazado'])
 
     <section
         x-data="{
@@ -209,10 +210,12 @@
         </p>
 
         <div class="flex flex-wrap items-center gap-2">
+
             @foreach ($estadoChips as $chip)
                 <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold" style="background-color: {{ $chip['bg'] }}; color: {{ $chip['text'] }};">
                     <span class="h-2 w-2 rounded-full" style="background-color: {{ $chip['text'] }}"></span>
                     {{ $chip['label'] }} ({{ $chip['total'] }})
+
                 </span>
             @endforeach
         </div>
