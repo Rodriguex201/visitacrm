@@ -119,6 +119,7 @@ class EmpresaController extends Controller
             ->map(fn ($total) => (int) $total)
             ->all();
 
+
         $estadoChips = collect(['pendiente', 'aprobado', 'rechazado'])
             ->map(function (string $estado) use ($estadoConfig, $resumenReferidos): array {
                 $cfg = $estadoConfig[$estado] ?? [
@@ -136,6 +137,7 @@ class EmpresaController extends Controller
             })
             ->all();
 
+
         return view('empresas.index', compact(
             'empresas',
             'sectores',
@@ -147,7 +149,9 @@ class EmpresaController extends Controller
             'hasta',
             'estadoConfig',
             'resumenReferidos',
+
             'estadoChips',
+
         ));
     }
 
