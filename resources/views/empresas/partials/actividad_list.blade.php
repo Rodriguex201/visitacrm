@@ -25,7 +25,11 @@
         @foreach ($acciones as $item)
             @php
                 $notaInicial = (string) ($item->nota ?? '');
-                $isEmpresaOpcion = isset($item->opcion_id);
+
+                $notaUpdateUrl = isset($item->opcion_id)
+                    ? route('empresa-opcion.nota', ['empresaOpcion' => $item->id])
+                    : route('empresas.acciones.nota', ['empresa' => $empresa, 'empresaAccion' => $item->id]);
+
             @endphp
             <div class="rounded-xl border border-slate-100 p-3" data-actividad-item="{{ (int) $item->id }}" data-accion-id="{{ (int) ($item->accion_id ?? 0) }}"
                 x-data="{ editingNota:false, draftNota:@js($notaInicial), nota:@js($notaInicial), savingNota:false, notaFlash:'', notaFlashType:'ok', async guardarNota(url){ if(!url){ return; } this.savingNota=true; this.notaFlash=''; try{ const response = await fetch(url,{ method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':'{{ csrf_token() }}', Accept:'application/json' }, body: JSON.stringify({ nota:this.draftNota }) }); const data = await response.json(); if(!response.ok){ throw new Error(data.message || 'No se pudo guardar la nota.'); } this.nota = data.nota || ''; this.draftNota = this.nota; this.editingNota = false; this.notaFlashType='ok'; this.notaFlash = data.message || 'Nota guardada'; } catch(error){ this.notaFlashType='error'; this.notaFlash = error.message || 'No se pudo guardar la nota.'; } finally { this.savingNota=false; setTimeout(()=>{ this.notaFlash=''; }, 2500); } } }">
@@ -41,14 +45,18 @@
                                 <template x-if="!editingNota">
                                     <div>
                                         <p x-show="nota" class="text-xs text-slate-500" x-text="nota"></p>
-                                        @if ($isEmpresaOpcion && (auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
+                                        @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
                                             <button x-show="!nota" type="button" @click="editingNota = true"
                                                 class="text-xs font-semibold text-blue-600 hover:text-blue-700">Agregar nota</button>
                                         @endif
                                     </div>
                                 </template>
 
-                                @if ($isEmpresaOpcion && (auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
+                                @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
                                     <template x-if="editingNota">
                                         <div class="space-y-2">
                                             <textarea x-model="draftNota" rows="2" maxlength="2000"
@@ -56,7 +64,9 @@
                                                 placeholder="Escribe una nota..."></textarea>
                                             <div class="flex items-center gap-2">
                                                 <button type="button" :disabled="savingNota"
-                                                    @click="guardarNota('{{ route('empresa-opcion.nota', ['empresaOpcion' => $item->id]) }}')"
+
+                                                    @click="guardarNota('{{ $notaUpdateUrl }}')"
+
                                                     class="inline-flex items-center rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
                                                     Guardar
                                                 </button>
@@ -91,6 +101,16 @@
                                 </button>
                             @endif
 
+                            <button
+                                    type="button"
+                                    class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                    @click="editingNota = true"
+                                    title="Editar nota"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
+                                    </svg>
+                                </button>
                             <button
                                 type="button"
                                 class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"

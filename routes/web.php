@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/empresas/{empresa}/acciones', [EmpresaController::class, 'storeAccion'])->name('empresas.acciones.store');
     Route::patch('/empresas/{empresa}/acciones/{empresaAccion}', [EmpresaController::class, 'actualizarEmpresaAccion'])->name('empresas.acciones.update');
+    Route::patch('/empresas/{empresa}/acciones/{empresaAccion}/nota', [EmpresaController::class, 'updateNotaEmpresaAccion'])->name('empresas.acciones.nota');
     Route::delete('/empresas/{empresa}/acciones/{empresaAccion}', [EmpresaController::class, 'eliminarEmpresaAccion'])->name('empresas.acciones.destroy');
     Route::get('/empresas/{empresa}/actividad/partial', [EmpresaController::class, 'actividadPartial'])->name('empresas.actividad.partial');
     Route::get('/empresas/{empresa}/visitas/partial', [EmpresaController::class, 'visitasPartial'])->name('empresas.visitas.partial');
