@@ -23,11 +23,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/empresas/{empresa}/asignar-usuario', [EmpresaController::class, 'asignarUsuario'])->name('empresas.asignar-usuario');
     Route::patch('/empresas/{empresa}/opciones', [EmpresaController::class, 'guardarOpciones'])->name('empresas.opciones.update');
     Route::patch('/empresas/{empresa}/cotizacion', [EmpresaController::class, 'actualizarCotizacion'])->name('empresas.cotizacion');
+    Route::patch('/empresa-opcion/{empresaOpcion}/nota', [EmpresaController::class, 'updateNota'])->name('empresa-opcion.nota');
     Route::post('/catalogo-opciones', [EmpresaController::class, 'storeCatalogoOpcion'])->name('catalogo-opciones.store');
     Route::get('/usuarios/buscar', [EmpresaController::class, 'searchUsuarios'])->name('usuarios.buscar');
 
     Route::post('/empresas/{empresa}/acciones', [EmpresaController::class, 'storeAccion'])->name('empresas.acciones.store');
     Route::patch('/empresas/{empresa}/acciones/{empresaAccion}', [EmpresaController::class, 'actualizarEmpresaAccion'])->name('empresas.acciones.update');
+    Route::patch('/empresas/{empresa}/acciones/{empresaAccion}/nota', [EmpresaController::class, 'updateNotaEmpresaAccion'])->name('empresas.acciones.nota');
     Route::delete('/empresas/{empresa}/acciones/{empresaAccion}', [EmpresaController::class, 'eliminarEmpresaAccion'])->name('empresas.acciones.destroy');
     Route::get('/empresas/{empresa}/actividad/partial', [EmpresaController::class, 'actividadPartial'])->name('empresas.actividad.partial');
     Route::get('/empresas/{empresa}/visitas/partial', [EmpresaController::class, 'visitasPartial'])->name('empresas.visitas.partial');
