@@ -210,17 +210,12 @@
         </p>
 
         <div class="flex flex-wrap items-center gap-2">
-            @foreach ($estadoOrden as $estadoItem)
-                @php
-                    $cfg = $estadoConfig[$estadoItem] ?? [
-                        'color_bg' => $estadoItem === 'aprobado' ? '#DCFCE7' : ($estadoItem === 'rechazado' ? '#FEE2E2' : '#FEF3C7'),
-                        'color_text' => $estadoItem === 'aprobado' ? '#166534' : ($estadoItem === 'rechazado' ? '#991B1B' : '#92400E'),
-                    ];
-                    $totalEstado = (int) ($resumenReferidos[$estadoItem] ?? 0);
-                @endphp
-                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold" style="background-color: {{ $cfg['color_bg'] }}; color: {{ $cfg['color_text'] }};">
-                    <span class="h-2 w-2 rounded-full" style="background-color: {{ $cfg['color_text'] }}"></span>
-                    {{ ucfirst($estadoItem) }} ({{ $totalEstado }})
+
+            @foreach ($estadoChips as $chip)
+                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold" style="background-color: {{ $chip['bg'] }}; color: {{ $chip['text'] }};">
+                    <span class="h-2 w-2 rounded-full" style="background-color: {{ $chip['text'] }}"></span>
+                    {{ $chip['label'] }} ({{ $chip['total'] }})
+
                 </span>
             @endforeach
         </div>

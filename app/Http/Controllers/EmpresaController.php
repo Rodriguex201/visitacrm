@@ -119,6 +119,25 @@ class EmpresaController extends Controller
             ->map(fn ($total) => (int) $total)
             ->all();
 
+
+        $estadoChips = collect(['pendiente', 'aprobado', 'rechazado'])
+            ->map(function (string $estado) use ($estadoConfig, $resumenReferidos): array {
+                $cfg = $estadoConfig[$estado] ?? [
+                    'color_bg' => $estado === 'aprobado' ? '#DCFCE7' : ($estado === 'rechazado' ? '#FEE2E2' : '#FEF3C7'),
+                    'color_text' => $estado === 'aprobado' ? '#166534' : ($estado === 'rechazado' ? '#991B1B' : '#92400E'),
+                ];
+
+                return [
+                    'estado' => $estado,
+                    'label' => ucfirst($estado),
+                    'bg' => $cfg['color_bg'],
+                    'text' => $cfg['color_text'],
+                    'total' => (int) ($resumenReferidos[$estado] ?? 0),
+                ];
+            })
+            ->all();
+
+
         return view('empresas.index', compact(
             'empresas',
             'sectores',
@@ -130,6 +149,9 @@ class EmpresaController extends Controller
             'hasta',
             'estadoConfig',
             'resumenReferidos',
+
+            'estadoChips',
+
         ));
     }
 
