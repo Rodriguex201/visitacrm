@@ -208,8 +208,22 @@
             @endif
         </p>
 
+        <div class="flex flex-wrap items-center gap-2">
+            @foreach ($estadoChips as $chip)
+                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold" style="background-color: {{ $chip['bg'] }}; color: {{ $chip['text'] }};">
+                    <span class="h-2 w-2 rounded-full" style="background-color: {{ $chip['text'] }}"></span>
+                    {{ $chip['label'] }} ({{ $chip['total'] }})
+                </span>
+            @endforeach
+        </div>
+
         <div class="space-y-3 pb-24">
-            @forelse ($empresas as $empresa)
+            @if ($empresas->isEmpty())
+                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
+                    No hay empresas registradas
+                </article>
+            @else
+                @foreach ($empresas as $empresa)
                 <article
                     x-data="{ empresa: @js([
                         'id' => $empresa->id,
@@ -234,7 +248,20 @@
                         </div>
 
                         <div class="min-w-0">
-                            <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
+                                @php
+                                    $empresaEstado = $empresa->referido_estado ?? 'pendiente';
+                                    $empresaCfg = $estadoConfig[$empresaEstado] ?? [
+                                        'color_bg' => $empresaEstado === 'aprobado' ? '#DCFCE7' : ($empresaEstado === 'rechazado' ? '#FEE2E2' : '#FEF3C7'),
+                                        'color_text' => $empresaEstado === 'aprobado' ? '#166534' : ($empresaEstado === 'rechazado' ? '#991B1B' : '#92400E'),
+                                    ];
+                                @endphp
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style="background-color: {{ $empresaCfg['color_bg'] }}; color: {{ $empresaCfg['color_text'] }};">
+                                    <span class="h-1.5 w-1.5 rounded-full" style="background-color: {{ $empresaCfg['color_text'] }}"></span>
+                                    {{ ucfirst($empresaEstado) }}
+                                </span>
+                            </div>
                             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
                                <span class="inline-flex items-center gap-1">
                                      {{ optional($empresa->created_at)->format('d/m/Y') }}
@@ -349,11 +376,8 @@
                         </a>
                     </div>
                 </article>
-            @empty
-                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
-                    No hay empresas registradas
-                </article>
-            @endforelse
+                @endforeach
+            @endif
         </div>
 
         <div>

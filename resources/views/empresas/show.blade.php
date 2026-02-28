@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+    @php($estadoActualReferido = $empresa->referido_estado ?? 'pendiente')
+    @php($estadoColorActual = $estadoConfig[$estadoActualReferido] ?? ($estadoActualReferido === 'aprobado' ? ['color_bg' => '#DCFCE7', 'color_text' => '#166534'] : ($estadoActualReferido === 'rechazado' ? ['color_bg' => '#FEE2E2', 'color_text' => '#991B1B'] : ['color_bg' => '#FEF3C7', 'color_text' => '#92400E'])))
     <section class="space-y-4 pb-24" x-data="historialVisitas()" x-init="init()">
         <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-transparent">
             <div class="flex min-w-0 items-start gap-3">
@@ -122,6 +124,68 @@
                 </div>
 
             </article>
+
+            <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-show="esAdministracion || referido.comision_valor || referido.comision_estado === 'pagada'">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-950">Estado de Referido</h2>
+                        <p class="text-xs text-slate-500">Aprobación/rechazo y comisión</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold" :style="badgeStyle()">
+                        <span class="h-2 w-2 rounded-full" :style="dotStyle()"></span>
+                        <span x-text="referido.estadoLabel"></span>
+                    </span>
+                    <template x-if="referido.estado === 'rechazado' && referido.motivo_rechazo">
+                        <span class="text-xs text-rose-700" x-text="`Motivo: ${referido.motivo_rechazo}`"></span>
+                    </template>
+                </div>
+
+                <template x-if="esAdministracion">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" @click="aprobarReferido()" class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Aprobar</button>
+                            <button type="button" @click="openRechazoModal = true" class="inline-flex items-center rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700">Rechazar</button>
+                        </div>
+
+                        <div class="rounded-lg border border-slate-200 p-3">
+                            <h3 class="text-sm font-semibold text-slate-800">Comisión</h3>
+                            <div class="mt-2 grid gap-2 md:grid-cols-2">
+                                <input type="number" step="0.01" min="0" x-model="referido.comision_valor" :disabled="referido.estado !== 'aprobado'" class="rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Valor comisión">
+                                <select x-model="referido.comision_estado" :disabled="referido.estado !== 'aprobado'" class="rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="pagada">Pagada</option>
+                                </select>
+                            </div>
+                            <button type="button" @click="guardarComision()" :disabled="referido.estado !== 'aprobado' || guardandoComision" class="mt-2 inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50">Guardar comisión</button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="!esAdministracion && referido.comision_valor">
+                    <p class="text-sm text-slate-600" x-text="`Comisión: $${referido.comision_valor} (${referido.comision_estado})`"></p>
+                </template>
+
+                <p x-show="referidoMensaje" class="text-xs text-slate-600" x-text="referidoMensaje"></p>
+            </article>
+        </div>
+
+        <div x-show="openRechazoModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4" role="dialog" aria-modal="true" @keydown.escape.window="cerrarRechazoModal()">
+            <div class="absolute inset-0 bg-slate-900/40" @click="cerrarRechazoModal()"></div>
+            <div class="relative z-10 w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-900">Rechazar referido</h3>
+                    <button type="button" class="rounded-md p-1 text-slate-500 hover:bg-slate-100" @click="cerrarRechazoModal()">✕</button>
+                </div>
+                <textarea x-model="motivoRechazo" rows="4" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Motivo de rechazo" required></textarea>
+                <p x-show="rechazoError" class="mt-1 text-xs text-rose-600" x-text="rechazoError"></p>
+                <div class="mt-3 flex justify-end gap-2">
+                    <button type="button" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm" @click="cerrarRechazoModal()">Cancelar</button>
+                    <button type="button" class="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white" @click="confirmarRechazo()">Confirmar</button>
+                </div>
+            </div>
         </div>
 
         {{--
@@ -727,6 +791,21 @@
                 accionesError: '',
                 accionSuccess: '',
                 esAdministracion: @js((auth()->user()?->tipo_usuario ?? null) === 'administracion'),
+                referido: {
+                    estado: @js($estadoActualReferido),
+                    estadoLabel: @js(ucfirst($estadoActualReferido)),
+                    colors: @js($estadoColorActual),
+                    motivo_rechazo: @js($empresa->referido_motivo_rechazo),
+                    comision_estado: @js($empresa->comision_estado ?? 'pendiente'),
+                    comision_valor: @js($empresa->comision_valor !== null ? number_format((float) $empresa->comision_valor, 2, '.', '') : null),
+                    comision_pagada_at: @js(optional($empresa->comision_pagada_at)->toIso8601String()),
+                },
+                estadoConfig: @js($estadoConfig),
+                referidoMensaje: '',
+                guardandoComision: false,
+                openRechazoModal: false,
+                motivoRechazo: '',
+                rechazoError: '',
                 accionesCatalogo: @js($accionesCatalogo->map(fn ($accion) => ['id' => (int) $accion->id, 'nombre' => $accion->nombre])->values()),
                 accionUpdateUrlTemplate: @js(route('empresas.acciones.update', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
                 accionDeleteUrlTemplate: @js(route('empresas.acciones.destroy', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
@@ -1031,6 +1110,121 @@
                         this.mostrarAccionSuccess('Acción eliminada');
                     } catch (error) {
                         this.accionesError = 'No fue posible conectar con el servidor.';
+                    }
+                },
+
+                estadoColorFallback(estado) {
+                    if (estado === 'aprobado') {
+                        return { color_bg: '#DCFCE7', color_text: '#166534' };
+                    }
+                    if (estado === 'rechazado') {
+                        return { color_bg: '#FEE2E2', color_text: '#991B1B' };
+                    }
+                    return { color_bg: '#FEF3C7', color_text: '#92400E' };
+                },
+                badgeStyle() {
+                    return `background-color: ${this.referido.colors?.color_bg || '#FEF3C7'}; color: ${this.referido.colors?.color_text || '#92400E'}`;
+                },
+                dotStyle() {
+                    return `background-color: ${this.referido.colors?.color_text || '#92400E'}`;
+                },
+                syncEstadoReferido(data) {
+                    this.referido.estado = data.estado || this.referido.estado;
+                    this.referido.estadoLabel = this.referido.estado.charAt(0).toUpperCase() + this.referido.estado.slice(1);
+                    this.referido.colors = data.colors || this.estadoConfig[this.referido.estado] || this.estadoColorFallback(this.referido.estado);
+                    this.referido.motivo_rechazo = data.motivo_rechazo || null;
+                    this.referido.comision_estado = data.comision_estado || this.referido.comision_estado;
+                    this.referido.comision_valor = data.comision_valor ?? this.referido.comision_valor;
+                    this.referido.comision_pagada_at = data.comision_pagada_at || this.referido.comision_pagada_at;
+                },
+                async aprobarReferido() {
+                    this.referidoMensaje = '';
+                    try {
+                        const response = await fetch(`{{ route('empresas.referido.estado', $empresa) }}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ referido_estado: 'aprobado' }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            this.referidoMensaje = data.message || 'No se pudo aprobar.';
+                            return;
+                        }
+                        this.syncEstadoReferido(data);
+                        this.referidoMensaje = data.message || 'Referido aprobado.';
+                    } catch (error) {
+                        this.referidoMensaje = 'No fue posible conectar con el servidor.';
+                    }
+                },
+                cerrarRechazoModal() {
+                    this.openRechazoModal = false;
+                    this.motivoRechazo = '';
+                    this.rechazoError = '';
+                },
+                async confirmarRechazo() {
+                    this.rechazoError = '';
+                    if (!(this.motivoRechazo || '').trim()) {
+                        this.rechazoError = 'El motivo es obligatorio.';
+                        return;
+                    }
+                    try {
+                        const response = await fetch(`{{ route('empresas.referido.estado', $empresa) }}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({ referido_estado: 'rechazado', referido_motivo_rechazo: this.motivoRechazo }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            this.rechazoError = data.message || 'No se pudo rechazar.';
+                            return;
+                        }
+                        this.syncEstadoReferido(data);
+                        this.referidoMensaje = data.message || 'Referido rechazado.';
+                        this.cerrarRechazoModal();
+                    } catch (error) {
+                        this.rechazoError = 'No fue posible conectar con el servidor.';
+                    }
+                },
+                async guardarComision() {
+                    if (this.referido.estado !== 'aprobado') {
+                        return;
+                    }
+                    this.guardandoComision = true;
+                    this.referidoMensaje = '';
+                    try {
+                        const response = await fetch(`{{ route('empresas.referido.comision', $empresa) }}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({
+                                comision_estado: this.referido.comision_estado,
+                                comision_valor: this.referido.comision_valor === '' ? null : this.referido.comision_valor,
+                            }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            this.referidoMensaje = data.message || 'No se pudo actualizar comisión.';
+                            return;
+                        }
+                        this.referido.comision_estado = data.comision_estado || this.referido.comision_estado;
+                        this.referido.comision_valor = data.comision_valor;
+                        this.referido.comision_pagada_at = data.comision_pagada_at;
+                        this.referidoMensaje = data.message || 'Comisión actualizada.';
+                    } catch (error) {
+                        this.referidoMensaje = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.guardandoComision = false;
                     }
                 },
 
