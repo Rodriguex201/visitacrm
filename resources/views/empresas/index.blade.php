@@ -221,7 +221,12 @@
         </div>
 
         <div class="space-y-3 pb-24">
-            @forelse ($empresas as $empresa)
+            @if ($empresas->isEmpty())
+                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
+                    No hay empresas registradas
+                </article>
+            @else
+                @foreach ($empresas as $empresa)
                 <article
                     x-data="{ empresa: @js([
                         'id' => $empresa->id,
@@ -374,11 +379,8 @@
                         </a>
                     </div>
                 </article>
-            @empty
-                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
-                    No hay empresas registradas
-                </article>
-            @endforelse
+                @endforeach
+            @endif
         </div>
 
         <div>
