@@ -142,7 +142,7 @@ class UsuarioController extends Controller
                 'required',
                 'string',
                 'max:20',
-                'regex:/^[A-Za-z0-9]+$/',
+                'regex:/^(A|V)-\d{4}$/',
                 Rule::unique('users', 'codigo')->ignore($user->id),
             ],
             'name' => ['required', 'string', 'max:255'],
