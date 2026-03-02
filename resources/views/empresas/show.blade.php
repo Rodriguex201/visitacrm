@@ -121,7 +121,65 @@
                     </template>
                 </div>
 
+
             </article>
+
+            @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="referidoLabel(referidoForm.referido_estado)"></span>
+                    </div>
+
+                    <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
+                    <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
+
+                    <form class="space-y-4" @submit.prevent="guardarReferidoEstado()">
+                        <div>
+                            <label for="referido_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado del referido</label>
+                            <select id="referido_estado" x-model="referidoForm.referido_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="rechazado">Rechazado</option>
+                            </select>
+                            <p x-show="referidoErrors.referido_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_estado"></p>
+                        </div>
+
+                        <div x-show="referidoForm.referido_estado === 'rechazado'">
+                            <label for="referido_motivo_rechazo" class="mb-1 block text-sm font-medium text-slate-700">Motivo de rechazo</label>
+                            <textarea id="referido_motivo_rechazo" x-model="referidoForm.referido_motivo_rechazo" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Indique el motivo" :required="referidoForm.referido_estado === 'rechazado'"></textarea>
+                            <p x-show="referidoErrors.referido_motivo_rechazo" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_motivo_rechazo"></p>
+                        </div>
+
+                        <div x-show="referidoForm.referido_estado === 'aprobado' || referidoForm.comision_valor">
+                            <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión</label>
+                            <input id="comision_valor" x-model="referidoForm.comision_valor" type="number" step="0.01" min="0" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
+                            <p x-show="referidoErrors.comision_valor" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_valor"></p>
+                        </div>
+
+                        <div>
+                            <label for="comision_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado de comisión</label>
+                            <select id="comision_estado" x-model="referidoForm.comision_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="pagada">Pagada</option>
+                            </select>
+                            <p x-show="referidoErrors.comision_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_estado"></p>
+                        </div>
+
+                        <div class="grid gap-2 text-xs text-slate-500 md:grid-cols-2">
+                            <p x-text="referidoForm.referido_aprobado_at ? `Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}` : 'Aún sin aprobación'"></p>
+                            <p x-text="referidoForm.comision_pagada_at ? `Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}` : 'Comisión no pagada'"></p>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="referidoSaving">
+                                <span x-show="!referidoSaving">Guardar estado</span>
+                                <span x-show="referidoSaving">Guardando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </article>
+            @endif
         </div>
 
         {{--
@@ -662,16 +720,6 @@
     </section>
 
 
-    @php
-        $catalogoOpcionesPayload = collect($categoriasOpciones)
-            ->mapWithKeys(fn ($categoria) => [
-                $categoria => $catalogoOpciones->get($categoria, collect())
-                    ->map(fn ($opcion) => ['id' => (int) $opcion->id, 'nombre' => $opcion->nombre])
-                    ->values()
-                    ->all(),
-            ])
-            ->all();
-    @endphp
 
     <script>
         function historialVisitas() {
@@ -727,6 +775,12 @@
                 accionesError: '',
                 accionSuccess: '',
                 esAdministracion: @js((auth()->user()?->tipo_usuario ?? null) === 'administracion'),
+                referidoUpdateUrl: @js(route('empresas.referido.update', $empresa)),
+                referidoSaving: false,
+                referidoError: '',
+                referidoSuccess: '',
+                referidoErrors: {},
+                referidoForm: @js($referidoPayload),
                 accionesCatalogo: @js($accionesCatalogo->map(fn ($accion) => ['id' => (int) $accion->id, 'nombre' => $accion->nombre])->values()),
                 accionUpdateUrlTemplate: @js(route('empresas.acciones.update', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
                 accionDeleteUrlTemplate: @js(route('empresas.acciones.destroy', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
@@ -1394,6 +1448,96 @@
                         this.newOptionError = 'No fue posible conectar con el servidor.';
                     } finally {
                         this.newOptionSaving = false;
+                    }
+                },
+                referidoLabel(estado) {
+                    const labels = {
+                        pendiente: 'Pendiente',
+                        aprobado: 'Aprobado',
+                        rechazado: 'Rechazado',
+                    };
+
+                    return labels[estado] || 'Pendiente';
+                },
+                referidoBadgeClass(estado) {
+                    const clases = {
+                        pendiente: 'bg-amber-100 text-amber-800',
+                        aprobado: 'bg-emerald-100 text-emerald-800',
+                        rechazado: 'bg-rose-100 text-rose-800',
+                    };
+
+                    return clases[estado] || clases.pendiente;
+                },
+                formatDateTime(valor) {
+                    if (!valor) {
+                        return '';
+                    }
+
+                    const fecha = new Date(valor);
+                    if (Number.isNaN(fecha.getTime())) {
+                        return '';
+                    }
+
+                    return new Intl.DateTimeFormat('es-CO', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                    }).format(fecha).replace(',', '');
+                },
+                async guardarReferidoEstado() {
+                    this.referidoSaving = true;
+                    this.referidoError = '';
+                    this.referidoSuccess = '';
+                    this.referidoErrors = {};
+
+                    const payload = {
+                        referido_estado: this.referidoForm.referido_estado,
+                        referido_motivo_rechazo: this.referidoForm.referido_estado === 'rechazado'
+                            ? (this.referidoForm.referido_motivo_rechazo || '').trim()
+                            : null,
+                        comision_estado: this.referidoForm.comision_estado || 'pendiente',
+                        comision_valor: this.referidoForm.comision_valor === '' || this.referidoForm.comision_valor === null
+                            ? null
+                            : Number(this.referidoForm.comision_valor),
+                    };
+
+                    try {
+                        const response = await fetch(this.referidoUpdateUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify(payload),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            if (response.status === 422) {
+                                this.referidoErrors = Object.fromEntries(
+                                    Object.entries(data.errors || {}).map(([key, value]) => [key, value[0]])
+                                );
+                            }
+
+                            this.referidoError = data.message || 'No se pudo actualizar el estado del referido.';
+                            return;
+                        }
+
+                        this.referidoForm = {
+                            ...this.referidoForm,
+                            ...(data.data || {}),
+                            comision_valor: data.data?.comision_valor ?? null,
+                        };
+                        this.referidoSuccess = 'Estado actualizado correctamente.';
+                    } catch (error) {
+                        this.referidoError = 'No fue posible conectar con el servidor.';
+                    } finally {
+                        this.referidoSaving = false;
                     }
                 },
                 cotizacionEnviadaAtFormateada(valor = null) {
