@@ -210,6 +210,9 @@
 
         <div class="space-y-3 pb-24">
             @forelse ($empresas as $empresa)
+                @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
+                @php($estadoRefStyle = $estadoRef === 'aprobado' ? 'border-color: #86EFAC; background-color: #F0FDF4;' : ($estadoRef === 'rechazado' ? 'border-color: #FCA5A5; background-color: #FEF2F2;' : 'border-color: #FCD34D; background-color: #FFFBEB;'))
+                @php($estadoRefBadgeClass = $estadoRef === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : ($estadoRef === 'rechazado' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'))
                 <article
                     x-data="{ empresa: @js([
                         'id' => $empresa->id,
@@ -225,6 +228,7 @@
                     ]) }"
                     @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
                     class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                    style="{{ $estadoRefStyle }}"
                 >
                     <div class="flex min-w-0 items-center gap-3">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
@@ -278,10 +282,16 @@
                                     <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                         🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
                                     </span>
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                    </div>
                                 @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
                                     <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                         🔁 Referido por: {{ $empresa->creador->codigo }}
                                     </span>
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                    </div>
                                 @elseif ($empresa->responsable_user_id)
                                     <p class="mt-1 truncate text-xs text-slate-500">
                                         Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}

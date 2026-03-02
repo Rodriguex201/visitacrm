@@ -25,12 +25,22 @@ class Empresa extends Model
         'responsable_user_id',
         'referida_at',
         'cotizacion_numero',
+        'referido_estado',
+        'referido_motivo_rechazo',
+        'referido_aprobado_at',
+        'referido_aprobado_by',
+        'comision_estado',
+        'comision_valor',
+        'comision_pagada_at',
     ];
 
     protected $casts = [
         'referida_at' => 'datetime',
         'cotizacion_enviada' => 'boolean',
         'cotizacion_enviada_at' => 'datetime',
+        'referido_aprobado_at' => 'datetime',
+        'comision_pagada_at' => 'datetime',
+        'comision_valor' => 'decimal:2',
     ];
 
     public function sector(): BelongsTo
