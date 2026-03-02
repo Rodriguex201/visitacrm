@@ -14,7 +14,9 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->user()?->tipo_usuario !== 'administracion') {
+
             return redirect()->route('empresas.index');
+
         }
 
         return $next($request);
