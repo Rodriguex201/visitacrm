@@ -14,7 +14,7 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('dashboard');
 
     Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::post('/empresas/{empresa}/contactos', [ContactoController::class, 'store'])->name('empresas.contactos.store');
