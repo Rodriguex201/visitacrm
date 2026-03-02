@@ -125,6 +125,7 @@
             </article>
 
             @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
                 <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'comision_valor'])) }">
                     <div class="flex items-center justify-between gap-3">
                         <div>
@@ -156,10 +157,12 @@
                     <div class="space-y-1 text-xs text-slate-500">
                         <p x-show="referidoForm.referido_aprobado_at" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></p>
                         <p x-show="referidoForm.comision_pagada_at" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></p>
+
                     </div>
 
                     <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
                     <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
+
 
                     <div
                         x-cloak
@@ -223,6 +226,7 @@
                             </form>
                         </div>
                     </div>
+
                 </article>
             @endif
         </div>
