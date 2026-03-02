@@ -87,15 +87,17 @@
                 <nav class="flex-1 space-y-1.5 px-3 py-4 text-sm" :class="sidebarCollapsed ? 'md:px-2' : ''">
 
 
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isDashboard ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Inicio">
+                    @if ($isAdmin)
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isDashboard ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Inicio">
 
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.75 4.75h6.5v6.5h-6.5zM12.75 4.75h6.5v6.5h-6.5zM4.75 12.75h6.5v6.5h-6.5zM12.75 12.75h6.5v6.5h-6.5z"/>
-                        </svg>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.75 4.75h6.5v6.5h-6.5zM12.75 4.75h6.5v6.5h-6.5zM4.75 12.75h6.5v6.5h-6.5zM12.75 12.75h6.5v6.5h-6.5z"/>
+                            </svg>
 
-                        <span x-show="shouldShowLabels()" x-transition>Inicio</span>
-                    </a>
+                            <span x-show="shouldShowLabels()" x-transition>Inicio</span>
+                        </a>
+                    @endif
 
 
                     <a href="{{ route('empresas.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isEmpresas ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Empresas">
