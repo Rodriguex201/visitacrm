@@ -125,59 +125,108 @@
             </article>
 
             @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
-                <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+
+                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'comision_valor'])) }">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
-                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="referidoLabel(referidoForm.referido_estado)"></span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
+                            <p class="text-xs text-slate-500">Estado actual</p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                            @click="referidoModalOpen = true"
+                        >
+                            Opciones
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="`Estado: ${referidoLabel(referidoForm.referido_estado)}`"></span>
+
+                        <template x-if="referidoForm.referido_estado === 'aprobado'">
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión: ${referidoForm.comision_valor ? referidoForm.comision_valor : 'Sin valor'}`"></span>
+                        </template>
+
+                        <template x-if="referidoForm.referido_estado === 'aprobado'">
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión ${referidoForm.comision_estado === 'pagada' ? 'Pagada' : 'Pendiente'}`"></span>
+                        </template>
+                    </div>
+
+                    <div class="space-y-1 text-xs text-slate-500">
+                        <p x-show="referidoForm.referido_aprobado_at" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></p>
+                        <p x-show="referidoForm.comision_pagada_at" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></p>
+
                     </div>
 
                     <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
                     <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
 
-                    <form class="space-y-4" @submit.prevent="guardarReferidoEstado()">
-                        <div>
-                            <label for="referido_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado del referido</label>
-                            <select id="referido_estado" x-model="referidoForm.referido_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="aprobado">Aprobado</option>
-                                <option value="rechazado">Rechazado</option>
-                            </select>
-                            <p x-show="referidoErrors.referido_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_estado"></p>
-                        </div>
 
-                        <div x-show="referidoForm.referido_estado === 'rechazado'">
-                            <label for="referido_motivo_rechazo" class="mb-1 block text-sm font-medium text-slate-700">Motivo de rechazo</label>
-                            <textarea id="referido_motivo_rechazo" x-model="referidoForm.referido_motivo_rechazo" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Indique el motivo" :required="referidoForm.referido_estado === 'rechazado'"></textarea>
-                            <p x-show="referidoErrors.referido_motivo_rechazo" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_motivo_rechazo"></p>
-                        </div>
+                    <div
+                        x-cloak
+                        x-show="referidoModalOpen"
+                        class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="modal-title-referido"
+                        @keydown.escape.window="referidoModalOpen = false"
+                    >
+                        <div class="absolute inset-0 bg-slate-900/40" @click="referidoModalOpen = false"></div>
 
-                        <div x-show="referidoForm.referido_estado === 'aprobado' || referidoForm.comision_valor">
-                            <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión</label>
-                            <input id="comision_valor" x-model="referidoForm.comision_valor" type="number" step="0.01" min="0" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
-                            <p x-show="referidoErrors.comision_valor" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_valor"></p>
-                        </div>
+                        <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
+                            <div class="mb-4 flex items-center justify-between">
+                                <h3 id="modal-title-referido" class="text-lg font-semibold text-slate-900">Referido / Comisión</h3>
+                                <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="referidoModalOpen = false" aria-label="Cerrar modal">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
 
-                        <div>
-                            <label for="comision_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado de comisión</label>
-                            <select id="comision_estado" x-model="referidoForm.comision_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="pendiente">Pendiente</option>
-                                <option value="pagada">Pagada</option>
-                            </select>
-                            <p x-show="referidoErrors.comision_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_estado"></p>
-                        </div>
+                            <form class="space-y-4" @submit.prevent="guardarReferidoEstado()">
+                                <div>
+                                    <label for="referido_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado del referido</label>
+                                    <select id="referido_estado" x-model="referidoForm.referido_estado" name="referido_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="aprobado">Aprobado</option>
+                                        <option value="rechazado">Rechazado</option>
+                                    </select>
+                                    <p x-show="referidoErrors.referido_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_estado"></p>
+                                </div>
 
-                        <div class="grid gap-2 text-xs text-slate-500 md:grid-cols-2">
-                            <p x-text="referidoForm.referido_aprobado_at ? `Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}` : 'Aún sin aprobación'"></p>
-                            <p x-text="referidoForm.comision_pagada_at ? `Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}` : 'Comisión no pagada'"></p>
-                        </div>
+                                <div x-show="referidoForm.referido_estado === 'rechazado'">
+                                    <label for="referido_motivo_rechazo" class="mb-1 block text-sm font-medium text-slate-700">Motivo de rechazo</label>
+                                    <textarea id="referido_motivo_rechazo" x-model="referidoForm.referido_motivo_rechazo" name="referido_motivo_rechazo" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Indique el motivo" :required="referidoForm.referido_estado === 'rechazado'"></textarea>
+                                    <p x-show="referidoErrors.referido_motivo_rechazo" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_motivo_rechazo"></p>
+                                </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="referidoSaving">
-                                <span x-show="!referidoSaving">Guardar estado</span>
-                                <span x-show="referidoSaving">Guardando...</span>
-                            </button>
+                                <div>
+                                    <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión</label>
+                                    <input id="comision_valor" x-model="referidoForm.comision_valor" name="comision_valor" type="number" step="0.01" min="0" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
+                                    <p x-show="referidoErrors.comision_valor" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_valor"></p>
+                                </div>
+
+                                <div>
+                                    <label for="comision_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado de comisión</label>
+                                    <select id="comision_estado" x-model="referidoForm.comision_estado" name="comision_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="pagada">Pagada</option>
+                                    </select>
+                                    <p x-show="referidoErrors.comision_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_estado"></p>
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="referidoSaving">
+                                        <span x-show="!referidoSaving">Guardar estado</span>
+                                        <span x-show="referidoSaving">Guardando...</span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
+
                 </article>
             @endif
         </div>
