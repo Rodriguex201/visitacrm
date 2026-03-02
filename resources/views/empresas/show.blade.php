@@ -584,7 +584,7 @@
                         <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700" x-text="opcionesMensaje"></div>
                     </template>
 
-                    <template x-if="activeTab !== 'Cotizaciones'">
+                    <template x-if="activeTab !== 'Cotizaciones' && activeTab !== 'Como Llego'">
                         <div>
                             <div class="mb-3 flex flex-wrap gap-2" x-show="modalOpen">
                                 <template x-for="chip in draftOptionChips().slice(0, 8)" :key="`draft-${chip.id}`">
@@ -630,6 +630,37 @@
                                         </label>
                                     </template>
                                 </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="activeTab === 'Como Llego'">
+                        <div class="rounded-lg border border-slate-100 bg-slate-50/40 p-4">
+                            <div class="space-y-3">
+                                <template x-for="opcion in comoLlegoOpciones" :key="`como-llego-${opcion.id}`">
+                                    <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                                            <input
+                                                type="checkbox"
+                                                class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                :checked="isComoLlegoSeleccionada(opcion.id)"
+                                                @change="toggleComoLlego(opcion.id, $event.target.checked)"
+                                            >
+                                            <span x-text="opcion.nombre"></span>
+                                        </label>
+
+                                        <template x-if="opcion.requiere_texto">
+                                            <input
+                                                type="text"
+                                                class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100"
+                                                :placeholder="placeholderComoLlego(opcion.nombre)"
+                                                :disabled="!isComoLlegoSeleccionada(opcion.id)"
+                                                :value="comoLlegoTexto(opcion.id)"
+                                                @input="setComoLlegoTexto(opcion.id, $event.target.value)"
+                                            >
+                                        </template>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </template>
@@ -802,8 +833,15 @@
                 usuarioLoading: false,
                 usuarioSaving: false,
                 categoriasOpciones: @js($categoriasOpciones),
-                modalTabs: [...@js($categoriasOpciones), 'Cotizaciones'],
+                modalTabs: [...@js($categoriasOpciones), 'Como Llego', 'Cotizaciones'],
                 opcionesPorCategoria: @js($catalogoOpcionesPayload),
+                comoLlegoOpciones: @js($comoLlegoOpciones->map(fn ($opcion) => [
+                    'id' => (int) $opcion->id,
+                    'nombre' => $opcion->nombre,
+                    'requiere_texto' => (bool) $opcion->requiere_texto,
+                ])->values()),
+                savedComoLlego: @js($comoLlegoSeleccionado),
+                draftComoLlego: [],
 
                 savedSelectedIds: @js($opcionesSeleccionadas),
                 draftSelectedIds: [],
@@ -1381,12 +1419,14 @@
                     this.opcionesMensaje = '';
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
+                    this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = true;
                 },
                 cerrarPerfilComercialModal() {
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
+                    this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = false;
                 },
@@ -1440,6 +1480,56 @@
 
                     this.draftSelectedIds.push(normalizedId);
 
+                },
+                isComoLlegoSeleccionada(opcionId) {
+                    const normalizedId = Number(opcionId);
+                    return this.draftComoLlego.some((item) => Number(item.opcion_id) === normalizedId);
+                },
+                toggleComoLlego(opcionId, checked) {
+                    const normalizedId = Number(opcionId);
+                    const existe = this.isComoLlegoSeleccionada(normalizedId);
+
+                    if (!checked) {
+                        this.draftComoLlego = this.draftComoLlego
+                            .filter((item) => Number(item.opcion_id) !== normalizedId)
+                            .map((item) => ({ ...item }));
+                        return;
+                    }
+
+                    if (existe) {
+                        return;
+                    }
+
+                    this.draftComoLlego = [
+                        ...this.draftComoLlego,
+                        { opcion_id: normalizedId, texto: null },
+                    ];
+                },
+                comoLlegoTexto(opcionId) {
+                    const item = this.draftComoLlego.find((entry) => Number(entry.opcion_id) === Number(opcionId));
+                    return item?.texto || '';
+                },
+                setComoLlegoTexto(opcionId, texto) {
+                    const normalizedId = Number(opcionId);
+                    this.draftComoLlego = this.draftComoLlego.map((item) => {
+                        if (Number(item.opcion_id) !== normalizedId) {
+                            return item;
+                        }
+
+                        return {
+                            ...item,
+                            texto,
+                        };
+                    });
+                },
+                placeholderComoLlego(nombre) {
+                    const placeholders = {
+                        'Referido': '¿Quién lo refirió?',
+                        'Redes Sociales': '¿Cuál red?',
+                        'Internet': '¿Dónde?',
+                    };
+
+                    return placeholders[nombre] || 'Escribe un detalle';
                 },
                 abrirModalOpcion(categoria) {
                     this.newOptionCategoria = categoria;
@@ -1629,6 +1719,12 @@
                                 opciones: this.draftSelectedIds,
                                 cotizacion_enviada: this.draftCotizacionEnviada ? 1 : 0,
                                 cotizacion_numero: this.form.cotizacion_numero || null,
+                                como_llego: this.draftComoLlego
+                                    .filter((item) => Number(item.opcion_id) > 0)
+                                    .map((item) => ({
+                                        opcion_id: Number(item.opcion_id),
+                                        texto: item.texto || null,
+                                    })),
                             }),
 
                         });
@@ -1642,6 +1738,8 @@
 
                         this.savedSelectedIds = (data.opciones || []).map((id) => Number(id));
                         this.draftSelectedIds = [...this.savedSelectedIds];
+                        this.savedComoLlego = Array.isArray(data.como_llego) ? data.como_llego : [];
+                        this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
                         this.savedCotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
                         this.savedCotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
                         this.savedCotizacionNumero = data.empresa?.cotizacion_numero || null;

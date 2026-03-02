@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
 use App\Models\EmpresaOpcion;
+use App\Models\EmpresaComoLlego;
+use App\Models\EmpresaComoLlegoOpcion;
 use Carbon\Carbon;
 use App\Models\Sector;
 use App\Models\Accion;
@@ -161,6 +163,21 @@ class EmpresaController extends Controller
             'Equipos',
         ];
 
+        $comoLlegoOpciones = EmpresaComoLlegoOpcion::query()
+            ->where('activo', 1)
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get(['id', 'nombre', 'requiere_texto']);
+
+        $comoLlegoSeleccionado = $empresa->comoLlego()
+            ->get(['opcion_id', 'texto'])
+            ->map(fn ($item) => [
+                'opcion_id' => (int) $item->opcion_id,
+                'texto' => $item->texto,
+            ])
+            ->values()
+            ->all();
+
         $catalogoOpciones = CatalogoOpcion::query()
             ->whereIn('categoria', $categoriasOpciones)
             ->where('activo', 1)
@@ -190,7 +207,7 @@ class EmpresaController extends Controller
             'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
         ];
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'referidoPayload'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -258,6 +275,9 @@ class EmpresaController extends Controller
             'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
             'cotizacion_enviada' => ['nullable', 'boolean'],
             'cotizacion_numero' => ['nullable', 'string', 'max:50'],
+            'como_llego' => ['nullable', 'array'],
+            'como_llego.*.opcion_id' => ['required', 'integer'],
+            'como_llego.*.texto' => ['nullable', 'string', 'max:255'],
         ]);
 
         $opciones = collect($validated['opciones'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
@@ -277,36 +297,92 @@ class EmpresaController extends Controller
             }
         }
 
-        $empresa->opciones()->sync($opciones->all());
+        $comoLlegoRows = collect($validated['como_llego'] ?? [])
+            ->map(function ($item) {
+                $opcionId = (int) ($item['opcion_id'] ?? 0);
+                $texto = array_key_exists('texto', $item) ? trim((string) ($item['texto'] ?? '')) : '';
 
-        if (array_key_exists('cotizacion_numero', $validated)) {
-            $cotizacionNumero = $validated['cotizacion_numero'] !== null
-                ? trim($validated['cotizacion_numero'])
-                : null;
+                return [
+                    'opcion_id' => $opcionId,
+                    'texto' => $texto !== '' ? $texto : null,
+                ];
+            })
+            ->filter(fn ($item) => $item['opcion_id'] > 0)
+            ->unique('opcion_id')
+            ->values();
 
-            $empresa->cotizacion_numero = $cotizacionNumero !== '' ? $cotizacionNumero : null;
-        }
+        if ($comoLlegoRows->isNotEmpty()) {
+            $comoLlegoOpciones = EmpresaComoLlegoOpcion::query()
+                ->whereIn('id', $comoLlegoRows->pluck('opcion_id'))
+                ->where('activo', 1)
+                ->get(['id', 'requiere_texto'])
+                ->keyBy('id');
 
-        if (array_key_exists('cotizacion_enviada', $validated) && ($request->user()?->tipo_usuario ?? null) === 'administracion') {
-            $cotizacionEnviadaNueva = (bool) $validated['cotizacion_enviada'];
-            $cotizacionEnviadaActual = (bool) $empresa->cotizacion_enviada;
-
-            if ($cotizacionEnviadaNueva !== $cotizacionEnviadaActual) {
-                $empresa->cotizacion_enviada_at = $cotizacionEnviadaNueva ? now() : null;
+            if ($comoLlegoOpciones->count() !== $comoLlegoRows->count()) {
+                return response()->json([
+                    'message' => 'Una o más opciones de "Como Llego" no existen o están inactivas.',
+                ], 422);
             }
 
-            $empresa->cotizacion_enviada = $cotizacionEnviadaNueva;
+            foreach ($comoLlegoRows as $index => $row) {
+                $opcion = $comoLlegoOpciones->get($row['opcion_id']);
+
+                if ($opcion && (bool) $opcion->requiere_texto && ! $row['texto']) {
+                    return response()->json([
+                        'message' => 'El texto es obligatorio para una o más opciones de "Como Llego".',
+                        'errors' => [
+                            "como_llego.$index.texto" => ['El texto es obligatorio para esta opción.'],
+                        ],
+                    ], 422);
+                }
+            }
         }
 
-        if (array_key_exists('cotizacion_enviada', $validated)
-            || array_key_exists('cotizacion_numero', $validated)) {
-            $empresa->save();
-        }
+        DB::transaction(function () use ($empresa, $opciones, $validated, $request, $comoLlegoRows) {
+            $empresa->opciones()->sync($opciones->all());
+
+            if (array_key_exists('cotizacion_numero', $validated)) {
+                $cotizacionNumero = $validated['cotizacion_numero'] !== null
+                    ? trim($validated['cotizacion_numero'])
+                    : null;
+
+                $empresa->cotizacion_numero = $cotizacionNumero !== '' ? $cotizacionNumero : null;
+            }
+
+            if (array_key_exists('cotizacion_enviada', $validated) && ($request->user()?->tipo_usuario ?? null) === 'administracion') {
+                $cotizacionEnviadaNueva = (bool) $validated['cotizacion_enviada'];
+                $cotizacionEnviadaActual = (bool) $empresa->cotizacion_enviada;
+
+                if ($cotizacionEnviadaNueva !== $cotizacionEnviadaActual) {
+                    $empresa->cotizacion_enviada_at = $cotizacionEnviadaNueva ? now() : null;
+                }
+
+                $empresa->cotizacion_enviada = $cotizacionEnviadaNueva;
+            }
+
+            if (array_key_exists('cotizacion_enviada', $validated)
+                || array_key_exists('cotizacion_numero', $validated)) {
+                $empresa->save();
+            }
+
+            EmpresaComoLlego::query()->where('empresa_id', $empresa->id)->delete();
+
+            if ($comoLlegoRows->isNotEmpty()) {
+                EmpresaComoLlego::query()->insert(
+                    $comoLlegoRows->map(fn ($row) => [
+                        'empresa_id' => $empresa->id,
+                        'opcion_id' => $row['opcion_id'],
+                        'texto' => $row['texto'],
+                    ])->all()
+                );
+            }
+        });
 
         return response()->json([
             'ok' => true,
             'message' => 'Opciones guardadas correctamente.',
             'opciones' => $opciones,
+            'como_llego' => $comoLlegoRows->all(),
             'empresa' => [
                 'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
                 'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),

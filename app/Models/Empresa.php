@@ -82,4 +82,9 @@ class Empresa extends Model
     {
         return $this->hasMany(EmpresaAccion::class, 'empresa_id');
     }
+
+    public function comoLlego(): HasMany
+    {
+        return $this->hasMany(EmpresaComoLlego::class, 'empresa_id');
+    }
 }
