@@ -194,6 +194,26 @@
             </div>
         </form>
 
+        <div class="flex flex-wrap gap-2 mt-3">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                style="background-color:#FEF3C7; color:#92400E;">
+                <span class="h-2 w-2 rounded-full" style="background-color:#92400E;"></span>
+                Pendiente
+            </span>
+
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                style="background-color:#DCFCE7; color:#166534;">
+                <span class="h-2 w-2 rounded-full" style="background-color:#166534;"></span>
+                Aprobado
+            </span>
+
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                style="background-color:#FEE2E2; color:#991B1B;">
+                <span class="h-2 w-2 rounded-full" style="background-color:#991B1B;"></span>
+                Rechazado
+            </span>
+        </div>
+
         <p class="text-xs text-slate-500">
             @if ($usaRangoPersonalizado)
                 Mostrando empresas
