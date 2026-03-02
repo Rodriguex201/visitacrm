@@ -35,6 +35,9 @@ class EmpresaController extends Controller
         $q = trim((string) $request->query('q', ''));
         $desdeInput = $request->query('desde');
         $hastaInput = $request->query('hasta');
+        $estadoInputRaw = strtolower(trim((string) $request->query('estado', '')));
+        $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
+        $estadoInput = in_array($estadoInputRaw, $estadosValidos, true) ? $estadoInputRaw : '';
 
         $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
@@ -62,6 +65,10 @@ class EmpresaController extends Controller
                 $query->where('nombre', 'like', "%{$q}%")
                     ->orWhere('ciudad', 'like', "%{$q}%");
             });
+        }
+
+        if ($estadoInput !== '') {
+            $empresasQuery->where('empresas.referido_estado', $estadoInput);
         }
 
         if (! $usaRangoPersonalizado) {
@@ -93,6 +100,7 @@ class EmpresaController extends Controller
             'q',
             'desdeInput',
             'hastaInput',
+            'estadoInput',
             'usaRangoPersonalizado',
             'desde',
             'hasta',

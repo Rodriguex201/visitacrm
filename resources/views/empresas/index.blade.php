@@ -178,9 +178,19 @@
                     class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                 >
 
+                <select
+                    name="estado"
+                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-1"
+                >
+                    <option value="">Estado (Todos)</option>
+                    <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
+                    <option value="aprobado" @selected($estadoInput === 'aprobado')>Aprobado</option>
+                    <option value="rechazado" @selected($estadoInput === 'rechazado')>Rechazado</option>
+                </select>
+
                 <button
                     type="submit"
-                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-2"
+                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-1"
                 >
                     Filtrar
                 </button>
