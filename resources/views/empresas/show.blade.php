@@ -203,7 +203,7 @@
                                     <p x-show="referidoErrors.referido_motivo_rechazo" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_motivo_rechazo"></p>
                                 </div>
 
-                                <div>
+                                <div x-show="referidoForm.referido_estado === 'aprobado'">
                                     <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión</label>
                                     <input id="comision_valor" x-model="referidoForm.comision_valor" name="comision_valor" type="number" step="0.01" min="0" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
                                     <p x-show="referidoErrors.comision_valor" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_valor"></p>
@@ -1640,7 +1640,7 @@
                             ? (this.referidoForm.referido_motivo_rechazo || '').trim()
                             : null,
                         comision_estado: this.referidoForm.comision_estado || 'pendiente',
-                        comision_valor: this.referidoForm.comision_valor === '' || this.referidoForm.comision_valor === null
+                        comision_valor: this.referidoForm.referido_estado !== 'aprobado' || this.referidoForm.comision_valor === '' || this.referidoForm.comision_valor === null
                             ? null
                             : Number(this.referidoForm.comision_valor),
                     };
