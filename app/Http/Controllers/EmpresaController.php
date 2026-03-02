@@ -171,8 +171,26 @@ class EmpresaController extends Controller
 
         $opcionesSeleccionadas = $empresa->opciones()->pluck('catalogo_opciones.id')->map(fn ($id) => (int) $id)->values();
 
+        $catalogoOpcionesPayload = collect($categoriasOpciones)
+            ->mapWithKeys(fn ($categoria) => [
+                $categoria => $catalogoOpciones->get($categoria, collect())
+                    ->map(fn ($opcion) => ['id' => (int) $opcion->id, 'nombre' => $opcion->nombre])
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo'));
+        $referidoPayload = [
+            'referido_estado' => $empresa->referido_estado ?: 'pendiente',
+            'referido_motivo_rechazo' => $empresa->referido_motivo_rechazo,
+            'referido_aprobado_at' => optional($empresa->referido_aprobado_at)->toIso8601String(),
+            'referido_aprobado_by' => $empresa->referido_aprobado_by,
+            'comision_estado' => $empresa->comision_estado ?: 'pendiente',
+            'comision_valor' => $empresa->comision_valor,
+            'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
+        ];
+
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'referidoPayload'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -322,6 +340,81 @@ class EmpresaController extends Controller
                 'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
                 'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),
                 'cotizacion_numero' => $empresa->cotizacion_numero,
+            ],
+        ]);
+    }
+
+    public function updateReferidoEstado(Request $request, Empresa $empresa): JsonResponse
+    {
+        $this->authorize('view', $empresa);
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'referido_estado' => ['required', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
+            'referido_motivo_rechazo' => ['nullable', 'string', 'min:5'],
+            'comision_estado' => ['nullable', Rule::in(['pendiente', 'pagada'])],
+            'comision_valor' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $referidoEstado = $validated['referido_estado'];
+        $motivoRechazo = isset($validated['referido_motivo_rechazo'])
+            ? trim((string) $validated['referido_motivo_rechazo'])
+            : null;
+
+        if ($referidoEstado === 'rechazado' && mb_strlen((string) $motivoRechazo) < 5) {
+            return response()->json([
+                'message' => 'El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.',
+                'errors' => [
+                    'referido_motivo_rechazo' => ['El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.'],
+                ],
+            ], 422);
+        }
+
+        $empresa->referido_estado = $referidoEstado;
+        $empresa->referido_motivo_rechazo = $referidoEstado === 'rechazado' ? $motivoRechazo : null;
+
+        if ($referidoEstado === 'aprobado' && ! $empresa->referido_aprobado_at) {
+            $empresa->referido_aprobado_at = now();
+            $empresa->referido_aprobado_by = (int) $request->user()->id;
+        }
+
+        if ($referidoEstado !== 'aprobado') {
+            $empresa->referido_aprobado_at = null;
+            $empresa->referido_aprobado_by = null;
+        }
+
+        if (array_key_exists('comision_estado', $validated)) {
+            $comisionEstado = $validated['comision_estado'] ?? 'pendiente';
+            $empresa->comision_estado = $comisionEstado;
+
+            if ($comisionEstado === 'pagada') {
+                $empresa->comision_pagada_at = now();
+            }
+
+            if ($comisionEstado === 'pendiente') {
+                $empresa->comision_pagada_at = null;
+            }
+        }
+
+        if (array_key_exists('comision_valor', $validated)) {
+            $empresa->comision_valor = $validated['comision_valor'];
+        }
+
+        $empresa->save();
+
+        return response()->json([
+            'ok' => true,
+            'data' => [
+                'referido_estado' => $empresa->referido_estado,
+                'referido_motivo_rechazo' => $empresa->referido_motivo_rechazo,
+                'referido_aprobado_at' => optional($empresa->referido_aprobado_at)->toIso8601String(),
+                'referido_aprobado_by' => $empresa->referido_aprobado_by,
+                'comision_estado' => $empresa->comision_estado,
+                'comision_valor' => $empresa->comision_valor,
+                'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
             ],
         ]);
     }
