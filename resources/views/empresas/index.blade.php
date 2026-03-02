@@ -194,6 +194,44 @@
             </div>
         </form>
 
+        @php
+            $estadoLegendConfig = [
+                'pendiente' => [
+                    'label' => 'Pendiente',
+                    'bg' => '#FEF3C7',
+                    'text' => '#92400E',
+                ],
+                'aprobado' => [
+                    'label' => 'Aprobado',
+                    'bg' => '#DCFCE7',
+                    'text' => '#166534',
+                ],
+                'rechazado' => [
+                    'label' => 'Rechazado',
+                    'bg' => '#FEE2E2',
+                    'text' => '#991B1B',
+                ],
+            ];
+
+            $resumenEstados = $resumenReferidos ?? [];
+        @endphp
+
+        <div class="flex flex-wrap gap-2">
+            @foreach ($estadoLegendConfig as $estadoKey => $estadoItem)
+                <span
+                    class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    style="background-color: {{ $estadoItem['bg'] }}; color: {{ $estadoItem['text'] }};"
+                >
+                    <span
+                        class="h-2 w-2 rounded-full"
+                        style="background-color: {{ $estadoItem['text'] }};"
+                        aria-hidden="true"
+                    ></span>
+                    {{ $estadoItem['label'] }} ({{ data_get($resumenEstados, $estadoKey, 0) }})
+                </span>
+            @endforeach
+        </div>
+
         <p class="text-xs text-slate-500">
             @if ($usaRangoPersonalizado)
                 Mostrando empresas
