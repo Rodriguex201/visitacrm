@@ -86,82 +86,83 @@
                 </div>
             </article>
 
-            <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <h2 class="text-lg font-semibold text-slate-950">Gestion Inicial</h2>
-                        <p class="text-xs text-slate-500">Selección múltiple</p>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                        @click="abrirPerfilComercialModal()"
-                    >
-                        Configurar
-                    </button>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-
-                    <template x-for="chip in savedOptionChips().slice(0, 6)" :key="chip.id">
-                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-                            <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
-                            <span class="text-xs" x-text="chip.nombre"></span>
-                        </span>
-                    </template>
-
-                    <template x-if="savedOptionChips().length > 6">
-                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${savedOptionChips().length - 6}`"></span>
-                    </template>
-
-                    <template x-if="savedOptionChips().length === 0">
-
-                        <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
-                    </template>
-                </div>
-
-
-            </article>
-
-            @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
-
-                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'comision_valor'])) }">
+            <div class="space-y-4">
+                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
-                            <p class="text-xs text-slate-500">Estado actual</p>
+                            <h2 class="text-lg font-semibold text-slate-950">Gestion Inicial</h2>
+                            <p class="text-xs text-slate-500">Selección múltiple</p>
                         </div>
 
                         <button
                             type="button"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            @click="referidoModalOpen = true"
+                            @click="abrirPerfilComercialModal()"
                         >
-                            Opciones
+                            Configurar
                         </button>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="`Estado: ${referidoLabel(referidoForm.referido_estado)}`"></span>
+                    <div class="flex flex-wrap gap-2">
 
-                        <template x-if="referidoForm.referido_estado === 'aprobado'">
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión: ${referidoForm.comision_valor ? referidoForm.comision_valor : 'Sin valor'}`"></span>
+                        <template x-for="chip in savedOptionChips().slice(0, 6)" :key="chip.id">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                                <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
+                                <span class="text-xs" x-text="chip.nombre"></span>
+                            </span>
                         </template>
 
-                        <template x-if="referidoForm.referido_estado === 'aprobado'">
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión ${referidoForm.comision_estado === 'pagada' ? 'Pagada' : 'Pendiente'}`"></span>
+                        <template x-if="savedOptionChips().length > 6">
+                            <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`+${savedOptionChips().length - 6}`"></span>
+                        </template>
+
+                        <template x-if="savedOptionChips().length === 0">
+
+                            <span class="text-sm text-slate-500">Sin opciones seleccionadas</span>
                         </template>
                     </div>
 
-                    <div class="space-y-1 text-xs text-slate-500">
-                        <p x-show="referidoForm.referido_aprobado_at" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></p>
-                        <p x-show="referidoForm.comision_pagada_at" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></p>
 
-                    </div>
+                </article>
 
-                    <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
-                    <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
+                @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+
+                    <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'comision_valor'])) }">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
+                                <p class="text-xs text-slate-500">Estado actual</p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                @click="referidoModalOpen = true"
+                            >
+                                Opciones
+                            </button>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="`Estado: ${referidoLabel(referidoForm.referido_estado)}`"></span>
+
+                            <template x-if="referidoForm.referido_estado === 'aprobado'">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión: ${referidoForm.comision_valor ? referidoForm.comision_valor : 'Sin valor'}`"></span>
+                            </template>
+
+                            <template x-if="referidoForm.referido_estado === 'aprobado'">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión ${referidoForm.comision_estado === 'pagada' ? 'Pagada' : 'Pendiente'}`"></span>
+                            </template>
+                        </div>
+
+                        <div class="space-y-1 text-xs text-slate-500">
+                            <p x-show="referidoForm.referido_aprobado_at" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></p>
+                            <p x-show="referidoForm.comision_pagada_at" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></p>
+
+                        </div>
+
+                        <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
+                        <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
 
 
                     <div
@@ -227,8 +228,9 @@
                         </div>
                     </div>
 
-                </article>
-            @endif
+                    </article>
+                @endif
+            </div>
         </div>
 
         {{--
