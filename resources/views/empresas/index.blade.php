@@ -318,15 +318,25 @@
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
                                             </span>
-                                            <div class="mt-1">
+                                            <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoInput === 'aprobado')
+                                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->creador->codigo }}
                                             </span>
-                                            <div class="mt-1">
+                                            <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoInput === 'aprobado')
+                                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif ($empresa->responsable_user_id)
                                             <p class="mt-1 truncate text-xs text-slate-500">
