@@ -322,11 +322,13 @@
                                                 @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+
                                                     </span>
                                                 @endif
                                                 @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+
                                                     </span>
                                                 @endif
                                             </div>
@@ -339,11 +341,13 @@
                                                 @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+
                                                     </span>
                                                 @endif
                                                 @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+
                                                     </span>
                                                 @endif
                                             </div>
@@ -359,6 +363,7 @@
                                             <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                 Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
                                             </span>
+
                                             @if (!is_null($empresa->referido_aprobado_at))
                                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                     Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
@@ -370,6 +375,7 @@
                                             <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                 Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
                                             </span>
+
                                         </div>
                                     @endif
                                 </div>
