@@ -101,6 +101,8 @@ class EmpresaController extends Controller
             ->appends($request->query());
 
         $sectores = Sector::query()
+            ->where('activo', 1)
+            ->orderBy('orden')
             ->orderBy('nombre')
             ->get();
 

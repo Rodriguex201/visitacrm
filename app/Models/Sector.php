@@ -11,6 +11,13 @@ class Sector extends Model
 
     protected $fillable = [
         'nombre',
+        'activo',
+        'orden',
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
+        'orden' => 'integer',
     ];
 
     public function empresas(): HasMany
