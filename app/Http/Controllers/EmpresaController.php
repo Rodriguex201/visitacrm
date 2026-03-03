@@ -35,9 +35,12 @@ class EmpresaController extends Controller
         $q = trim((string) $request->query('q', ''));
         $desdeInput = $request->query('desde');
         $hastaInput = $request->query('hasta');
-        $estadoInputRaw = strtolower(trim((string) $request->query('referido_estado', $request->query('estado', ''))));
+
+        $estado = strtolower(trim((string) $request->query('estado', '')));
+
         $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
-        $estadoInput = in_array($estadoInputRaw, $estadosValidos, true) ? $estadoInputRaw : '';
+        $estadoInput = in_array($estado, $estadosValidos, true) ? $estado : '';
+        $soloAprobados = $estado === 'aprobado';
 
         $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
@@ -86,12 +89,14 @@ class EmpresaController extends Controller
             }
         }
 
-        $resumenAprobados = null;
 
-        if ($request->query('referido_estado') === 'aprobado') {
-            $resumenAprobados = (clone $empresasQuery)
-                ->selectRaw('COUNT(*) as total, COALESCE(SUM(comision_valor),0) as comision_total')
-                ->first();
+        $comisionTotal = null;
+        $totalEmpresas = null;
+
+        if ($soloAprobados) {
+            $comisionTotal = (clone $empresasQuery)->sum('comision_valor');
+            $totalEmpresas = (clone $empresasQuery)->count();
+
         }
 
         $empresas = $empresasQuery
@@ -109,7 +114,11 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
-            'resumenAprobados',
+
+            'soloAprobados',
+            'comisionTotal',
+            'totalEmpresas',
+
             'usaRangoPersonalizado',
             'desde',
             'hasta',

@@ -147,8 +147,10 @@
             </div>
         @endif
 
-        <div class="grid gap-4 lg:grid-cols-12 lg:items-start">
-            <div class="space-y-4 lg:col-span-8">
+
+        <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
+            <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
+
                 <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
                     <div class="grid gap-2 md:grid-cols-12">
                         <div class="relative md:col-span-3">
@@ -181,7 +183,9 @@
                         >
 
                         <select
-                            name="referido_estado"
+
+                            name="estado"
+
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
                             <option value="">Estado (Todos)</option>
@@ -379,6 +383,7 @@
                                     </form>
                                 @endif
 
+
                                 <a
                                     href="{{ route('empresas.show', $empresa) }}"
                                     @click.stop
@@ -403,25 +408,30 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-4">
-                @if (request('referido_estado') === 'aprobado')
+            @if ($soloAprobados)
+                <div class="lg:col-span-1">
+
                     <aside class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
                         <dl class="mt-4 space-y-3">
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">
-                                    $ {{ number_format((float) ($resumenAprobados->comision_total ?? 0), 0, ',', '.') }}
+
+                                    $ {{ number_format((float) ($comisionTotal ?? 0), 0, ',', '.') }}
+
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
-                                <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $resumenAprobados->total ?? 0 }}</dd>
+
+                                <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
                             </div>
                         </dl>
                     </aside>
-                @endif
-            </div>
+                </div>
+            @endif
+
         </div>
 
         <div
