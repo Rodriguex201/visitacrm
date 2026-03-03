@@ -147,257 +147,281 @@
             </div>
         @endif
 
-        <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
-            <div class="grid gap-2 md:grid-cols-12">
-                <div class="relative md:col-span-3">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-                        </svg>
-                    </span>
-                    <input
-                        type="text"
-                        name="q"
-                        value="{{ $q }}"
-                        placeholder="Buscar por nombre o ciudad..."
-                        class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                </div>
-
-                <input
-                    type="date"
-                    name="desde"
-                    value="{{ $desdeInput }}"
-                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
-                >
-
-                <input
-                    type="date"
-                    name="hasta"
-                    value="{{ $hastaInput }}"
-                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
-                >
-
-                <select
-                    name="estado"
-                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
-                >
-                    <option value="">Estado (Todos)</option>
-                    <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
-                    <option value="aprobado" @selected($estadoInput === 'aprobado')>Aprobado</option>
-                    <option value="rechazado" @selected($estadoInput === 'rechazado')>Rechazado</option>
-                </select>
-
-                <button
-                    type="submit"
-                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-1"
-                >
-                    Filtrar
-                </button>
-
-                <a
-                    href="{{ route('empresas.index') }}"
-                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:col-span-1"
-                >
-                    Limpiar
-                </a>
-            </div>
-        </form>
-
-        <div class="flex flex-wrap gap-2 mt-3">
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                style="background-color:#FEF3C7; color:#92400E;">
-                <span class="h-2 w-2 rounded-full" style="background-color:#92400E;"></span>
-                Pendiente
-            </span>
-
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                style="background-color:#DCFCE7; color:#166534;">
-                <span class="h-2 w-2 rounded-full" style="background-color:#166534;"></span>
-                Aprobado
-            </span>
-
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                style="background-color:#FEE2E2; color:#991B1B;">
-                <span class="h-2 w-2 rounded-full" style="background-color:#991B1B;"></span>
-                Rechazado
-            </span>
-        </div>
-
-        <p class="text-xs text-slate-500">
-            @if ($usaRangoPersonalizado)
-                Mostrando empresas
-                @if ($desde)
-                    desde {{ $desde->format('d/m/Y') }}
-                @endif
-                @if ($hasta)
-                    hasta {{ $hasta->format('d/m/Y') }}
-                @endif
-            @else
-                Mostrando empresas del mes actual
-            @endif
-        </p>
-
-        <div class="space-y-3 pb-24">
-            @forelse ($empresas as $empresa)
-                @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
-                @php($estadoRefStyle = $estadoRef === 'aprobado' ? 'border-color: #86EFAC; background-color: #F0FDF4;' : ($estadoRef === 'rechazado' ? 'border-color: #FCA5A5; background-color: #FEF2F2;' : 'border-color: #FCD34D; background-color: #FFFBEB;'))
-                @php($estadoRefBadgeClass = $estadoRef === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : ($estadoRef === 'rechazado' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'))
-                <article
-                    x-data="{ empresa: @js([
-                        'id' => $empresa->id,
-                        'nombre' => $empresa->nombre,
-                        // 'nit' => $empresa->nit,
-                        'ciudad' => $empresa->ciudad,
-                        'contacto_nombre' => $empresa->contacto_nombre,
-                        'direccion' => $empresa->direccion,
-                        'telefono' => $empresa->telefono,
-                        'email' => $empresa->email,
-                        'sector_id' => $empresa->sector_id,
-                        'notas' => $empresa->notas,
-                    ]) }"
-                    @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
-                    class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
-                    style="{{ $estadoRefStyle }}"
-                >
-                    <div class="flex min-w-0 items-center gap-3">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
-                            </svg>
-                        </div>
-
-                        <div class="min-w-0">
-                            <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
-                            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                               <span class="inline-flex items-center gap-1">
-                                     {{ optional($empresa->created_at)->format('d/m/Y') }}
-                                </span>
-                            <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
-                                        <circle cx="12" cy="9.75" r="2.25" />
-                                    </svg>
-                                    {{ $empresa->ciudad }}
-                                </span>
-                                {{--
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v13.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V5.25z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 4.5h6" />
-                                    </svg>
-                                    {{ $empresa->nit ?: 'Sin NIT' }}
-                                </span>
-                                --}}
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
-                                    </svg>
-                                    {{ $empresa->sector?->nombre ?: 'Sin sector' }}
-                                </span>
-
-                            </div>
-
-                            @if ($empresa->contacto_nombre)
-                                <p class="mt-1 flex items-center gap-1 text-sm text-slate-500">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a8.966 8.966 0 0114.998 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.499-1.632z" />
-                                    </svg>
-                                    <span>Contacto: {{ $empresa->contacto_nombre }}</span>
-                                </p>
-                            @endif
-
-                            @if ($esAdministracion)
-                                @if ($empresa->referida_at)
-                                    <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                        🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
-                                    </span>
-                                    <div class="mt-1">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                    </div>
-                                @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                    <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                        🔁 Referido por: {{ $empresa->creador->codigo }}
-                                    </span>
-                                    <div class="mt-1">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                    </div>
-                                @elseif ($empresa->responsable_user_id)
-                                    <p class="mt-1 truncate text-xs text-slate-500">
-                                        Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
-                                    </p>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="flex shrink-0 items-center gap-1">
-                        <button
-                            type="button"
-                            @click.stop="openEditModal(empresa)"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
-                            </svg>
-                        </button>
-
-                        <button
-                            type="button"
-                            @click.stop="openNotesModal(empresa)"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition {{ $empresa->notas ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' : 'cursor-not-allowed text-slate-300' }}"
-                            @if (!$empresa->notas) disabled @endif
-                            title="{{ $empresa->notas ? 'Ver notas' : 'Sin notas' }}"
-                            aria-label="{{ $empresa->notas ? 'Ver notas de ' . $empresa->nombre : 'Sin notas para ' . $empresa->nombre }}"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5" />
-                            </svg>
-                        </button>
-
-                        @if ($esAdministracion)
-                            <form
-                                method="POST"
-                                action="{{ route('empresas.destroy', $empresa) }}"
-                                @click.stop
-                                onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
+        <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
+            <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
+                <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
+                    <div class="grid gap-2 md:grid-cols-12">
+                        <div class="relative md:col-span-3">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                name="q"
+                                value="{{ $q }}"
+                                placeholder="Buscar por nombre o ciudad..."
+                                class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
-                                @csrf
-                                @method('DELETE')
-                                <button
-                                    type="submit"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
-                                    aria-label="Eliminar {{ $empresa->nombre }}"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
-                                    </svg>
-                                </button>
-                            </form>
-                        @endif
+                        </div>
+
+                        <input
+                            type="date"
+                            name="desde"
+                            value="{{ $desdeInput }}"
+                            class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                        >
+
+                        <input
+                            type="date"
+                            name="hasta"
+                            value="{{ $hastaInput }}"
+                            class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                        >
+
+                        <select
+                            name="estado"
+                            class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                        >
+                            <option value="">Estado (Todos)</option>
+                            <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
+                            <option value="aprobado" @selected($estadoInput === 'aprobado')>Aprobado</option>
+                            <option value="rechazado" @selected($estadoInput === 'rechazado')>Rechazado</option>
+                        </select>
+
+                        <button
+                            type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-1"
+                        >
+                            Filtrar
+                        </button>
 
                         <a
-                            href="{{ route('empresas.show', $empresa) }}"
-                            @click.stop
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-                            aria-label="Ver detalle de {{ $empresa->nombre }}"
+                            href="{{ route('empresas.index') }}"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:col-span-1"
                         >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
-                            </svg>
+                            Limpiar
                         </a>
                     </div>
-                </article>
-            @empty
-                <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
-                    No hay empresas registradas
-                </article>
-            @endforelse
-        </div>
+                </form>
 
-        <div>
-            {{ $empresas->links() }}
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                        style="background-color:#FEF3C7; color:#92400E;">
+                        <span class="h-2 w-2 rounded-full" style="background-color:#92400E;"></span>
+                        Pendiente
+                    </span>
+
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                        style="background-color:#DCFCE7; color:#166534;">
+                        <span class="h-2 w-2 rounded-full" style="background-color:#166534;"></span>
+                        Aprobado
+                    </span>
+
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                        style="background-color:#FEE2E2; color:#991B1B;">
+                        <span class="h-2 w-2 rounded-full" style="background-color:#991B1B;"></span>
+                        Rechazado
+                    </span>
+                </div>
+
+                <p class="text-xs text-slate-500">
+                    @if ($usaRangoPersonalizado)
+                        Mostrando empresas
+                        @if ($desde)
+                            desde {{ $desde->format('d/m/Y') }}
+                        @endif
+                        @if ($hasta)
+                            hasta {{ $hasta->format('d/m/Y') }}
+                        @endif
+                    @else
+                        Mostrando empresas del mes actual
+                    @endif
+                </p>
+
+                <div class="space-y-3 pb-24">
+                    @forelse ($empresas as $empresa)
+                        @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
+                        @php($estadoRefStyle = $estadoRef === 'aprobado' ? 'border-color: #86EFAC; background-color: #F0FDF4;' : ($estadoRef === 'rechazado' ? 'border-color: #FCA5A5; background-color: #FEF2F2;' : 'border-color: #FCD34D; background-color: #FFFBEB;'))
+                        @php($estadoRefBadgeClass = $estadoRef === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : ($estadoRef === 'rechazado' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'))
+                        <article
+                            x-data="{ empresa: @js([
+                                'id' => $empresa->id,
+                                'nombre' => $empresa->nombre,
+                                // 'nit' => $empresa->nit,
+                                'ciudad' => $empresa->ciudad,
+                                'contacto_nombre' => $empresa->contacto_nombre,
+                                'direccion' => $empresa->direccion,
+                                'telefono' => $empresa->telefono,
+                                'email' => $empresa->email,
+                                'sector_id' => $empresa->sector_id,
+                                'notas' => $empresa->notas,
+                            ]) }"
+                            @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
+                            class="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                            style="{{ $estadoRefStyle }}"
+                        >
+                            <div class="flex min-w-0 items-center gap-3">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-colors duration-200 group-hover:bg-blue-200/80">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5"/>
+                                    </svg>
+                                </div>
+
+                                <div class="min-w-0">
+                                    <p class="truncate text-base font-semibold text-slate-950">{{ $empresa->nombre }}</p>
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                                       <span class="inline-flex items-center gap-1">
+                                             {{ optional($empresa->created_at)->format('d/m/Y') }}
+                                        </span>
+                                    <span class="inline-flex items-center gap-1">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
+                                                <circle cx="12" cy="9.75" r="2.25" />
+                                            </svg>
+                                            {{ $empresa->ciudad }}
+                                        </span>
+                                        {{--
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v13.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V5.25z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 4.5h6" />
+                                            </svg>
+                                            {{ $empresa->nit ?: 'Sin NIT' }}
+                                        </span>
+                                        --}}
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
+                                            </svg>
+                                            {{ $empresa->sector?->nombre ?: 'Sin sector' }}
+                                        </span>
+
+                                    </div>
+
+                                    @if ($empresa->contacto_nombre)
+                                        <p class="mt-1 flex items-center gap-1 text-sm text-slate-500">
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a8.966 8.966 0 0114.998 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.499-1.632z" />
+                                            </svg>
+                                            <span>Contacto: {{ $empresa->contacto_nombre }}</span>
+                                        </p>
+                                    @endif
+
+                                    @if ($esAdministracion)
+                                        @if ($empresa->referida_at)
+                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
+                                            </span>
+                                            <div class="mt-1">
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                            </div>
+                                        @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
+                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                🔁 Referido por: {{ $empresa->creador->codigo }}
+                                            </span>
+                                            <div class="mt-1">
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                            </div>
+                                        @elseif ($empresa->responsable_user_id)
+                                            <p class="mt-1 truncate text-xs text-slate-500">
+                                                Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
+                                            </p>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="flex shrink-0 items-center gap-1">
+                                <button
+                                    type="button"
+                                    @click.stop="openEditModal(empresa)"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    @click.stop="openNotesModal(empresa)"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition {{ $empresa->notas ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' : 'cursor-not-allowed text-slate-300' }}"
+                                    @if (!$empresa->notas) disabled @endif
+                                    title="{{ $empresa->notas ? 'Ver notas' : 'Sin notas' }}"
+                                    aria-label="{{ $empresa->notas ? 'Ver notas de ' . $empresa->nombre : 'Sin notas para ' . $empresa->nombre }}"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5" />
+                                    </svg>
+                                </button>
+
+                                @if ($esAdministracion)
+                                    <form
+                                        method="POST"
+                                        action="{{ route('empresas.destroy', $empresa) }}"
+                                        @click.stop
+                                        onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            type="submit"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
+                                            aria-label="Eliminar {{ $empresa->nombre }}"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <a
+                                    href="{{ route('empresas.show', $empresa) }}"
+                                    @click.stop
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                    aria-label="Ver detalle de {{ $empresa->nombre }}"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </article>
+                    @empty
+                        <article class="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-600 shadow-sm">
+                            No hay empresas registradas
+                        </article>
+                    @endforelse
+                </div>
+
+                <div>
+                    {{ $empresas->links() }}
+                </div>
+            </div>
+
+            @if ($soloAprobados)
+                <div class="lg:col-span-1">
+                    <aside class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
+                        <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
+                        <dl class="mt-4 space-y-3">
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
+                                <dd class="mt-1 text-lg font-semibold text-slate-900">
+                                    $ {{ number_format((float) ($comisionTotal ?? 0), 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
+                                <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
+                            </div>
+                        </dl>
+                    </aside>
+                </div>
+            @endif
         </div>
 
         <div
