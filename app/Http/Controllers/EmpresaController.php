@@ -35,7 +35,7 @@ class EmpresaController extends Controller
         $q = trim((string) $request->query('q', ''));
         $desdeInput = $request->query('desde');
         $hastaInput = $request->query('hasta');
-        $estadoInputRaw = strtolower(trim((string) $request->query('estado', '')));
+        $estadoInputRaw = strtolower(trim((string) $request->query('referido_estado', $request->query('estado', ''))));
         $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
         $estadoInput = in_array($estadoInputRaw, $estadosValidos, true) ? $estadoInputRaw : '';
 
@@ -86,6 +86,14 @@ class EmpresaController extends Controller
             }
         }
 
+        $resumenAprobados = null;
+
+        if ($request->query('referido_estado') === 'aprobado') {
+            $resumenAprobados = (clone $empresasQuery)
+                ->selectRaw('COUNT(*) as total, COALESCE(SUM(comision_valor),0) as comision_total')
+                ->first();
+        }
+
         $empresas = $empresasQuery
             ->paginate(10)
             ->appends($request->query());
@@ -101,6 +109,7 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
+            'resumenAprobados',
             'usaRangoPersonalizado',
             'desde',
             'hasta',
