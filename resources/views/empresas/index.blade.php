@@ -376,6 +376,7 @@
                                                 Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
                                             </span>
 
+
                                         </div>
                                     @endif
                                 </div>
