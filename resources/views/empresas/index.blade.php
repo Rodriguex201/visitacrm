@@ -147,6 +147,8 @@
             </div>
         @endif
 
+        <div class="grid gap-4 lg:grid-cols-12 lg:items-start">
+            <div class="space-y-4 lg:col-span-8">
         <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
             <div class="grid gap-2 md:grid-cols-12">
                 <div class="relative md:col-span-3">
@@ -237,6 +239,7 @@
                 Mostrando empresas del mes actual
             @endif
         </p>
+
 
         <div class="space-y-3 pb-24">
             @forelse ($empresas as $empresa)
@@ -399,6 +402,28 @@
         <div>
             {{ $empresas->links() }}
         </div>
+            </div>
+
+            @if (request('estado') === 'aprobado' && $resumenAprobados)
+                <aside class="lg:col-span-4">
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
+                        <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
+
+                        <dl class="mt-4 space-y-3">
+                            <div>
+                                <dt class="text-sm text-slate-500">Comisión total</dt>
+                                <dd class="text-lg font-bold text-slate-900">$ {{ number_format((float) $resumenAprobados->comision_total, 0, ',', '.') }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm text-slate-500">Total empresas</dt>
+                                <dd class="text-lg font-bold text-slate-900">{{ $resumenAprobados->total }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </aside>
+            @endif
+        </div>
+
 
         <div
             x-show="notesModalOpen"

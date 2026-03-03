@@ -86,6 +86,14 @@ class EmpresaController extends Controller
             }
         }
 
+        $resumenAprobados = null;
+
+        if ($estadoInput === 'aprobado') {
+            $resumenAprobados = (clone $empresasQuery)
+                ->selectRaw('COUNT(*) as total, COALESCE(SUM(comision_valor), 0) as comision_total')
+                ->first();
+        }
+
         $empresas = $empresasQuery
             ->paginate(10)
             ->appends($request->query());
@@ -104,6 +112,7 @@ class EmpresaController extends Controller
             'usaRangoPersonalizado',
             'desde',
             'hasta',
+            'resumenAprobados',
         ));
     }
 
