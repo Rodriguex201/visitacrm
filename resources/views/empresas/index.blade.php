@@ -147,8 +147,9 @@
             </div>
         @endif
 
-        <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
-            <div class="grid gap-2 md:grid-cols-12">
+        <div class="space-y-3">
+            <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
+                <div class="grid gap-2 md:grid-cols-12 items-end">
                 <div class="relative md:col-span-5">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -178,43 +179,55 @@
                     class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                 >
 
-                <button
-                    type="submit"
-                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 md:col-span-2"
+                <select
+                    name="estado"
+                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                 >
-                    Filtrar
-                </button>
+                    <option value="">Estado (Todos)</option>
+                    <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
+                    <option value="aprobado" @selected($estadoInput === 'aprobado')>Aprobado</option>
+                    <option value="rechazado" @selected($estadoInput === 'rechazado')>Rechazado</option>
+                </select>
 
-                <a
-                    href="{{ route('empresas.index') }}"
-                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:col-span-1"
-                >
-                    Limpiar
-                </a>
+                <div class="flex gap-2 md:col-span-12 md:justify-end">
+                    <button
+                        type="submit"
+                        class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    >
+                        Filtrar
+                    </button>
+
+                    <a
+                        href="{{ route('empresas.index') }}"
+                        class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                    >
+                        Limpiar
+                    </a>
+                </div>
             </div>
-        </form>
+            </form>
 
-        <div class="flex flex-wrap gap-2 mt-3">
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+            <div class="mt-1 flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
                 style="background-color:#FEF3C7; color:#92400E;">
                 <span class="h-2 w-2 rounded-full" style="background-color:#92400E;"></span>
                 Pendiente
             </span>
 
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
                 style="background-color:#DCFCE7; color:#166534;">
                 <span class="h-2 w-2 rounded-full" style="background-color:#166534;"></span>
                 Aprobado
             </span>
 
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
                 style="background-color:#FEE2E2; color:#991B1B;">
                 <span class="h-2 w-2 rounded-full" style="background-color:#991B1B;"></span>
                 Rechazado
             </span>
         </div>
 
-        <p class="text-xs text-slate-500">
+            <p class="text-xs text-slate-500">
             @if ($usaRangoPersonalizado)
                 Mostrando empresas
                 @if ($desde)
@@ -226,7 +239,8 @@
             @else
                 Mostrando empresas del mes actual
             @endif
-        </p>
+            </p>
+        </div>
 
         <div class="space-y-3 pb-24">
             @forelse ($empresas as $empresa)
