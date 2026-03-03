@@ -35,9 +35,10 @@ class EmpresaController extends Controller
         $q = trim((string) $request->query('q', ''));
         $desdeInput = $request->query('desde');
         $hastaInput = $request->query('hasta');
-        $estadoInputRaw = strtolower(trim((string) $request->query('estado', '')));
+        $estado = strtolower(trim((string) $request->query('estado', '')));
         $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
-        $estadoInput = in_array($estadoInputRaw, $estadosValidos, true) ? $estadoInputRaw : '';
+        $estadoInput = in_array($estado, $estadosValidos, true) ? $estado : '';
+        $soloAprobados = $estado === 'aprobado';
 
         $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
@@ -86,6 +87,14 @@ class EmpresaController extends Controller
             }
         }
 
+        $comisionTotal = null;
+        $totalEmpresas = null;
+
+        if ($soloAprobados) {
+            $comisionTotal = (clone $empresasQuery)->sum('comision_valor');
+            $totalEmpresas = (clone $empresasQuery)->count();
+        }
+
         $empresas = $empresasQuery
             ->paginate(10)
             ->appends($request->query());
@@ -101,6 +110,9 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
+            'soloAprobados',
+            'comisionTotal',
+            'totalEmpresas',
             'usaRangoPersonalizado',
             'desde',
             'hasta',
