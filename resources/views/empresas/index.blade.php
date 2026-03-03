@@ -148,10 +148,7 @@
         @endif
 
 
-        <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
-            <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
-
-                <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
+        <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
                     <div class="grid gap-2 md:grid-cols-12">
                         <div class="relative md:col-span-3">
                             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -230,20 +227,22 @@
                     </span>
                 </div>
 
-                <p class="text-xs text-slate-500">
-                    @if ($usaRangoPersonalizado)
-                        Mostrando empresas
-                        @if ($desde)
-                            desde {{ $desde->format('d/m/Y') }}
-                        @endif
-                        @if ($hasta)
-                            hasta {{ $hasta->format('d/m/Y') }}
-                        @endif
-                    @else
-                        Mostrando empresas del mes actual
-                    @endif
-                </p>
+        <p class="text-xs text-slate-500">
+            @if ($usaRangoPersonalizado)
+                Mostrando empresas
+                @if ($desde)
+                    desde {{ $desde->format('d/m/Y') }}
+                @endif
+                @if ($hasta)
+                    hasta {{ $hasta->format('d/m/Y') }}
+                @endif
+            @else
+                Mostrando empresas del mes actual
+            @endif
+        </p>
 
+        <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
+            <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
                         @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
@@ -318,15 +317,25 @@
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
                                             </span>
-                                            <div class="mt-1">
+                                            <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoInput === 'aprobado')
+                                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->creador->codigo }}
                                             </span>
-                                            <div class="mt-1">
+                                            <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoInput === 'aprobado')
+                                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif ($empresa->responsable_user_id)
                                             <p class="mt-1 truncate text-xs text-slate-500">
