@@ -90,14 +90,11 @@ class EmpresaController extends Controller
         }
 
 
-        $comisionTotal = null;
-        $totalEmpresas = null;
+        $totalEmpresas = (clone $empresasQuery)->count();
 
-        if ($soloAprobados) {
-            $comisionTotal = (clone $empresasQuery)->sum('comision_valor');
-            $totalEmpresas = (clone $empresasQuery)->count();
-
-        }
+        $totalComision = (clone $empresasQuery)
+            ->where('referido_estado', 'aprobado')
+            ->sum('comision_valor');
 
         $empresas = $empresasQuery
             ->paginate(10)
@@ -116,7 +113,7 @@ class EmpresaController extends Controller
             'estadoInput',
 
             'soloAprobados',
-            'comisionTotal',
+            'totalComision',
             'totalEmpresas',
 
             'usaRangoPersonalizado',
