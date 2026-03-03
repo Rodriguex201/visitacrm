@@ -147,8 +147,10 @@
             </div>
         @endif
 
+
         <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
             <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
+
                 <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
                     <div class="grid gap-2 md:grid-cols-12">
                         <div class="relative md:col-span-3">
@@ -181,6 +183,7 @@
                         >
 
                         <select
+
                             name="estado"
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
@@ -205,6 +208,7 @@
                         </a>
                     </div>
                 </form>
+
 
                 <div class="mt-3 flex flex-wrap gap-2">
                     <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
@@ -314,6 +318,7 @@
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
                                             </span>
+
                                             <div class="mt-1 flex flex-wrap items-center gap-1.5">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($soloAprobados)
@@ -321,11 +326,13 @@
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
                                                     </span>
                                                 @endif
+
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                 🔁 Referido por: {{ $empresa->creador->codigo }}
                                             </span>
+
                                             <div class="mt-1 flex flex-wrap items-center gap-1.5">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($soloAprobados)
@@ -333,6 +340,7 @@
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
                                                     </span>
                                                 @endif
+
                                             </div>
                                         @elseif ($empresa->responsable_user_id)
                                             <p class="mt-1 truncate text-xs text-slate-500">
@@ -389,6 +397,7 @@
                                     </form>
                                 @endif
 
+
                                 <a
                                     href="{{ route('empresas.show', $empresa) }}"
                                     @click.stop
@@ -432,6 +441,7 @@
                     </aside>
                 </div>
             @endif
+
         </div>
 
         <div

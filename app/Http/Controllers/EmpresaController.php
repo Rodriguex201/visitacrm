@@ -35,7 +35,9 @@ class EmpresaController extends Controller
         $q = trim((string) $request->query('q', ''));
         $desdeInput = $request->query('desde');
         $hastaInput = $request->query('hasta');
+
         $estado = strtolower(trim((string) $request->query('estado', '')));
+
         $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
         $estadoInput = in_array($estado, $estadosValidos, true) ? $estado : '';
         $soloAprobados = $estado === 'aprobado';
@@ -87,12 +89,14 @@ class EmpresaController extends Controller
             }
         }
 
+
         $comisionTotal = null;
         $totalEmpresas = null;
 
         if ($soloAprobados) {
             $comisionTotal = (clone $empresasQuery)->sum('comision_valor');
             $totalEmpresas = (clone $empresasQuery)->count();
+
         }
 
         $empresas = $empresasQuery
@@ -110,9 +114,11 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
+
             'soloAprobados',
             'comisionTotal',
             'totalEmpresas',
+
             'usaRangoPersonalizado',
             'desde',
             'hasta',
