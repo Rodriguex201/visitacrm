@@ -241,8 +241,8 @@
             @endif
         </p>
 
-        <div @class(['space-y-4', 'grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start lg:space-y-0' => $soloAprobados])>
-            <div @class(['space-y-4', 'lg:col-span-2' => $soloAprobados])>
+        <div class="grid grid-cols-1 gap-6 space-y-4 lg:grid-cols-3 lg:items-start lg:space-y-0">
+            <div class="space-y-4 lg:col-span-2">
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
                         @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
@@ -319,9 +319,14 @@
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                                @if ($estadoInput === 'aprobado')
+                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                        Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
+                                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                                        Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -331,9 +336,14 @@
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                                @if ($estadoInput === 'aprobado')
+                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
+                                                        Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
+                                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                                        Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -342,6 +352,25 @@
                                                 Responsable: {{ $empresa->responsable?->codigo ?: 'S/C' }} - {{ strtoupper($empresa->responsable?->name ?? $empresa->responsable?->nombre ?? 'Sin nombre') }} - {{ $empresa->responsable?->telefono ?: 'Sin teléfono' }}
                                             </p>
                                         @endif
+                                    @endif
+
+                                    @if (! $esAdministracion && ($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
+                                        <div class="mt-1 flex flex-wrap items-center gap-1">
+                                            <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                                                Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                            </span>
+                                            @if (!is_null($empresa->referido_aprobado_at))
+                                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                                    Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @elseif (! $esAdministracion && ($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
+                                        <div class="mt-1 flex flex-wrap items-center gap-1">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                                Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+                                            </span>
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -417,8 +446,7 @@
                 </div>
             </div>
 
-            @if ($soloAprobados)
-                <div class="lg:col-span-1">
+            <div class="lg:col-span-1">
 
                     <aside class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
@@ -427,7 +455,7 @@
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">
 
-                                    $ {{ number_format((float) ($comisionTotal ?? 0), 0, ',', '.') }}
+                                    $ {{ number_format((float) ($totalComision ?? 0), 0, ',', '.') }}
 
                                 </dd>
                             </div>
@@ -439,7 +467,6 @@
                         </dl>
                     </aside>
                 </div>
-            @endif
 
         </div>
 
