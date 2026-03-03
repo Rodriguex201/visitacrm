@@ -307,6 +307,15 @@
                                 </p>
                             @endif
 
+                            @if (! $esAdministracion && $estadoRef === 'aprobado')
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                        💰 Mi comisión:
+                                        {{ $empresa->comision_valor !== null ? '$ ' . number_format((float) $empresa->comision_valor, 2, ',', '.') : 'Sin valor' }}
+                                    </span>
+                                </div>
+                            @endif
+
                             @if ($esAdministracion)
                                 @if ($empresa->referida_at)
                                     <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
