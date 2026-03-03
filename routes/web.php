@@ -3,7 +3,9 @@
 use App\Http\Controllers\AccionesController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\SectorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VisitaController;
 use App\Http\Controllers\UsuarioController;
@@ -48,6 +50,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
         Route::put('/usuarios/{user}', [UsuarioController::class, 'update'])->name('usuarios.update');
         Route::put('/usuarios/tipos/{tipoUsuario}', [UsuarioController::class, 'updateTipoUsuario'])->name('usuarios.tipos.update');
+
+
+        Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
+
+        Route::get('/sectores', [SectorController::class, 'index'])->name('sectores.index');
+        Route::post('/sectores', [SectorController::class, 'store'])->name('sectores.store');
+        Route::patch('/sectores/{sector}', [SectorController::class, 'update'])->name('sectores.update');
+        Route::delete('/sectores/{sector}', [SectorController::class, 'destroy'])->name('sectores.destroy');
     });
 
     // Perfil

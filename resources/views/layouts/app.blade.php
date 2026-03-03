@@ -45,6 +45,7 @@
             $isDashboard = request()->routeIs('dashboard');
             $isEmpresas = request()->routeIs('empresas.*');
             $isUsuarios = request()->routeIs('usuarios.*');
+            $isConfiguracion = request()->routeIs('configuracion.*');
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
         @endphp
 
@@ -138,17 +139,18 @@
                     @endif
 
 
+                    @if ($isAdmin)
+                        <a href="{{ route('configuracion.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isConfiguracion ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Configuración">
 
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Nueva">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0l.212.85a1.724 1.724 0 002.573 1.066l.75-.425a1.724 1.724 0 012.487 1.437l.02.86a1.724 1.724 0 001.677 1.677l.86.02a1.724 1.724 0 011.437 2.487l-.425.75a1.724 1.724 0 001.066 2.573l.85.212a1.724 1.724 0 010 3.35l-.85.212a1.724 1.724 0 00-1.066 2.573l.425.75a1.724 1.724 0 01-1.437 2.487l-.86.02a1.724 1.724 0 00-1.677 1.677l-.02.86a1.724 1.724 0 01-2.487 1.437l-.75-.425a1.724 1.724 0 00-2.573 1.066l-.212.85a1.724 1.724 0 01-3.35 0l-.212-.85a1.724 1.724 0 00-2.573-1.066l-.75.425a1.724 1.724 0 01-2.487-1.437l-.02-.86a1.724 1.724 0 00-1.677-1.677l-.86-.02a1.724 1.724 0 01-1.437-2.487l.425-.75a1.724 1.724 0 00-1.066-2.573l-.85-.212a1.724 1.724 0 010-3.35l.85-.212a1.724 1.724 0 001.066-2.573l-.425-.75A1.724 1.724 0 012.606 9.98l.86-.02a1.724 1.724 0 001.677-1.677l.02-.86a1.724 1.724 0 012.487-1.437l.75.425a1.724 1.724 0 002.573-1.066l.212-.85z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
 
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                            <span x-show="shouldShowLabels()" x-transition>Configuración</span>
 
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5M5.25 12h13.5"/>
-                        </svg>
-
-                        <span x-show="shouldShowLabels()" x-transition>Nueva</span>
-
-                    </a>
+                        </a>
+                    @endif
                 </nav>
 
 
