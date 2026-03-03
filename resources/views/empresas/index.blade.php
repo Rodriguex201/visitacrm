@@ -149,7 +149,7 @@
 
         <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
             <div class="grid gap-2 md:grid-cols-12">
-                <div class="relative md:col-span-5">
+                <div class="relative md:col-span-3">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.6-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
@@ -180,7 +180,7 @@
 
                 <select
                     name="estado"
-                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-1"
+                    class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                 >
                     <option value="">Estado (Todos)</option>
                     <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
