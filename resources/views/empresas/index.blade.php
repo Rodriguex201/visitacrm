@@ -181,7 +181,9 @@
 
                 <select
                     name="estado"
+
                     class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
+
                 >
                     <option value="">Estado (Todos)</option>
                     <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
