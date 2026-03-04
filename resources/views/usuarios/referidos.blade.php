@@ -10,6 +10,14 @@
 
     <section class="mx-auto w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6 lg:px-8">
 
+        <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-blue-700">Referidos de usuario</p>
+            <p class="mt-1 text-base font-bold">
+                {{ $user->name }}
+                <span class="font-medium">({{ $user->codigo ?: 'S/C' }})</span>
+            </p>
+        </div>
+
         {{-- BOTÓN ARRIBA --}}
         <div class="flex justify-end">
             <a href="{{ route('usuarios.index') }}"
