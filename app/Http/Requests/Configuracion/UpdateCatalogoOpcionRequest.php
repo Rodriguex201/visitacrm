@@ -36,6 +36,8 @@ class UpdateCatalogoOpcionRequest extends FormRequest
             'orden' => ['nullable', 'integer', 'min:0'],
 
             'valor' => ['nullable', 'numeric', 'min:0'],
+            'valor_vinculado' => ['nullable', 'numeric', 'min:0'],
+            'valor_freelance' => ['nullable', 'numeric', 'min:0'],
 
         ];
     }

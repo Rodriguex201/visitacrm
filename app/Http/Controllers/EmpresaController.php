@@ -597,7 +597,7 @@ class EmpresaController extends Controller
         }
 
         if ($referidoEstado === 'aprobado') {
-            $empresa->comision_valor = $this->calcularComisionAutomatica($empresa->id);
+            $empresa->comision_valor = $this->calcularComisionAutomatica($empresa->id, auth()->user());
         }
 
 
@@ -617,14 +617,17 @@ class EmpresaController extends Controller
         ]);
     }
 
-    private function calcularComisionAutomatica(int $empresaId): float
+    private function calcularComisionAutomatica(int $empresaId, ?User $user = null): float
     {
-        return (float) DB::table('empresa_opcion')
-            ->join('catalogo_opciones', 'catalogo_opciones.id', '=', 'empresa_opcion.opcion_id')
+        $opciones = CatalogoOpcion::query()
+            ->select(['catalogo_opciones.id', 'catalogo_opciones.valor', 'catalogo_opciones.valor_vinculado', 'catalogo_opciones.valor_freelance'])
+            ->join('empresa_opcion', 'empresa_opcion.opcion_id', '=', 'catalogo_opciones.id')
             ->where('empresa_opcion.empresa_id', $empresaId)
             ->where('catalogo_opciones.activo', 1)
             ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
-            ->sum('catalogo_opciones.valor');
+            ->get();
+
+        return (float) $opciones->sum(fn (CatalogoOpcion $opcion) => $opcion->valorParaUsuario($user));
     }
 
     public function storeCatalogoOpcion(Request $request): JsonResponse

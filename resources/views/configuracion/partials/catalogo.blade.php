@@ -19,7 +19,8 @@
                     <th class="px-4 py-3">Nombre</th>
 
                     <th class="px-4 py-3">Valor</th>
-
+                    <th class="px-4 py-3">Valor Vinculado</th>
+                    <th class="px-4 py-3">Valor Freelance</th>
                     <th class="px-4 py-3">Orden</th>
                     <th class="px-4 py-3">Activo</th>
                     <th class="px-4 py-3 text-right">Acciones</th>
@@ -31,7 +32,8 @@
                         <td class="px-4 py-3 font-medium text-slate-800" x-text="opcion.nombre"></td>
 
                         <td class="px-4 py-3 text-slate-600" x-text="formatCop(opcion.valor)"></td>
-
+                        <td class="px-4 py-3 text-slate-600" x-text="formatCop(opcion.valor_vinculado)"></td>
+                        <td class="px-4 py-3 text-slate-600" x-text="formatCop(opcion.valor_freelance)"></td>
                         <td class="px-4 py-3 text-slate-600" x-text="opcion.orden"></td>
                         <td class="px-4 py-3"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Activo</span></td>
                         <td class="px-4 py-3"><div class="flex justify-end gap-2">
@@ -53,10 +55,19 @@
                     <input type="text" x-model="form.nombre" maxlength="255" required class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</label>
-                    <input type="number" step="0.01" min="0" x-model="form.valor" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="0.00">
-
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</label>
+                        <input type="number" step="0.01" min="0" x-model="form.valor" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Valor Vinculado</label>
+                        <input type="number" step="0.01" min="0" x-model="form.valor_vinculado" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="Opcional">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Valor Freelance</label>
+                        <input type="number" step="0.01" min="0" x-model="form.valor_freelance" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="Opcional">
+                    </div>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Orden</label>
@@ -80,9 +91,9 @@ function catalogoManager({ categoriaSlug, initialOpciones, indexUrl, storeUrl, u
         showModal: false,
         editingId: null,
         loading: false,
-        form: { nombre: '', valor: '', orden: 0 },
-        openCreateModal() { this.editingId = null; this.form = { nombre: '', valor: '', orden: 0 }; this.showModal = true },
-        openEditModal(opcion) { this.editingId = opcion.id; this.form = { nombre: opcion.nombre ?? '', valor: opcion.valor ?? '', orden: opcion.orden ?? 0 }; this.showModal = true },
+        form: { nombre: '', valor: '', valor_vinculado: '', valor_freelance: '', orden: 0 },
+        openCreateModal() { this.editingId = null; this.form = { nombre: '', valor: '', valor_vinculado: '', valor_freelance: '', orden: 0 }; this.showModal = true },
+        openEditModal(opcion) { this.editingId = opcion.id; this.form = { nombre: opcion.nombre ?? '', valor: opcion.valor ?? '', valor_vinculado: opcion.valor_vinculado ?? '', valor_freelance: opcion.valor_freelance ?? '', orden: opcion.orden ?? 0 }; this.showModal = true },
         closeModal() { this.showModal = false },
         csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
 
@@ -101,7 +112,8 @@ function catalogoManager({ categoriaSlug, initialOpciones, indexUrl, storeUrl, u
                 orden: this.form.orden === '' ? 0 : Number(this.form.orden),
 
                 valor: this.form.valor === '' || this.form.valor === null ? null : Number(this.form.valor),
-
+                valor_vinculado: this.form.valor_vinculado === '' || this.form.valor_vinculado === null ? null : Number(this.form.valor_vinculado),
+                valor_freelance: this.form.valor_freelance === '' || this.form.valor_freelance === null ? null : Number(this.form.valor_freelance),
             }
         },
         async saveItem() {
