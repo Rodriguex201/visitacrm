@@ -1,4 +1,6 @@
+
 @php($isAdminModal = $esAdministracion ?? ((auth()->user()?->tipo_usuario ?? null) === 'administracion'))
+
 
 <div
     x-show="openModal"
@@ -42,7 +44,9 @@
                 <input type="hidden" name="_method" value="PUT">
             </template>
 
+
             @if ($isAdminModal)
+
                 @include('empresas.partials.modal_form_full')
             @else
                 @include('empresas.partials.modal_form_basic')
