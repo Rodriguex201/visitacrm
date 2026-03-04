@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/empresas/{empresa}/contactos/{contacto}', [ContactoController::class, 'update'])->name('empresas.contactos.update');
     Route::patch('/empresas/{empresa}/asignar-usuario', [EmpresaController::class, 'asignarUsuario'])->name('empresas.asignar-usuario');
     Route::patch('/empresas/{empresa}/opciones', [EmpresaController::class, 'guardarOpciones'])->name('empresas.opciones.update');
+    Route::post('/empresas/{empresa}/categoria-notas', [EmpresaController::class, 'guardarCategoriaNota'])->name('empresas.categoria-notas.store');
     Route::patch('/empresas/{empresa}/cotizacion', [EmpresaController::class, 'actualizarCotizacion'])->name('empresas.cotizacion');
     Route::post('/empresas/{empresa}/referido-estado', [EmpresaController::class, 'updateReferidoEstado'])->name('empresas.referido.update');
     Route::patch('/empresa-opcion/{empresaOpcion}/nota', [EmpresaController::class, 'updateNota'])->name('empresa-opcion.nota');

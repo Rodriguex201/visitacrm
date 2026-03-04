@@ -456,6 +456,43 @@ class EmpresaController extends Controller
         ]);
     }
 
+    public function guardarCategoriaNota(Request $request, Empresa $empresa): JsonResponse
+    {
+        $this->authorize('update', $empresa);
+
+        $categoriasValidas = [
+            'Estado Actual',
+            'Aplicativos',
+            'Procesos Electrónicos',
+            'Equipos',
+        ];
+
+        $validated = $request->validate([
+            'categoria' => ['required', 'string', Rule::in($categoriasValidas)],
+            'nota' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $nota = array_key_exists('nota', $validated) && $validated['nota'] !== null
+            ? trim((string) $validated['nota'])
+            : null;
+
+        EmpresaCategoriaNota::query()->updateOrCreate(
+            [
+                'empresa_id' => $empresa->id,
+                'categoria' => $validated['categoria'],
+            ],
+            [
+                'nota' => $nota !== '' ? $nota : null,
+            ]
+        );
+
+        return response()->json([
+            'ok' => true,
+            'categoria' => $validated['categoria'],
+            'nota' => $nota !== '' ? $nota : null,
+        ]);
+    }
+
     public function actualizarCotizacion(Request $request, Empresa $empresa): JsonResponse
     {
         if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
