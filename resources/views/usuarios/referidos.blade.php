@@ -2,29 +2,28 @@
     <x-slot name="header">
         <div>
             <h1 class="text-2xl font-bold text-slate-900">Empresas referidas</h1>
-            <p class="text-sm text-slate-600">
-                {{ $user->codigo }} - {{ $user->name }}
-            </p>
         </div>
     </x-slot>
 
     <section class="mx-auto w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6 lg:px-8">
 
-        <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-            <p class="text-xs font-semibold uppercase tracking-wide text-blue-700">Referidos de usuario</p>
-            <p class="mt-1 text-base font-bold">
-                {{ $user->name }}
-                <span class="font-medium">({{ $user->codigo ?: 'S/C' }})</span>
-            </p>
-        </div>
+        {{-- BARRA SUPERIOR COMPACTA --}}
+        <div class="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Referidos de usuario</p>
+                <p class="truncate text-base font-bold text-slate-900">
+                    {{ $user->name }}
+                    <span class="font-medium text-slate-600">({{ $user->codigo ?: 'S/C' }})</span>
+                </p>
+            </div>
 
-        {{-- BOTÓN ARRIBA --}}
-        <div class="flex justify-end">
             <a href="{{ route('usuarios.index') }}"
-               class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+               class="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 Volver a usuarios
             </a>
         </div>
+
+        {{-- TABLA DE REFERIDOS --}}
 
         <div class="rounded-xl bg-white shadow-sm">
             <div class="overflow-x-auto">
