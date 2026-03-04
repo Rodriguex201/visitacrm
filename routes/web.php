@@ -5,7 +5,6 @@ use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\EmpresaController;
-use App\Http\Controllers\SectorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VisitaController;
 use App\Http\Controllers\UsuarioController;
@@ -53,11 +52,15 @@ Route::middleware('auth')->group(function () {
 
 
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
+        Route::get('/configuracion/sectores', [ConfiguracionController::class, 'sectores'])->name('configuracion.sectores.index');
+        Route::post('/configuracion/sectores', [ConfiguracionController::class, 'storeSector'])->name('configuracion.sectores.store');
+        Route::patch('/configuracion/sectores/{sector}', [ConfiguracionController::class, 'updateSector'])->name('configuracion.sectores.update');
+        Route::delete('/configuracion/sectores/{sector}', [ConfiguracionController::class, 'destroySector'])->name('configuracion.sectores.destroy');
 
-        Route::get('/sectores', [SectorController::class, 'index'])->name('sectores.index');
-        Route::post('/sectores', [SectorController::class, 'store'])->name('sectores.store');
-        Route::patch('/sectores/{sector}', [SectorController::class, 'update'])->name('sectores.update');
-        Route::delete('/sectores/{sector}', [SectorController::class, 'destroy'])->name('sectores.destroy');
+        Route::get('/configuracion/catalogo/{categoria}', [ConfiguracionController::class, 'catalogo'])->name('configuracion.catalogo.index');
+        Route::post('/configuracion/catalogo', [ConfiguracionController::class, 'storeCatalogo'])->name('configuracion.catalogo.store');
+        Route::patch('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'updateCatalogo'])->name('configuracion.catalogo.update');
+        Route::delete('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'destroyCatalogo'])->name('configuracion.catalogo.destroy');
     });
 
     // Perfil
