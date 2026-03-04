@@ -60,7 +60,7 @@ class UsuarioController extends Controller
             ->with([
                 'sector',
                 'opciones' => function ($query): void {
-                    $query->select('catalogo_opciones.id', 'catalogo_opciones.categoria', 'catalogo_opciones.nombre', 'catalogo_opciones.valor')
+                    $query->select('catalogo_opciones.id', 'catalogo_opciones.categoria', 'catalogo_opciones.nombre', 'catalogo_opciones.valor', 'catalogo_opciones.valor_vinculado', 'catalogo_opciones.valor_freelance')
                         ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
                         ->orderBy('catalogo_opciones.categoria')
                         ->orderBy('catalogo_opciones.nombre');
@@ -70,8 +70,8 @@ class UsuarioController extends Controller
             ->latest('id')
             ->paginate(10);
 
-        $empresasReferidas->getCollection()->transform(function ($empresa) {
-            $empresa->valor_total_referido = (float) $empresa->opciones->sum('valor');
+        $empresasReferidas->getCollection()->transform(function ($empresa) use ($user) {
+            $empresa->valor_total_referido = (float) $empresa->opciones->sum(fn ($opcion) => $opcion->valorParaUsuario($user));
 
             return $empresa;
         });
