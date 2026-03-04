@@ -630,6 +630,25 @@
                                         </label>
                                     </template>
                                 </div>
+
+                                <div class="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+                                    <div class="mb-1 flex items-center justify-between gap-2">
+                                        <label class="text-sm font-medium text-slate-700" :for="`nota_categoria_${activeTab}`" x-text="`Notas de ${activeTab}`"></label>
+                                        <span
+                                            class="text-xs"
+                                            :class="categoriaNotaError[activeTab] ? 'text-rose-600' : 'text-slate-500'"
+                                            x-text="categoriaNotaError[activeTab] || (categoriaNotaSaving[activeTab] ? 'Guardando...' : (categoriaNotaMensaje[activeTab] || ''))"
+                                        ></span>
+                                    </div>
+                                    <textarea
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                        rows="3"
+                                        :id="`nota_categoria_${activeTab}`"
+                                        placeholder="Escribe una nota para esta categoría"
+                                        :value="notaCategoriaActual(activeTab)"
+                                        @input="onCategoriaNotaInput(activeTab, $event.target.value)"
+                                    ></textarea>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -842,6 +861,13 @@
                 ])->values()),
                 savedComoLlego: @js($comoLlegoSeleccionado),
                 draftComoLlego: [],
+                savedCategoriaNotas: @js($categoriaNotasPayload),
+                draftCategoriaNotas: @js($categoriaNotasPayload),
+                categoriaNotaTimers: {},
+                categoriaNotaSaving: {},
+                categoriaNotaMensaje: {},
+                categoriaNotaError: {},
+                categoriaNotasSaveUrl: @js(route('empresas.categoria-notas.store', $empresa)),
 
                 savedSelectedIds: @js($opcionesSeleccionadas),
                 draftSelectedIds: [],
@@ -1420,6 +1446,9 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
+                    this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
+                    this.categoriaNotaMensaje = {};
+                    this.categoriaNotaError = {};
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = true;
                 },
@@ -1427,8 +1456,100 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
+                    this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = false;
+                },
+                notaCategoriaActual(categoria) {
+                    return this.draftCategoriaNotas?.[categoria] || '';
+                },
+                onCategoriaNotaInput(categoria, valor) {
+                    this.draftCategoriaNotas = {
+                        ...this.draftCategoriaNotas,
+                        [categoria]: valor,
+                    };
+
+                    this.categoriaNotaError = {
+                        ...this.categoriaNotaError,
+                        [categoria]: '',
+                    };
+
+                    this.programarGuardadoCategoriaNota(categoria);
+                },
+                programarGuardadoCategoriaNota(categoria) {
+                    const timer = this.categoriaNotaTimers?.[categoria];
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+
+                    this.categoriaNotaTimers = {
+                        ...this.categoriaNotaTimers,
+                        [categoria]: setTimeout(() => this.guardarCategoriaNota(categoria), 600),
+                    };
+                },
+                async guardarCategoriaNota(categoria) {
+                    if (!this.categoriasOpciones.includes(categoria)) {
+                        return;
+                    }
+
+                    this.categoriaNotaSaving = {
+                        ...this.categoriaNotaSaving,
+                        [categoria]: true,
+                    };
+                    this.categoriaNotaMensaje = {
+                        ...this.categoriaNotaMensaje,
+                        [categoria]: '',
+                    };
+
+                    try {
+                        const response = await fetch(this.categoriaNotasSaveUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                Accept: 'application/json',
+                            },
+                            body: JSON.stringify({
+                                categoria,
+                                nota: this.notaCategoriaActual(categoria),
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.categoriaNotaError = {
+                                ...this.categoriaNotaError,
+                                [categoria]: data.message || 'No se pudo guardar la nota.',
+                            };
+                            return;
+                        }
+
+                        this.savedCategoriaNotas = {
+                            ...this.savedCategoriaNotas,
+                            [categoria]: data.nota || '',
+                        };
+
+                        this.draftCategoriaNotas = {
+                            ...this.draftCategoriaNotas,
+                            [categoria]: data.nota || '',
+                        };
+
+                        this.categoriaNotaMensaje = {
+                            ...this.categoriaNotaMensaje,
+                            [categoria]: 'Guardado',
+                        };
+                    } catch (error) {
+                        this.categoriaNotaError = {
+                            ...this.categoriaNotaError,
+                            [categoria]: 'No fue posible conectar con el servidor.',
+                        };
+                    } finally {
+                        this.categoriaNotaSaving = {
+                            ...this.categoriaNotaSaving,
+                            [categoria]: false,
+                        };
+                    }
                 },
 
                 categoryAbbreviation(categoria) {
