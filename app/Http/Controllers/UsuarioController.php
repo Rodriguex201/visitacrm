@@ -76,9 +76,11 @@ class UsuarioController extends Controller
             return $empresa;
         });
 
+
         $valorTotalPagina = (float) $empresasReferidas->getCollection()->sum('valor_total_referido');
 
         return view('usuarios.referidos', compact('user', 'empresasReferidas', 'valorTotalPagina'));
+
     }
 
     public function updateTipoUsuario(Request $request, TipoUsuario $tipoUsuario): RedirectResponse
