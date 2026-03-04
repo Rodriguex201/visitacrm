@@ -34,12 +34,10 @@ class StoreCatalogoOpcionRequest extends FormRequest
             'categoria' => ['required', 'string', Rule::in(self::CATEGORIAS)],
             'nombre' => ['required', 'string', 'max:255'],
             'orden' => ['nullable', 'integer', 'min:0'],
-            'valor' => ['nullable', 'numeric', 'between:0,9999999999.99'],
+
+            'valor' => ['nullable', 'numeric', 'min:0'],
         ];
 
-        if ($this->input('categoria') === 'cotizaciones') {
-            $rules['valor'] = ['nullable', 'numeric', 'between:0,9999999999.99'];
-        }
 
         return $rules;
     }

@@ -319,9 +319,9 @@
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
+                                                @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                        Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
 
                                                     </span>
                                                 @endif
@@ -338,9 +338,9 @@
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
+                                                @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                        Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
 
                                                     </span>
                                                 @endif
@@ -358,10 +358,10 @@
                                         @endif
                                     @endif
 
-                                    @if (! $esAdministracion && ($empresa->referido_estado === 'aprobado') && !is_null($empresa->comision_valor))
+                                    @if (! $esAdministracion && ($empresa->referido_estado === 'aprobado'))
                                         <div class="mt-1 flex flex-wrap items-center gap-1">
                                             <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                Comisión: $ {{ number_format((float) $empresa->comision_valor, 0, ',', '.') }}
+                                                Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
                                             </span>
 
                                             @if (!is_null($empresa->referido_aprobado_at))
