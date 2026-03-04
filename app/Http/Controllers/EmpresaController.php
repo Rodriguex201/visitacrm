@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CatalogoOpcion;
 use App\Models\Empresa;
+use App\Models\EmpresaCategoriaNota;
 use App\Models\EmpresaOpcion;
 use App\Models\EmpresaComoLlego;
 use App\Models\EmpresaComoLlegoOpcion;
@@ -158,7 +159,13 @@ class EmpresaController extends Controller
         $visFrom = $this->rangoFecha($visRange);
 
 
-        $empresa->load(['sector', 'user', 'responsable', 'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest()]);
+        $empresa->load([
+            'sector',
+            'user',
+            'responsable',
+            'categoriaNotas',
+            'contactos' => fn ($query) => $query->orderByDesc('es_principal')->latest(),
+        ]);
 
         $visitas = Visita::query()
             ->where('empresa_id', $empresa->id)
@@ -222,6 +229,10 @@ class EmpresaController extends Controller
             ])
             ->all();
 
+        $categoriaNotasPayload = collect($categoriasOpciones)
+            ->mapWithKeys(fn ($categoria) => [$categoria => $empresa->notaCategoria($categoria) ?? ''])
+            ->all();
+
         $referidoPayload = [
             'referido_estado' => $empresa->referido_estado ?: 'pendiente',
             'referido_motivo_rechazo' => $empresa->referido_motivo_rechazo,
@@ -232,7 +243,7 @@ class EmpresaController extends Controller
             'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
         ];
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -295,6 +306,13 @@ class EmpresaController extends Controller
     {
         $this->authorize('update', $empresa);
 
+        $categoriasValidas = [
+            'Estado Actual',
+            'Aplicativos',
+            'Procesos Electrónicos',
+            'Equipos',
+        ];
+
         $validated = $request->validate([
             'opciones' => ['nullable', 'array'],
             'opciones.*' => ['integer', 'exists:catalogo_opciones,id'],
@@ -303,7 +321,14 @@ class EmpresaController extends Controller
             'como_llego' => ['nullable', 'array'],
             'como_llego.*.opcion_id' => ['required', 'integer'],
             'como_llego.*.texto' => ['nullable', 'string', 'max:255'],
+            'categoria_notas' => ['nullable', 'array'],
+            'categoria_notas.*' => ['nullable', 'string', 'max:5000'],
         ]);
+
+        $categoriaNotas = collect($validated['categoria_notas'] ?? [])
+            ->filter(fn ($nota, $categoria) => in_array((string) $categoria, $categoriasValidas, true))
+            ->map(fn ($nota) => $nota !== null ? trim((string) $nota) : null)
+            ->map(fn ($nota) => $nota !== '' ? $nota : null);
 
         $opciones = collect($validated['opciones'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
 
@@ -363,7 +388,7 @@ class EmpresaController extends Controller
             }
         }
 
-        DB::transaction(function () use ($empresa, $opciones, $validated, $request, $comoLlegoRows) {
+        DB::transaction(function () use ($empresa, $opciones, $validated, $request, $comoLlegoRows, $categoriasValidas, $categoriaNotas) {
             $empresa->opciones()->sync($opciones->all());
 
             if (array_key_exists('cotizacion_numero', $validated)) {
@@ -401,6 +426,18 @@ class EmpresaController extends Controller
                     ])->all()
                 );
             }
+
+            foreach ($categoriasValidas as $categoria) {
+                EmpresaCategoriaNota::query()->updateOrCreate(
+                    [
+                        'empresa_id' => $empresa->id,
+                        'categoria' => $categoria,
+                    ],
+                    [
+                        'nota' => $categoriaNotas->get($categoria),
+                    ]
+                );
+            }
         });
 
         return response()->json([
@@ -408,6 +445,9 @@ class EmpresaController extends Controller
             'message' => 'Opciones guardadas correctamente.',
             'opciones' => $opciones,
             'como_llego' => $comoLlegoRows->all(),
+            'categoria_notas' => collect($categoriasValidas)
+                ->mapWithKeys(fn ($categoria) => [$categoria => $categoriaNotas->get($categoria) ?? ''])
+                ->all(),
             'empresa' => [
                 'cotizacion_enviada' => (bool) $empresa->cotizacion_enviada,
                 'cotizacion_enviada_at' => optional($empresa->cotizacion_enviada_at)->toIso8601String(),

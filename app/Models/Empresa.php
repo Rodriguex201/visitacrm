@@ -87,4 +87,20 @@ class Empresa extends Model
     {
         return $this->hasMany(EmpresaComoLlego::class, 'empresa_id');
     }
+
+    public function categoriaNotas(): HasMany
+    {
+        return $this->hasMany(EmpresaCategoriaNota::class, 'empresa_id');
+    }
+
+    public function notaCategoria(string $categoria): ?string
+    {
+        if (! $this->relationLoaded('categoriaNotas')) {
+            return $this->categoriaNotas()->where('categoria', $categoria)->value('nota');
+        }
+
+        return $this->categoriaNotas
+            ->firstWhere('categoria', $categoria)
+            ?->nota;
+    }
 }

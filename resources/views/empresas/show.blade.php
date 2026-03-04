@@ -630,6 +630,20 @@
                                         </label>
                                     </template>
                                 </div>
+
+                                <div class="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+                                    <div class="mb-1 flex items-center justify-between gap-2">
+                                        <label class="text-sm font-medium text-slate-700" :for="`nota_categoria_${activeTab}`" x-text="`Notas de ${activeTab}`"></label>
+                                    </div>
+                                    <textarea
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                        rows="3"
+                                        :id="`nota_categoria_${activeTab}`"
+                                        placeholder="Escribe una nota para esta categoría"
+                                        :value="notaCategoriaActual(activeTab)"
+                                        @input="setNotaCategoria(activeTab, $event.target.value)"
+                                    ></textarea>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -842,6 +856,8 @@
                 ])->values()),
                 savedComoLlego: @js($comoLlegoSeleccionado),
                 draftComoLlego: [],
+                savedCategoriaNotas: @js($categoriaNotasPayload),
+                draftCategoriaNotas: @js($categoriaNotasPayload),
 
                 savedSelectedIds: @js($opcionesSeleccionadas),
                 draftSelectedIds: [],
@@ -1420,6 +1436,7 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
+                    this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = true;
                 },
@@ -1427,8 +1444,18 @@
                     this.draftSelectedIds = [...this.savedSelectedIds];
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
+                    this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = false;
+                },
+                notaCategoriaActual(categoria) {
+                    return this.draftCategoriaNotas?.[categoria] || '';
+                },
+                setNotaCategoria(categoria, valor) {
+                    this.draftCategoriaNotas = {
+                        ...this.draftCategoriaNotas,
+                        [categoria]: valor,
+                    };
                 },
 
                 categoryAbbreviation(categoria) {
@@ -1716,6 +1743,7 @@
                                 opciones: this.draftSelectedIds,
                                 cotizacion_enviada: this.draftCotizacionEnviada ? 1 : 0,
                                 cotizacion_numero: this.form.cotizacion_numero || null,
+                                categoria_notas: this.draftCategoriaNotas,
                                 como_llego: this.draftComoLlego
                                     .filter((item) => Number(item.opcion_id) > 0)
                                     .map((item) => ({
@@ -1737,6 +1765,11 @@
                         this.draftSelectedIds = [...this.savedSelectedIds];
                         this.savedComoLlego = Array.isArray(data.como_llego) ? data.como_llego : [];
                         this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
+                        this.savedCategoriaNotas = {
+                            ...this.savedCategoriaNotas,
+                            ...(data.categoria_notas || {}),
+                        };
+                        this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
                         this.savedCotizacionEnviada = Boolean(data.empresa?.cotizacion_enviada);
                         this.savedCotizacionEnviadaAt = data.empresa?.cotizacion_enviada_at || null;
                         this.savedCotizacionNumero = data.empresa?.cotizacion_numero || null;
