@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Auth\User as AuthenticatableUser;
 
 class CatalogoOpcion extends Model
 {
@@ -27,9 +28,11 @@ class CatalogoOpcion extends Model
         'orden' => 'integer',
     ];
 
+
     public function valorParaTipo(?string $tipo): float
     {
         $valor = match ($tipo) {
+
             'vinculado' => $this->valor_vinculado ?? $this->valor,
             'freelance' => $this->valor_freelance ?? $this->valor,
             default => $this->valor,
@@ -37,6 +40,7 @@ class CatalogoOpcion extends Model
 
         return (float) ($valor ?? 0);
     }
+
 
     public function empresas(): BelongsToMany
     {

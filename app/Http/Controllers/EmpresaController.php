@@ -597,7 +597,9 @@ class EmpresaController extends Controller
         }
 
         if ($referidoEstado === 'aprobado') {
+
             $empresa->comision_valor = $this->calcularComisionAutomatica($empresa);
+
         }
 
 
@@ -617,6 +619,7 @@ class EmpresaController extends Controller
         ]);
     }
 
+
     private function calcularComisionAutomatica(Empresa $empresa): float
     {
         if (! $empresa->relationLoaded('responsable') || ! $empresa->relationLoaded('creador')) {
@@ -629,9 +632,11 @@ class EmpresaController extends Controller
             ->select(['catalogo_opciones.id', 'catalogo_opciones.valor', 'catalogo_opciones.valor_vinculado', 'catalogo_opciones.valor_freelance'])
             ->join('empresa_opcion', 'empresa_opcion.opcion_id', '=', 'catalogo_opciones.id')
             ->where('empresa_opcion.empresa_id', $empresa->id)
+
             ->where('catalogo_opciones.activo', 1)
             ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
             ->get();
+
 
         return (float) $opciones->sum(fn (CatalogoOpcion $opcion) => $opcion->valorParaTipo($tipoRefiere));
     }
@@ -647,6 +652,7 @@ class EmpresaController extends Controller
         }
 
         return null;
+
     }
 
     public function storeCatalogoOpcion(Request $request): JsonResponse

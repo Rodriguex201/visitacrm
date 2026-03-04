@@ -72,11 +72,13 @@ class UsuarioController extends Controller
             ->latest('id')
             ->paginate(10);
 
+
         $empresasReferidas->getCollection()->transform(function ($empresa) {
             $tipoRefiere = $this->tipoUsuarioRefiere($empresa);
 
             $empresa->tipo_usuario_refiere = $tipoRefiere;
             $empresa->valor_total_referido = (float) $empresa->opciones->sum(fn ($opcion) => $opcion->valorParaTipo($tipoRefiere));
+
 
             return $empresa;
         });
