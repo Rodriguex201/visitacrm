@@ -3,6 +3,8 @@
     indexUrl: @js(route('configuracion.bancos.index')),
     storeUrl: @js(route('configuracion.bancos.store')),
     updateUrlTemplate: @js(route('configuracion.bancos.update', ['banco' => '__ID__'])),
+    activateUrlTemplate: @js(route('configuracion.bancos.activate', ['banco' => '__ID__'])),
+    deactivateUrlTemplate: @js(route('configuracion.bancos.deactivate', ['banco' => '__ID__'])),
     destroyUrlTemplate: @js(route('configuracion.bancos.destroy', ['banco' => '__ID__'])),
 })">
     <div class="flex items-center justify-between gap-3">
@@ -32,7 +34,9 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-2">
                                 <button type="button" @click="openEditModal(banco)" class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700">Editar</button>
-                                <button type="button" @click="destroyBanco(banco)" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700" x-text="banco.can_delete ? 'Eliminar' : 'Desactivar'"></button>
+                                <button type="button" x-show="banco.activo" @click="desactivarBanco(banco)" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">Desactivar</button>
+                                <button type="button" x-show="!banco.activo" @click="activarBanco(banco)" class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Activar</button>
+                                <button type="button" x-show="banco.can_delete" @click="destroyBanco(banco)" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700">Eliminar</button>
                             </div>
                         </td>
                     </tr>
@@ -59,7 +63,7 @@
 </section>
 
 <script>
-function bancosManager({ initialBancos, indexUrl, storeUrl, updateUrlTemplate, destroyUrlTemplate }) {
+function bancosManager({ initialBancos, indexUrl, storeUrl, updateUrlTemplate, activateUrlTemplate, deactivateUrlTemplate, destroyUrlTemplate }) {
     return {
         bancos: initialBancos ?? [],
         showModal: false,
@@ -83,9 +87,19 @@ function bancosManager({ initialBancos, indexUrl, storeUrl, updateUrlTemplate, d
             this.loading = false
         },
         async destroyBanco(banco) {
-            const accion = banco.can_delete ? 'eliminar' : 'desactivar'
-            if (!confirm(`¿Deseas ${accion} el banco "${banco.nombre}"?`)) return
+            if (!banco.can_delete) return
+            if (!confirm(`¿Deseas eliminar el banco "${banco.nombre}"?`)) return
             const response = await fetch(destroyUrlTemplate.replace('__ID__', banco.id), { method: 'DELETE', headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' } })
+            if (response.ok) await this.refreshBancos()
+        },
+        async desactivarBanco(banco) {
+            if (!confirm(`¿Deseas desactivar el banco "${banco.nombre}"?`)) return
+            const response = await fetch(deactivateUrlTemplate.replace('__ID__', banco.id), { method: 'PATCH', headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' } })
+            if (response.ok) await this.refreshBancos()
+        },
+        async activarBanco(banco) {
+            if (!confirm(`¿Deseas activar el banco "${banco.nombre}"?`)) return
+            const response = await fetch(activateUrlTemplate.replace('__ID__', banco.id), { method: 'PATCH', headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' } })
             if (response.ok) await this.refreshBancos()
         },
     }
