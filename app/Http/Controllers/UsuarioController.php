@@ -57,10 +57,24 @@ class UsuarioController extends Controller
     public function referidos(User $user): View
     {
         $empresasReferidas = $user->empresasReferidas()
-            ->with(['sector'])
+            ->with([
+                'sector',
+                'opciones' => function ($query): void {
+                    $query->select('catalogo_opciones.id', 'catalogo_opciones.categoria', 'catalogo_opciones.nombre', 'catalogo_opciones.valor')
+                        ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
+                        ->orderBy('catalogo_opciones.categoria')
+                        ->orderBy('catalogo_opciones.nombre');
+                },
+            ])
             ->latest('referida_at')
             ->latest('id')
             ->paginate(10);
+
+        $empresasReferidas->getCollection()->transform(function ($empresa) {
+            $empresa->valor_total_referido = (float) $empresa->opciones->sum('valor');
+
+            return $empresa;
+        });
 
         return view('usuarios.referidos', compact('user', 'empresasReferidas'));
     }
