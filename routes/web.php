@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccionesController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ConfiguracionBancoController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProfileController;
@@ -62,6 +63,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/configuracion/catalogo', [ConfiguracionController::class, 'storeCatalogo'])->name('configuracion.catalogo.store');
         Route::patch('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'updateCatalogo'])->name('configuracion.catalogo.update');
         Route::delete('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'destroyCatalogo'])->name('configuracion.catalogo.destroy');
+
+        Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
+        Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');
+        Route::patch('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'update'])->name('configuracion.bancos.update');
+        Route::delete('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'destroy'])->name('configuracion.bancos.destroy');
     });
 
     // Perfil

@@ -6,6 +6,7 @@ use App\Http\Requests\Configuracion\StoreCatalogoOpcionRequest;
 use App\Http\Requests\Configuracion\StoreSectorRequest;
 use App\Http\Requests\Configuracion\UpdateCatalogoOpcionRequest;
 use App\Http\Requests\Configuracion\UpdateSectorRequest;
+use App\Models\Banco;
 use App\Models\CatalogoOpcion;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
@@ -35,6 +36,7 @@ class ConfiguracionController extends Controller
             'sectores' => $sectores,
             'categorias' => self::CATEGORIAS,
             'catalogoPorCategoria' => $catalogo,
+            'bancos' => $this->bancosListado(),
         ]);
     }
 
@@ -137,6 +139,22 @@ class ConfiguracionController extends Controller
         return response()->json([
             'message' => 'Opción desactivada correctamente.',
         ]);
+    }
+
+
+    private function bancosListado()
+    {
+        return Banco::query()
+            ->withCount('usuarios')
+            ->orderBy('nombre')
+            ->get()
+            ->map(fn (Banco $banco) => [
+                'id' => $banco->id,
+                'nombre' => $banco->nombre,
+                'activo' => (bool) $banco->activo,
+                'usuarios_count' => $banco->usuarios_count,
+                'can_delete' => $banco->usuarios_count === 0,
+            ]);
     }
 
     private function sectoresActivos()
