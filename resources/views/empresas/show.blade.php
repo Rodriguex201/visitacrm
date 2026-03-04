@@ -643,6 +643,7 @@
                                 <div class="mt-4 rounded-lg border border-slate-200 bg-white p-3">
                                     <div class="mb-1 flex items-center justify-between gap-2">
                                         <label class="text-sm font-medium text-slate-700" :for="`nota_categoria_${activeTab}`" x-text="`Notas de ${activeTab}`"></label>
+
                                     </div>
                                     <textarea
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -650,7 +651,9 @@
                                         :id="`nota_categoria_${activeTab}`"
                                         placeholder="Escribe una nota para esta categoría"
                                         :value="notaCategoriaActual(activeTab)"
+
                                         @input="setNotaCategoria(activeTab, $event.target.value)"
+
                                     ></textarea>
                                 </div>
                             </div>
@@ -867,6 +870,7 @@
                 draftComoLlego: [],
                 savedCategoriaNotas: @js($categoriaNotasPayload),
                 draftCategoriaNotas: @js($categoriaNotasPayload),
+
 
                 savedSelectedIds: @js($opcionesSeleccionadas),
                 draftSelectedIds: [],
@@ -1446,6 +1450,7 @@
                     this.draftCotizacionEnviada = this.savedCotizacionEnviada;
                     this.draftComoLlego = this.savedComoLlego.map((item) => ({ ...item }));
                     this.draftCategoriaNotas = { ...this.savedCategoriaNotas };
+
                     this.form.cotizacion_numero = this.savedCotizacionNumero;
                     this.modalOpen = true;
                 },
@@ -1460,11 +1465,14 @@
                 notaCategoriaActual(categoria) {
                     return this.draftCategoriaNotas?.[categoria] || '';
                 },
+
                 setNotaCategoria(categoria, valor) {
+
                     this.draftCategoriaNotas = {
                         ...this.draftCategoriaNotas,
                         [categoria]: valor,
                     };
+
                 },
 
                 categoryAbbreviation(categoria) {
