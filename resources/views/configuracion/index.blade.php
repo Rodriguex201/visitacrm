@@ -50,8 +50,6 @@
                 { key: 'aplicativos', label: 'Aplicativos' },
                 { key: 'procesos-electronicos', label: 'Procesos Electrónicos' },
                 { key: 'equipos', label: 'Equipos' },
-                { key: 'como-llego', label: 'Como Llego' },
-                { key: 'cotizaciones', label: 'Cotizaciones' },
                 { key: 'bancos', label: 'Bancos' },
             ],
             activeTab: 'sectores',
