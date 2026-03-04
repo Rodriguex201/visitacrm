@@ -138,10 +138,4 @@
         </div>
     </section>
 
-    <a
-        href="{{ route('usuarios.index') }}"
-        class="fixed bottom-6 right-6 z-40 inline-flex items-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-    >
-        Volver a usuarios
-    </a>
 </x-app-layout>
