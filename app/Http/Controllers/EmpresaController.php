@@ -179,6 +179,11 @@ class EmpresaController extends Controller
             ->orderBy('id')
             ->get();
 
+        $sectores = Sector::query()
+            ->where('activo', 1)
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
+
         $acciones = EmpresaAccion::query()
             ->with('accion')
             ->where('empresa_id', $empresa->id)
@@ -243,7 +248,7 @@ class EmpresaController extends Controller
             'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
         ];
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View

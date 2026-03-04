@@ -31,8 +31,108 @@
 
 
         <div class="grid gap-4 lg:grid-cols-2 lg:items-start">
-            <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
-                <div class="space-y-3 text-slate-600">
+            <article
+                class="relative rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm"
+                x-data="{
+                    openModal: {{ old('modal_mode') === 'edit' && (int) old('empresa_id', 0) === (int) $empresa->id ? 'true' : 'false' }},
+                    openEdit: true,
+                    editId: {{ (int) $empresa->id }},
+                    updateRouteTemplate: @js(route('empresas.update', ['empresa' => '__ID__'])),
+                    formAction: '{{ route('empresas.update', ['empresa' => $empresa]) }}',
+                    form: {
+                        nombre: @js(old('nombre', $empresa->nombre ?? '')),
+                        ciudad: @js(old('ciudad', $empresa->ciudad ?? '')),
+                        ciudad_codigo: @js(old('ciudad_codigo', '')),
+                        contacto_nombre: @js(old('contacto_nombre', $empresa->contacto_nombre ?? '')),
+                        direccion: @js(old('direccion', $empresa->direccion ?? '')),
+                        telefono: @js(old('telefono', $empresa->telefono ?? '')),
+                        email: @js(old('email', $empresa->email ?? '')),
+                        sector_id: @js(old('sector_id', $empresa->sector_id ?? '')),
+                        notas: @js(old('notas', $empresa->notas ?? '')),
+                    },
+                    cityResults: [],
+                    cityLoading: false,
+                    openEditModal(empresa) {
+                        this.openEdit = true
+                        this.editId = empresa.id
+                        this.form = {
+                            nombre: empresa.nombre ?? '',
+                            ciudad: empresa.ciudad ?? '',
+                            ciudad_codigo: '',
+                            contacto_nombre: empresa.contacto_nombre ?? '',
+                            direccion: empresa.direccion ?? '',
+                            telefono: empresa.telefono ?? '',
+                            email: empresa.email ?? '',
+                            sector_id: empresa.sector_id ?? '',
+                            notas: empresa.notas ?? '',
+                        }
+                        this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
+                        this.cityResults = []
+                        this.cityLoading = false
+                        this.openModal = true
+                    },
+                    closeModal() {
+                        this.openModal = false
+                        this.cityResults = []
+                        this.cityLoading = false
+                    },
+                    async searchCity() {
+                        const query = (this.form.ciudad ?? '').trim()
+
+                        if (query.length === 0) {
+                            this.cityResults = []
+                            return
+                        }
+
+                        this.cityLoading = true
+
+                        try {
+                            const response = await fetch(`/api/ciudades?query=${encodeURIComponent(query)}`, {
+                                headers: { Accept: 'application/json' },
+                            })
+
+                            if (!response.ok) {
+                                this.cityResults = []
+                                return
+                            }
+
+                            this.cityResults = await response.json()
+                        } catch (error) {
+                            this.cityResults = []
+                        } finally {
+                            this.cityLoading = false
+                        }
+                    },
+                    selectCity(city) {
+                        this.form.ciudad = city.citynomb ?? ''
+                        this.form.ciudad_codigo = city.citycodigo ?? ''
+                        this.cityResults = []
+                    },
+                }"
+            >
+                <button
+                    type="button"
+                    @click="openEditModal({
+                        id: {{ (int) $empresa->id }},
+                        nombre: @js($empresa->nombre),
+                        ciudad: @js($empresa->ciudad),
+                        contacto_nombre: @js($empresa->contacto_nombre),
+                        direccion: @js($empresa->direccion),
+                        telefono: @js($empresa->telefono),
+                        email: @js($empresa->email),
+                        sector_id: @js($empresa->sector_id),
+                        notas: @js($empresa->notas),
+                    })"
+                    class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    title="Editar empresa"
+                    aria-label="Editar empresa"
+                >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 013.536 3.536L12.536 14.5a4 4 0 01-1.414.943L8 16l.557-3.122A4 4 0 019.5 11.464zM5 19h14" />
+                    </svg>
+                </button>
+
+                <div class="space-y-3 pr-10 text-slate-600">
                     <p class="flex items-center gap-2 text-sm">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
@@ -84,6 +184,8 @@
                         <p class="mt-2 text-sm text-slate-400 italic">Sin notas</p>
                     @endif
                 </div>
+
+                @include('empresas.partials.modal_empresa', ['showModalErrors' => old('modal_mode') === 'edit' && (int) old('empresa_id', 0) === (int) $empresa->id])
             </article>
 
             <div class="space-y-4">
