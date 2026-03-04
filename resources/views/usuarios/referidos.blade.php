@@ -43,7 +43,9 @@
                                         <button
                                             type="button"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+
                                             @click="openDetalle = true"
+
                                             title="Ver detalle de valor"
                                             aria-label="Ver detalle de valor"
                                         >
@@ -53,6 +55,7 @@
                                             </svg>
                                         </button>
                                     </div>
+
 
                                     <div x-cloak x-show="openDetalle" x-transition.opacity class="fixed inset-0 z-40 bg-slate-900/40" @click="openDetalle = false"></div>
 
@@ -106,6 +109,7 @@
                                                 @else
                                                     <p class="text-sm text-slate-500">Esta empresa no tiene opciones valorables.</p>
                                                 @endif
+
                                             </div>
                                         </div>
                                     </div>
