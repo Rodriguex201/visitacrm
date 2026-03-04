@@ -28,11 +28,11 @@ class CatalogoOpcion extends Model
         'orden' => 'integer',
     ];
 
-    public function valorParaUsuario(?AuthenticatableUser $user = null): float
-    {
-        $tipoUsuario = $user?->tipo_usuario;
 
-        $valor = match ($tipoUsuario) {
+    public function valorParaTipo(?string $tipo): float
+    {
+        $valor = match ($tipo) {
+
             'vinculado' => $this->valor_vinculado ?? $this->valor,
             'freelance' => $this->valor_freelance ?? $this->valor,
             default => $this->valor,
@@ -41,13 +41,6 @@ class CatalogoOpcion extends Model
         return (float) ($valor ?? 0);
     }
 
-    public function getValorEfectivoAttribute(): float
-    {
-        /** @var AuthenticatableUser|null $user */
-        $user = auth()->user();
-
-        return $this->valorParaUsuario($user);
-    }
 
     public function empresas(): BelongsToMany
     {

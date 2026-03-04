@@ -59,6 +59,8 @@ class UsuarioController extends Controller
         $empresasReferidas = $user->empresasReferidas()
             ->with([
                 'sector',
+                'responsable:id,codigo,tipo_usuario',
+                'creador:id,codigo,tipo_usuario',
                 'opciones' => function ($query): void {
                     $query->select('catalogo_opciones.id', 'catalogo_opciones.categoria', 'catalogo_opciones.nombre', 'catalogo_opciones.valor', 'catalogo_opciones.valor_vinculado', 'catalogo_opciones.valor_freelance')
                         ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
@@ -70,8 +72,13 @@ class UsuarioController extends Controller
             ->latest('id')
             ->paginate(10);
 
-        $empresasReferidas->getCollection()->transform(function ($empresa) use ($user) {
-            $empresa->valor_total_referido = (float) $empresa->opciones->sum(fn ($opcion) => $opcion->valorParaUsuario($user));
+
+        $empresasReferidas->getCollection()->transform(function ($empresa) {
+            $tipoRefiere = $this->tipoUsuarioRefiere($empresa);
+
+            $empresa->tipo_usuario_refiere = $tipoRefiere;
+            $empresa->valor_total_referido = (float) $empresa->opciones->sum(fn ($opcion) => $opcion->valorParaTipo($tipoRefiere));
+
 
             return $empresa;
         });
@@ -81,6 +88,19 @@ class UsuarioController extends Controller
 
         return view('usuarios.referidos', compact('user', 'empresasReferidas', 'valorTotalPagina'));
 
+    }
+
+    private function tipoUsuarioRefiere($empresa): ?string
+    {
+        if ($empresa->responsable_user_id) {
+            return $empresa->responsable?->tipo_usuario;
+        }
+
+        if (($empresa->creador?->tipo_usuario ?? null) === 'administracion') {
+            return $empresa->creador?->tipo_usuario;
+        }
+
+        return null;
     }
 
     public function updateTipoUsuario(Request $request, TipoUsuario $tipoUsuario): RedirectResponse

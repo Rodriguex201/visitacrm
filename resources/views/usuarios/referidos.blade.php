@@ -88,6 +88,11 @@
                                             </div>
 
                                             <div class="p-4">
+                                                <div class="mb-3">
+                                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                                        Tipo referido: {{ $empresa->tipo_usuario_refiere ?? 'general' }}
+                                                    </span>
+                                                </div>
                                                 @if($empresa->opciones->isNotEmpty())
                                                     <table class="w-full text-sm">
                                                         <thead class="bg-slate-50 text-slate-600">
@@ -104,7 +109,9 @@
                                                                     <td class="px-3 py-2">{{ $opcion->categoria }}</td>
                                                                     <td class="px-3 py-2">{{ $opcion->nombre }}</td>
                                                                     <td class="px-3 py-2 text-right">
-                                                                        ${{ number_format($opcion->valorParaUsuario($user),0,',','.') }}
+
+                                                                        ${{ number_format($opcion->valorParaTipo($empresa->tipo_usuario_refiere),0,',','.') }}
+
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
