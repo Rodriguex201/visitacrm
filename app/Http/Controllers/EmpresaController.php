@@ -8,6 +8,7 @@ use App\Models\EmpresaCategoriaNota;
 use App\Models\EmpresaOpcion;
 use App\Models\EmpresaComoLlego;
 use App\Models\EmpresaComoLlegoOpcion;
+use App\Models\EstadoReferidoColor;
 use Carbon\Carbon;
 use App\Models\Sector;
 use App\Models\Accion;
@@ -23,6 +24,12 @@ use Illuminate\View\View;
 
 class EmpresaController extends Controller
 {
+    private const REFERIDO_ESTADO_DEFAULT_COLORS = [
+        'pendiente' => ['bg_color' => '#FEF3C7', 'text_color' => '#92400E'],
+        'aprobado' => ['bg_color' => '#D1FAE5', 'text_color' => '#065F46'],
+        'rechazado' => ['bg_color' => '#FEE2E2', 'text_color' => '#991B1B'],
+    ];
+
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Empresa::class);
@@ -107,6 +114,8 @@ class EmpresaController extends Controller
             ->orderBy('nombre')
             ->get();
 
+        $referidoEstadoColors = $this->referidoEstadoColors();
+
         return view('empresas.index', compact(
             'empresas',
             'sectores',
@@ -122,6 +131,7 @@ class EmpresaController extends Controller
             'usaRangoPersonalizado',
             'desde',
             'hasta',
+            'referidoEstadoColors',
         ));
     }
 
@@ -248,7 +258,9 @@ class EmpresaController extends Controller
             'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
         ];
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores'));
+        $referidoEstadoColors = $this->referidoEstadoColors();
+
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -1020,4 +1032,27 @@ class EmpresaController extends Controller
 
         return $validated;
     }
+
+    private function referidoEstadoColors(): array
+    {
+        $configurados = EstadoReferidoColor::query()
+            ->whereIn('estado', array_keys(self::REFERIDO_ESTADO_DEFAULT_COLORS))
+            ->where('activo', 1)
+            ->get()
+            ->keyBy('estado');
+
+        $colores = [];
+
+        foreach (self::REFERIDO_ESTADO_DEFAULT_COLORS as $estado => $default) {
+            $color = $configurados->get($estado);
+
+            $colores[$estado] = [
+                'bg_color' => $color?->bg_color ?: $default['bg_color'],
+                'text_color' => $color?->text_color ?: $default['text_color'],
+            ];
+        }
+
+        return $colores;
+    }
+
 }

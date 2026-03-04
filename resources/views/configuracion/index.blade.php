@@ -33,6 +33,12 @@
             </div>
         @endforeach
 
+        <div class="mt-4" x-show="activeTab === 'estados-colores'" x-cloak>
+            @include('configuracion.partials.estado_referido_colores', [
+                'estadosReferidoColores' => $estadosReferidoColores,
+            ])
+        </div>
+
         <div class="mt-4" x-show="activeTab === 'bancos'" x-cloak>
             @include('configuracion.partials.bancos', [
                 'bancos' => $bancos,
@@ -50,6 +56,7 @@
                 { key: 'aplicativos', label: 'Aplicativos' },
                 { key: 'procesos-electronicos', label: 'Procesos Electrónicos' },
                 { key: 'equipos', label: 'Equipos' },
+                { key: 'estados-colores', label: 'Estados (Colores)' },
                 { key: 'bancos', label: 'Bancos' },
             ],
             activeTab: 'sectores',

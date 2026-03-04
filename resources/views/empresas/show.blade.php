@@ -255,7 +255,7 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="referidoBadgeClass(referidoForm.referido_estado)" x-text="`Estado: ${referidoLabel(referidoForm.referido_estado)}`"></span>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :style="referidoBadgeStyle(referidoForm.referido_estado)" x-text="`Estado: ${referidoLabel(referidoForm.referido_estado)}`"></span>
 
                             <template x-if="referidoForm.referido_estado === 'aprobado'">
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" x-text="`Comisión: ${referidoForm.comision_valor ? referidoForm.comision_valor : 'Sin valor'}`"></span>
@@ -1001,6 +1001,7 @@
                 referidoSuccess: '',
                 referidoErrors: {},
                 referidoForm: @js($referidoPayload),
+                referidoEstadoColors: @js($referidoEstadoColors),
                 accionesCatalogo: @js($accionesCatalogo->map(fn ($accion) => ['id' => (int) $accion->id, 'nombre' => $accion->nombre])->values()),
                 accionUpdateUrlTemplate: @js(route('empresas.acciones.update', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
                 accionDeleteUrlTemplate: @js(route('empresas.acciones.destroy', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
@@ -1747,14 +1748,11 @@
 
                     return labels[estado] || 'Pendiente';
                 },
-                referidoBadgeClass(estado) {
-                    const clases = {
-                        pendiente: 'bg-amber-100 text-amber-800',
-                        aprobado: 'bg-emerald-100 text-emerald-800',
-                        rechazado: 'bg-rose-100 text-rose-800',
-                    };
+                referidoBadgeStyle(estado) {
+                    const fallback = this.referidoEstadoColors.pendiente || { bg_color: '#FEF3C7', text_color: '#92400E' };
+                    const color = this.referidoEstadoColors[estado] || fallback;
 
-                    return clases[estado] || clases.pendiente;
+                    return `background-color: ${color.bg_color}; color: ${color.text_color};`;
                 },
                 formatDateTime(valor) {
                     if (!valor) {

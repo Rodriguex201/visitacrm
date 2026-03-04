@@ -8,8 +8,10 @@ use App\Http\Requests\Configuracion\UpdateCatalogoOpcionRequest;
 use App\Http\Requests\Configuracion\UpdateSectorRequest;
 use App\Models\Banco;
 use App\Models\CatalogoOpcion;
+use App\Models\EstadoReferidoColor;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ConfiguracionController extends Controller
@@ -21,6 +23,19 @@ class ConfiguracionController extends Controller
         'equipos' => 'Equipos',
         'como-llego' => 'Como Llego',
         'cotizaciones' => 'Cotizaciones',
+    ];
+
+
+    private const ESTADOS_REFERIDO = [
+        'pendiente' => 'Pendiente',
+        'aprobado' => 'Aprobado',
+        'rechazado' => 'Rechazado',
+    ];
+
+    private const ESTADOS_REFERIDO_DEFAULT_COLORS = [
+        'pendiente' => ['bg_color' => '#FEF3C7', 'text_color' => '#92400E'],
+        'aprobado' => ['bg_color' => '#D1FAE5', 'text_color' => '#065F46'],
+        'rechazado' => ['bg_color' => '#FEE2E2', 'text_color' => '#991B1B'],
     ];
 
     public function index(): View
@@ -37,6 +52,8 @@ class ConfiguracionController extends Controller
             'categorias' => self::CATEGORIAS,
             'catalogoPorCategoria' => $catalogo,
             'bancos' => $this->bancosListado(),
+            'estadosReferidoColores' => $this->estadoReferidoColores(),
+            'estadosReferidoLabels' => self::ESTADOS_REFERIDO,
         ]);
     }
 
@@ -142,6 +159,29 @@ class ConfiguracionController extends Controller
     }
 
 
+
+    public function updateEstadoReferidoColor(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validateWithBag('updateEstadoReferidoColor', [
+            'estado' => ['required', 'in:pendiente,aprobado,rechazado'],
+            'bg_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'text_color' => ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+        ]);
+
+        EstadoReferidoColor::query()->updateOrCreate(
+            ['estado' => $validated['estado']],
+            [
+                'bg_color' => strtoupper($validated['bg_color']),
+                'text_color' => strtoupper($validated['text_color']),
+                'activo' => 1,
+            ]
+        );
+
+        return redirect()
+            ->route('configuracion.index')
+            ->with('success', 'Colores del estado del referido actualizados correctamente.');
+    }
+
     private function bancosListado()
     {
         return Banco::query()
@@ -174,6 +214,29 @@ class ConfiguracionController extends Controller
             ->orderBy('orden')
             ->orderBy('nombre')
             ->get(['id', 'categoria', 'nombre', 'valor', 'valor_vinculado', 'valor_freelance', 'orden', 'activo']);
+    }
+
+
+    private function estadoReferidoColores()
+    {
+        $coloresConfigurados = EstadoReferidoColor::query()
+            ->whereIn('estado', array_keys(self::ESTADOS_REFERIDO))
+            ->get()
+            ->keyBy('estado');
+
+        return collect(self::ESTADOS_REFERIDO)
+            ->mapWithKeys(function (string $label, string $estado) use ($coloresConfigurados) {
+                $color = $coloresConfigurados->get($estado);
+                $default = self::ESTADOS_REFERIDO_DEFAULT_COLORS[$estado];
+
+                return [$estado => [
+                    'estado' => $estado,
+                    'label' => $label,
+                    'bg_color' => $color?->bg_color ?: $default['bg_color'],
+                    'text_color' => $color?->text_color ?: $default['text_color'],
+                    'activo' => $color ? (bool) $color->activo : false,
+                ]];
+            });
     }
 
     private function resolveCategoria(string $slug): string

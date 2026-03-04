@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'updateCatalogo'])->name('configuracion.catalogo.update');
         Route::delete('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'destroyCatalogo'])->name('configuracion.catalogo.destroy');
 
+        Route::post('/configuracion/estado-referido-colores', [ConfiguracionController::class, 'updateEstadoReferidoColor'])->name('configuracion.estado-referido-colores.update');
+
         Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
         Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');
         Route::patch('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'update'])->name('configuracion.bancos.update');
