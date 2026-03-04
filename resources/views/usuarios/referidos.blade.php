@@ -24,6 +24,7 @@
                             <th class="px-4 py-3 font-semibold">Teléfono</th>
                             <th class="px-4 py-3 font-semibold">Sector</th>
                             <th class="px-4 py-3 font-semibold">Referida</th>
+                            <th class="px-4 py-3 font-semibold">Valor total</th>
                             <th class="px-4 py-3 font-semibold">Detalle</th>
                         </tr>
                     </thead>
@@ -35,13 +36,77 @@
                                 <td class="px-4 py-3">{{ $empresa->telefono ?? '—' }}</td>
                                 <td class="px-4 py-3">{{ $empresa->sector?->nombre ?? '—' }}</td>
                                 <td class="px-4 py-3">{{ optional($empresa->referida_at)->format('d/m/Y H:i') ?? '—' }}</td>
+                                <td class="px-4 py-3 font-semibold text-slate-900">${{ number_format($empresa->valor_total_referido, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3">
-                                    <a href="{{ route('empresas.show', $empresa) }}" class="text-blue-600 hover:text-blue-800 font-semibold">Ver</a>
+                                    <div class="flex items-center gap-3">
+                                        <a href="{{ route('empresas.show', $empresa) }}" class="text-blue-600 hover:text-blue-800 font-semibold">Ver</a>
+                                        <button
+                                            type="button"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                            data-modal-target="detalle-opciones-{{ $empresa->id }}"
+                                            data-modal-toggle="detalle-opciones-{{ $empresa->id }}"
+                                            title="Ver detalle de valor"
+                                            aria-label="Ver detalle de valor"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.983 5.5c.422-1.297 2.612-1.297 3.034 0a1.75 1.75 0 002.622 1.032c1.103-.637 2.652.913 2.015 2.016a1.75 1.75 0 001.032 2.622c1.297.422 1.297 2.612 0 3.034a1.75 1.75 0 00-1.032 2.622c.637 1.103-.912 2.653-2.015 2.016a1.75 1.75 0 00-2.622 1.032c-.422 1.297-2.612 1.297-3.034 0a1.75 1.75 0 00-2.622-1.032c-1.103.637-2.652-.913-2.015-2.016a1.75 1.75 0 00-1.032-2.622c-1.297-.422-1.297-2.612 0-3.034a1.75 1.75 0 001.032-2.622c-.637-1.103.912-2.653 2.015-2.016A1.75 1.75 0 0011.983 5.5z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div id="detalle-opciones-{{ $empresa->id }}" tabindex="-1" aria-hidden="true" class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0">
+                                        <div class="relative max-h-full w-full max-w-2xl">
+                                            <div class="relative rounded-lg bg-white shadow">
+                                                <div class="flex items-center justify-between rounded-t border-b p-4 md:p-5">
+                                                    <h3 class="text-lg font-semibold text-slate-900">Detalle de valor · {{ $empresa->nombre }}</h3>
+                                                    <button type="button" class="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-slate-100 hover:text-slate-900" data-modal-hide="detalle-opciones-{{ $empresa->id }}">
+                                                        <span class="sr-only">Cerrar modal</span>
+                                                        <svg class="h-3 w-3" aria-hidden="true" fill="none" viewBox="0 0 14 14">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="space-y-4 p-4 md:p-5">
+                                                    @if($empresa->opciones->isNotEmpty())
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-left text-sm text-slate-700">
+                                                                <thead class="bg-slate-50 text-slate-600">
+                                                                    <tr>
+                                                                        <th class="px-3 py-2 font-semibold">Categoría</th>
+                                                                        <th class="px-3 py-2 font-semibold">Nombre</th>
+                                                                        <th class="px-3 py-2 font-semibold text-right">Valor</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody class="divide-y divide-slate-100">
+                                                                    @foreach($empresa->opciones as $opcion)
+                                                                        <tr>
+                                                                            <td class="px-3 py-2">{{ $opcion->categoria }}</td>
+                                                                            <td class="px-3 py-2">{{ $opcion->nombre }}</td>
+                                                                            <td class="px-3 py-2 text-right">${{ number_format((float) $opcion->valor, 0, ',', '.') }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                                <tfoot class="border-t border-slate-200">
+                                                                    <tr>
+                                                                        <td colspan="2" class="px-3 py-2 text-right font-semibold text-slate-900">Total</td>
+                                                                        <td class="px-3 py-2 text-right font-semibold text-slate-900">${{ number_format($empresa->valor_total_referido, 0, ',', '.') }}</td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    @else
+                                                        <p class="text-sm text-slate-500">Esta empresa no tiene opciones valorables.</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-slate-500">No hay empresas referidas para este usuario.</td>
+                                <td colspan="7" class="px-4 py-6 text-center text-slate-500">No hay empresas referidas para este usuario.</td>
                             </tr>
                         @endforelse
                     </tbody>
