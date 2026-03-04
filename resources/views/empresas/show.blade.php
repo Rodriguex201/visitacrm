@@ -106,9 +106,18 @@
                     <div class="flex flex-wrap gap-2">
 
                         <template x-for="chip in savedOptionChips().slice(0, 6)" :key="chip.id">
-                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-                                <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
-                                <span class="text-xs" x-text="chip.nombre"></span>
+                            <span class="group relative inline-flex">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                                    <span class="text-[10px] opacity-70" x-text="chip.categoriaAbreviada"></span>
+                                    <span class="text-xs" x-text="chip.nombre"></span>
+                                </span>
+
+                                <template x-if="chip.nota">
+                                    <span
+                                        class="absolute left-0 top-full z-50 mt-2 hidden w-64 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block"
+                                        x-text="chip.nota"
+                                    ></span>
+                                </template>
                             </span>
                         </template>
 
@@ -1486,6 +1495,7 @@
                             nombre: opcion.nombre,
                             categoria,
                             categoriaAbreviada: this.categoryAbbreviation(categoria),
+                            nota: (this.savedCategoriaNotas?.[categoria] || '').trim(),
                         })))
                         .filter((opcion) => selectedSet.has(opcion.id));
                 },
