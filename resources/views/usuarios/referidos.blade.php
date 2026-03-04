@@ -121,6 +121,15 @@
                             </tr>
                         @endforelse
                     </tbody>
+                    @if($empresasReferidas->isNotEmpty())
+                        <tfoot class="border-t border-slate-200 bg-slate-50">
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-right font-semibold text-slate-900">Valor total</td>
+                                <td class="px-4 py-3 font-bold text-slate-900">${{ number_format($valorTotalPagina, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3"></td>
+                            </tr>
+                        </tfoot>
+                    @endif
                 </table>
             </div>
             <div class="border-t border-slate-100 px-4 py-3">
