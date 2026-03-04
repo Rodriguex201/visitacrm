@@ -188,6 +188,14 @@
                     <p class="text-lg font-semibold text-slate-900">VisitaCRM</p>
                 </div>
 
+                @if (isset($header))
+                    <header class="bg-white shadow">
+                        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
+
                 <div class="mx-auto w-full max-w-[1300px] px-4 py-2 md:px-5 md:py-5">
 
                     @yield('content')
