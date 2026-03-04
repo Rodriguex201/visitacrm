@@ -96,7 +96,9 @@ class ConfiguracionController extends Controller
             'categoria' => $categoriaNombre,
             'nombre' => $request->validated('nombre'),
             'orden' => $request->validated('orden') ?? 0,
+
             'valor' => $request->validated('valor'),
+
             'activo' => 1,
         ]);
 
@@ -115,7 +117,9 @@ class ConfiguracionController extends Controller
             'categoria' => $categoriaNombre,
             'nombre' => $request->validated('nombre'),
             'orden' => $request->validated('orden') ?? 0,
+
             'valor' => $request->validated('valor'),
+
         ]);
 
         return response()->json([

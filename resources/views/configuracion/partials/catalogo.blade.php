@@ -17,7 +17,9 @@
             <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                     <th class="px-4 py-3">Nombre</th>
+
                     <th class="px-4 py-3">Valor</th>
+
                     <th class="px-4 py-3">Orden</th>
                     <th class="px-4 py-3">Activo</th>
                     <th class="px-4 py-3 text-right">Acciones</th>
@@ -27,7 +29,9 @@
                 <template x-for="opcion in opciones" :key="opcion.id">
                     <tr>
                         <td class="px-4 py-3 font-medium text-slate-800" x-text="opcion.nombre"></td>
+
                         <td class="px-4 py-3 text-slate-600" x-text="formatCop(opcion.valor)"></td>
+
                         <td class="px-4 py-3 text-slate-600" x-text="opcion.orden"></td>
                         <td class="px-4 py-3"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Activo</span></td>
                         <td class="px-4 py-3"><div class="flex justify-end gap-2">
@@ -48,9 +52,11 @@
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
                     <input type="text" x-model="form.nombre" maxlength="255" required class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
                 </div>
+
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</label>
                     <input type="number" step="0.01" min="0" x-model="form.valor" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="0.00">
+
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Orden</label>
@@ -69,6 +75,7 @@
 function catalogoManager({ categoriaSlug, initialOpciones, indexUrl, storeUrl, updateUrlTemplate, destroyUrlTemplate }) {
     return {
         categoriaSlug,
+
         opciones: initialOpciones ?? [],
         showModal: false,
         editingId: null,
@@ -78,19 +85,23 @@ function catalogoManager({ categoriaSlug, initialOpciones, indexUrl, storeUrl, u
         openEditModal(opcion) { this.editingId = opcion.id; this.form = { nombre: opcion.nombre ?? '', valor: opcion.valor ?? '', orden: opcion.orden ?? 0 }; this.showModal = true },
         closeModal() { this.showModal = false },
         csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+
         formatCop(value) {
             if (value === null || value === undefined || value === '') return '—'
             const amount = Number(value)
             if (Number.isNaN(amount)) return '—'
             return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 2 }).format(amount)
         },
+
         async refreshList() { const r = await fetch(indexUrl, { headers: { Accept: 'application/json' } }); const j = await r.json(); this.opciones = j.data || [] },
         payload() {
             return {
                 categoria: this.categoriaSlug,
                 nombre: (this.form.nombre || '').trim(),
                 orden: this.form.orden === '' ? 0 : Number(this.form.orden),
+
                 valor: this.form.valor === '' || this.form.valor === null ? null : Number(this.form.valor),
+
             }
         },
         async saveItem() {

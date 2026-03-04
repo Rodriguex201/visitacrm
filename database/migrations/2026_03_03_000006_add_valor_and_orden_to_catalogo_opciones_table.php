@@ -13,6 +13,7 @@ return new class extends Migration
         }
 
         Schema::table('catalogo_opciones', function (Blueprint $table) {
+
             if (! Schema::hasColumn('catalogo_opciones', 'orden')) {
                 $table->integer('orden')->default(0)->after('valor');
             }
@@ -29,6 +30,7 @@ return new class extends Migration
             if (Schema::hasColumn('catalogo_opciones', 'orden')) {
                 $table->dropColumn('orden');
             }
+
         });
     }
 };
