@@ -98,7 +98,8 @@ class ConfiguracionController extends Controller
             'orden' => $request->validated('orden') ?? 0,
 
             'valor' => $request->validated('valor'),
-
+            'valor_vinculado' => $request->validated('valor_vinculado'),
+            'valor_freelance' => $request->validated('valor_freelance'),
             'activo' => 1,
         ]);
 
@@ -119,7 +120,8 @@ class ConfiguracionController extends Controller
             'orden' => $request->validated('orden') ?? 0,
 
             'valor' => $request->validated('valor'),
-
+            'valor_vinculado' => $request->validated('valor_vinculado'),
+            'valor_freelance' => $request->validated('valor_freelance'),
         ]);
 
         return response()->json([
@@ -153,7 +155,7 @@ class ConfiguracionController extends Controller
             ->where('activo', 1)
             ->orderBy('orden')
             ->orderBy('nombre')
-            ->get(['id', 'categoria', 'nombre', 'valor', 'orden', 'activo']);
+            ->get(['id', 'categoria', 'nombre', 'valor', 'valor_vinculado', 'valor_freelance', 'orden', 'activo']);
     }
 
     private function resolveCategoria(string $slug): string
