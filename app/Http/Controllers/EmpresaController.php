@@ -428,13 +428,28 @@ class EmpresaController extends Controller
             }
 
             foreach ($categoriasValidas as $categoria) {
+
+                $notaCategoria = $categoriaNotas->get($categoria);
+
+                if ($notaCategoria === null) {
+                    EmpresaCategoriaNota::query()
+                        ->where('empresa_id', $empresa->id)
+                        ->where('categoria', $categoria)
+                        ->delete();
+
+                    continue;
+                }
+
+
                 EmpresaCategoriaNota::query()->updateOrCreate(
                     [
                         'empresa_id' => $empresa->id,
                         'categoria' => $categoria,
                     ],
                     [
-                        'nota' => $categoriaNotas->get($categoria),
+
+                        'nota' => $notaCategoria,
+
                     ]
                 );
             }
