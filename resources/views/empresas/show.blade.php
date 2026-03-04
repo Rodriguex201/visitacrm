@@ -127,7 +127,7 @@
 
                 @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
 
-                    <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'comision_valor'])) }">
+                    <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado'])) }">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
@@ -204,9 +204,9 @@
                                 </div>
 
                                 <div x-show="referidoForm.referido_estado === 'aprobado'">
-                                    <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión</label>
-                                    <input id="comision_valor" x-model="referidoForm.comision_valor" name="comision_valor" type="number" step="0.01" min="0" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
-                                    <p x-show="referidoErrors.comision_valor" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_valor"></p>
+                                    <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión (automático)</label>
+                                    <input id="comision_valor" :value="formatCurrency(referidoForm.comision_valor)" type="text" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-600 focus:border-blue-500 focus:ring-blue-500" placeholder="$ 0">
+                                    <p class="mt-1 text-xs text-slate-500">Se calcula al guardar: suma de opciones activas (excepto Cotizaciones y Como Llego).</p>
                                 </div>
 
                                 <div>
@@ -1640,9 +1640,6 @@
                             ? (this.referidoForm.referido_motivo_rechazo || '').trim()
                             : null,
                         comision_estado: this.referidoForm.comision_estado || 'pendiente',
-                        comision_valor: this.referidoForm.referido_estado !== 'aprobado' || this.referidoForm.comision_valor === '' || this.referidoForm.comision_valor === null
-                            ? null
-                            : Number(this.referidoForm.comision_valor),
                     };
 
                     try {

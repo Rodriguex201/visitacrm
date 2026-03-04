@@ -12,11 +12,15 @@ class CatalogoOpcion extends Model
     protected $fillable = [
         'categoria',
         'nombre',
+        'valor',
+        'orden',
         'activo',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
+        'valor' => 'decimal:2',
+        'orden' => 'integer',
     ];
 
     public function empresas(): BelongsToMany

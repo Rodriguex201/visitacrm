@@ -457,7 +457,6 @@ class EmpresaController extends Controller
             'referido_estado' => ['required', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
             'referido_motivo_rechazo' => ['nullable', 'string', 'min:5'],
             'comision_estado' => ['nullable', Rule::in(['pendiente', 'pagada'])],
-            'comision_valor' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $referidoEstado = $validated['referido_estado'];
@@ -500,9 +499,10 @@ class EmpresaController extends Controller
             }
         }
 
-        if (array_key_exists('comision_valor', $validated)) {
-            $empresa->comision_valor = $validated['comision_valor'];
+        if ($referidoEstado === 'aprobado') {
+            $empresa->comision_valor = $this->calcularComisionAutomatica($empresa->id);
         }
+
 
         $empresa->save();
 
@@ -518,6 +518,16 @@ class EmpresaController extends Controller
                 'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
             ],
         ]);
+    }
+
+    private function calcularComisionAutomatica(int $empresaId): float
+    {
+        return (float) DB::table('empresa_opcion')
+            ->join('catalogo_opciones', 'catalogo_opciones.id', '=', 'empresa_opcion.opcion_id')
+            ->where('empresa_opcion.empresa_id', $empresaId)
+            ->where('catalogo_opciones.activo', 1)
+            ->whereNotIn('catalogo_opciones.categoria', ['Cotizaciones', 'Como Llego'])
+            ->sum('catalogo_opciones.valor');
     }
 
     public function storeCatalogoOpcion(Request $request): JsonResponse
