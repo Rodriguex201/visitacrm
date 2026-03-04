@@ -246,8 +246,9 @@
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
                         @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
-                        @php($estadoRefStyle = $estadoRef === 'aprobado' ? 'border-color: #86EFAC; background-color: #F0FDF4;' : ($estadoRef === 'rechazado' ? 'border-color: #FCA5A5; background-color: #FEF2F2;' : 'border-color: #FCD34D; background-color: #FFFBEB;'))
-                        @php($estadoRefBadgeClass = $estadoRef === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : ($estadoRef === 'rechazado' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'))
+                        @php($estadoRefColor = $referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente'])
+                        @php($estadoRefStyle = 'border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';')
+                        @php($estadoRefBadgeStyle = 'background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';')
                         <article
                             x-data="{ empresa: @js([
                                 'id' => $empresa->id,
@@ -318,7 +319,7 @@
                                                 🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
@@ -337,7 +338,7 @@
                                                 🔁 Referido por: {{ $empresa->creador->codigo }}
                                             </span>
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {{ $estadoRefBadgeClass }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
