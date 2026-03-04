@@ -41,17 +41,34 @@ class ConfiguracionBancoController extends Controller
         ]);
     }
 
+    public function activar(Banco $banco): JsonResponse
+    {
+        $banco->update(['activo' => 1]);
+
+        return response()->json([
+            'message' => 'Banco activado correctamente.',
+            'data' => $this->normalizarBanco($banco->refresh()->loadCount('usuarios')),
+        ]);
+    }
+
+    public function desactivar(Banco $banco): JsonResponse
+    {
+        $banco->update(['activo' => 0]);
+
+        return response()->json([
+            'message' => 'Banco desactivado correctamente.',
+            'data' => $this->normalizarBanco($banco->refresh()->loadCount('usuarios')),
+        ]);
+    }
+
     public function destroy(Banco $banco): JsonResponse
     {
         $banco->loadCount('usuarios');
 
         if ($banco->usuarios_count > 0) {
-            $banco->update(['activo' => 0]);
-
             return response()->json([
-                'message' => 'Banco desactivado porque está en uso.',
-                'data' => $this->normalizarBanco($banco->refresh()->loadCount('usuarios')),
-            ]);
+                'message' => 'No se puede eliminar un banco que está en uso.',
+            ], 422);
         }
 
         $banco->delete();

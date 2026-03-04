@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
         Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');
         Route::patch('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'update'])->name('configuracion.bancos.update');
+        Route::patch('/configuracion/bancos/{banco}/activar', [ConfiguracionBancoController::class, 'activar'])->name('configuracion.bancos.activate');
+        Route::patch('/configuracion/bancos/{banco}/desactivar', [ConfiguracionBancoController::class, 'desactivar'])->name('configuracion.bancos.deactivate');
         Route::delete('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'destroy'])->name('configuracion.bancos.destroy');
     });
 
