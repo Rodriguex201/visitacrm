@@ -32,6 +32,12 @@
                 ])
             </div>
         @endforeach
+
+        <div class="mt-4" x-show="activeTab === 'bancos'" x-cloak>
+            @include('configuracion.partials.bancos', [
+                'bancos' => $bancos,
+            ])
+        </div>
     </div>
 </section>
 
@@ -46,6 +52,7 @@
                 { key: 'equipos', label: 'Equipos' },
                 { key: 'como-llego', label: 'Como Llego' },
                 { key: 'cotizaciones', label: 'Cotizaciones' },
+                { key: 'bancos', label: 'Bancos' },
             ],
             activeTab: 'sectores',
         }
