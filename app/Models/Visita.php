@@ -18,6 +18,7 @@ class Visita extends Model
         'nivel_interes',
         'resultado_at',
         'notas',
+        'duracion_min',
     ];
 
     protected $casts = [

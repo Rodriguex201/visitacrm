@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccionesController;
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracionBancoController;
@@ -39,6 +40,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/empresas/{empresa}/actividad/partial', [EmpresaController::class, 'actividadPartial'])->name('empresas.actividad.partial');
     Route::get('/empresas/{empresa}/visitas/partial', [EmpresaController::class, 'visitasPartial'])->name('empresas.visitas.partial');
     Route::post('/visitas', [VisitaController::class, 'store'])->name('visitas.store');
+
+    Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
+    Route::get('/agenda/events', [AgendaController::class, 'events'])->name('agenda.events');
+    Route::post('/agenda', [AgendaController::class, 'store'])->name('agenda.store');
+    Route::put('/agenda/{visita}', [AgendaController::class, 'update'])->name('agenda.update');
+    Route::patch('/agenda/{visita}/move', [AgendaController::class, 'move'])->name('agenda.move');
+    Route::delete('/agenda/{visita}', [AgendaController::class, 'destroy'])->name('agenda.destroy');
+
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
     Route::middleware(['auth', 'admin'])->group(function () {
