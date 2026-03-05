@@ -20,7 +20,7 @@ class UsuarioController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         $usuariosQuery = User::query()
-            ->with('banco')
+            ->with(['banco', 'usuarioDe:id,codigo,name'])
             ->withCount('empresasReferidas')
             ->orderByDesc('created_at');
 
@@ -48,7 +48,13 @@ class UsuarioController extends Controller
 
         $tipos = $tiposLista->keyBy('nombre');
 
-        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista'));
+        $usuariosPadre = User::query()
+            ->select('id', 'codigo', 'name')
+            ->orderBy('codigo')
+            ->orderBy('name')
+            ->get();
+
+        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista', 'usuariosPadre'));
     }
 
 
@@ -131,6 +137,7 @@ class UsuarioController extends Controller
             'password' => ['required', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
             'banco_id' => ['nullable', 'exists:bancos,id'],
+            'usuario_de_id' => ['nullable', 'exists:users,id'],
             'cta_banco' => ['nullable', 'string', 'max:60'],
             'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
@@ -151,6 +158,7 @@ class UsuarioController extends Controller
                         'password' => Hash::make($validated['password']),
                         'tipo_usuario' => $validated['tipo_usuario'],
                         'banco_id' => $validated['banco_id'] ?? null,
+                        'usuario_de_id' => $validated['usuario_de_id'] ?? null,
                         'cta_banco' => $validated['cta_banco'] ?? null,
                         'ciudad' => $validated['ciudad'] ?? null,
                     ]);
@@ -190,6 +198,7 @@ class UsuarioController extends Controller
             'password' => ['nullable', 'string', 'min:6'],
             'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
             'banco_id' => ['nullable', 'exists:bancos,id'],
+            'usuario_de_id' => ['nullable', 'exists:users,id', Rule::notIn([$user->id])],
             'cta_banco' => ['nullable', 'string', 'max:60'],
             'ciudad' => ['nullable', 'string', 'max:255'],
         ]);
@@ -201,6 +210,7 @@ class UsuarioController extends Controller
         $user->email = $validated['email'];
         $user->tipo_usuario = $validated['tipo_usuario'];
         $user->banco_id = $validated['banco_id'] ?? null;
+        $user->usuario_de_id = $validated['usuario_de_id'] ?? null;
         $user->cta_banco = $validated['cta_banco'] ?? null;
         $user->ciudad = $validated['ciudad'] ?? null;
 

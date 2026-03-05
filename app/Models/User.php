@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'telefono',
         'direccion',
+        'usuario_de_id',
         'banco_id',
         'cta_banco',
         'ciudad',
@@ -61,6 +62,16 @@ class User extends Authenticatable
     public function empresasReferidas(): HasMany
     {
         return $this->hasMany(Empresa::class, 'responsable_user_id');
+    }
+
+    public function usuarioDe(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'usuario_de_id');
+    }
+
+    public function usuariosHijos(): HasMany
+    {
+        return $this->hasMany(self::class, 'usuario_de_id');
     }
 
 
