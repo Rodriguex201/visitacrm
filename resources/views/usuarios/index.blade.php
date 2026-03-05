@@ -25,6 +25,7 @@
                 email: '',
                 tipo_usuario: 'freelance',
                 password: '',
+                usuario_de_id: '',
             },
 
             startEdit(user) {
@@ -40,6 +41,7 @@
                     email: user.email ?? '',
                     tipo_usuario: user.tipo_usuario ?? 'freelance',
                     password: '',
+                    usuario_de_id: user.usuario_de_id ?? '',
                 };
                 this.editCityResults = [];
                 this.editCityLoading = false;
@@ -138,6 +140,7 @@
                     email: @js(old('email', '')),
                     tipo_usuario: @js(old('tipo_usuario', 'freelance')),
                     password: '',
+                    usuario_de_id: @js(old('usuario_de_id', '')),
                 };
                 openEditModal = true;
             }
@@ -209,6 +212,7 @@
 
                             <th scope="col" class="px-4 py-3 font-semibold">Ciudad</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Tipo de usuario</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Usuario de</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Referidos</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Acciones</th>
                         </tr>
@@ -237,6 +241,15 @@
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3">
+                                    @if ($u->usuarioDe)
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                            Usuario de: {{ $u->usuarioDe->codigo }}
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3">
                                     <a href="{{ route('usuarios.referidos', $u) }}" class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                         {{ $u->empresas_referidas_count }}
                                     </a>
@@ -256,6 +269,7 @@
                                                 'ciudad' => $u->ciudad,
                                                 'email' => $u->email,
                                                 'tipo_usuario' => $u->tipo_usuario,
+                                                'usuario_de_id' => $u->usuario_de_id,
                                             ]))"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
                                             title="Editar usuario"
@@ -279,7 +293,7 @@
                         @empty
                             <tr>
 
-                                <td colspan="11" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
+                                <td colspan="12" class="px-4 py-6 text-center text-slate-500">No hay usuarios registrados.</td>
 
                             </tr>
                         @endforelse
@@ -389,6 +403,18 @@
                                     <option value="">Selecciona un banco</option>
                                     @foreach ($bancos as $banco)
                                         <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="create_usuario_de_id" class="mb-1.5 block font-semibold text-slate-700">Usuario de</label>
+                                <select id="create_usuario_de_id" name="usuario_de_id" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="">Selecciona un usuario</option>
+                                    @foreach ($usuariosPadre as $usuarioPadre)
+                                        <option value="{{ $usuarioPadre->id }}" @selected(old('usuario_de_id') == $usuarioPadre->id)>
+                                            {{ $usuarioPadre->codigo }} - {{ $usuarioPadre->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -530,6 +556,16 @@
                                 <option value="">Selecciona un banco</option>
                                 @foreach ($bancos as $banco)
                                     <option value="{{ $banco->id }}">{{ $banco->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="edit_usuario_de_id" class="mb-1.5 block font-semibold text-slate-700">Usuario de</label>
+                            <select id="edit_usuario_de_id" name="usuario_de_id" x-model="editingUser.usuario_de_id" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                <option value="">Selecciona un usuario</option>
+                                @foreach ($usuariosPadre as $usuarioPadre)
+                                    <option value="{{ $usuarioPadre->id }}" :disabled="editingUser.id == {{ $usuarioPadre->id }}" x-show="editingUser.id != {{ $usuarioPadre->id }}">{{ $usuarioPadre->codigo }} - {{ $usuarioPadre->name }}</option>
                                 @endforeach
                             </select>
                         </div>
