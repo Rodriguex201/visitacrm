@@ -44,6 +44,7 @@
         @php
             $isDashboard = request()->routeIs('dashboard');
             $isEmpresas = request()->routeIs('empresas.*');
+            $isAgenda = request()->routeIs('agenda.*');
             $isUsuarios = request()->routeIs('usuarios.*');
             $isConfiguracion = request()->routeIs('configuracion.*');
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
@@ -112,7 +113,7 @@
                     </a>
 
 
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Agenda">
+                    <a href="{{ route('agenda.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isAgenda ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Agenda">
 
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
 
