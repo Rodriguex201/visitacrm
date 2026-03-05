@@ -18,6 +18,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'admin'])->name('dashboard');
 
+    Route::get('/empresas/limpiar-filtros', [EmpresaController::class, 'clearIndexFilters'])->name('empresas.filters.clear');
     Route::resource('empresas', EmpresaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::post('/empresas/{empresa}/contactos', [ContactoController::class, 'store'])->name('empresas.contactos.store');
 
