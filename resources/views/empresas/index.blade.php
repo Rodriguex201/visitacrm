@@ -159,7 +159,7 @@
                             <input
                                 type="text"
                                 name="q"
-                                value="{{ $q }}"
+                                value="{{ $filters['q'] ?? '' }}"
                                 placeholder="Buscar por nombre o ciudad..."
                                 class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
@@ -168,14 +168,14 @@
                         <input
                             type="date"
                             name="desde"
-                            value="{{ $desdeInput }}"
+                            value="{{ $filters['desde'] ?? '' }}"
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
 
                         <input
                             type="date"
                             name="hasta"
-                            value="{{ $hastaInput }}"
+                            value="{{ $filters['hasta'] ?? '' }}"
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
 
@@ -186,9 +186,9 @@
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
                             <option value="">Estado (Todos)</option>
-                            <option value="pendiente" @selected($estadoInput === 'pendiente')>Pendiente</option>
-                            <option value="aprobado" @selected($estadoInput === 'aprobado')>Aprobado</option>
-                            <option value="rechazado" @selected($estadoInput === 'rechazado')>Rechazado</option>
+                            <option value="pendiente" @selected(($filters['estado'] ?? '') === 'pendiente')>Pendiente</option>
+                            <option value="aprobado" @selected(($filters['estado'] ?? '') === 'aprobado')>Aprobado</option>
+                            <option value="rechazado" @selected(($filters['estado'] ?? '') === 'rechazado')>Rechazado</option>
                         </select>
 
                         <button
@@ -199,7 +199,7 @@
                         </button>
 
                         <a
-                            href="{{ route('empresas.index') }}"
+                            href="{{ route('empresas.filters.clear') }}"
                             class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:col-span-1"
                         >
                             Limpiar

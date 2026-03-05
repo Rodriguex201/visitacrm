@@ -38,17 +38,38 @@ class EmpresaController extends Controller
             'q' => ['nullable', 'string'],
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date'],
+            'estado' => ['nullable', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
         ]);
 
-        $q = trim((string) $request->query('q', ''));
-        $desdeInput = $request->query('desde');
-        $hastaInput = $request->query('hasta');
+        $filterKeys = ['q', 'desde', 'hasta', 'estado'];
+        $requestFilters = [
+            'q' => trim((string) $request->query('q', '')),
+            'desde' => trim((string) $request->query('desde', '')),
+            'hasta' => trim((string) $request->query('hasta', '')),
+            'estado' => strtolower(trim((string) $request->query('estado', ''))),
+        ];
 
-        $estado = strtolower(trim((string) $request->query('estado', '')));
+        $hasRequestFilters = collect($requestFilters)
+            ->some(fn ($value) => $value !== '');
+
+        $sessionFilters = $request->session()->get('filters.empresas', []);
+        $filters = collect($filterKeys)
+            ->mapWithKeys(fn ($key) => [$key => (string) ($sessionFilters[$key] ?? '')])
+            ->all();
+
+        if ($hasRequestFilters) {
+            $filters = $requestFilters;
+            $request->session()->put('filters.empresas', $filters);
+        }
+
+        $q = $filters['q'];
+        $desdeInput = $filters['desde'];
+        $hastaInput = $filters['hasta'];
 
         $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
-        $estadoInput = in_array($estado, $estadosValidos, true) ? $estado : '';
-        $soloAprobados = $estado === 'aprobado';
+        $estadoInput = in_array($filters['estado'], $estadosValidos, true) ? $filters['estado'] : '';
+        $filters['estado'] = $estadoInput;
+        $soloAprobados = $estadoInput === 'aprobado';
 
         $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
         $hasta = $hastaInput ? Carbon::parse((string) $hastaInput)->endOfDay() : null;
@@ -106,7 +127,7 @@ class EmpresaController extends Controller
 
         $empresas = $empresasQuery
             ->paginate(10)
-            ->appends($request->query());
+            ->appends($filters);
 
         $sectores = Sector::query()
             ->where('activo', 1)
@@ -123,6 +144,7 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
+            'filters',
 
             'soloAprobados',
             'totalComision',
@@ -133,6 +155,13 @@ class EmpresaController extends Controller
             'hasta',
             'referidoEstadoColors',
         ));
+    }
+
+    public function clearIndexFilters(Request $request): RedirectResponse
+    {
+        $request->session()->forget('filters.empresas');
+
+        return redirect()->route('empresas.index');
     }
 
     public function show(Request $request, Empresa $empresa): View
