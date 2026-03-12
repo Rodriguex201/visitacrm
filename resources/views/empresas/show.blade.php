@@ -266,10 +266,14 @@
                             </template>
                         </div>
 
-                        <div class="space-y-1 text-xs text-slate-500">
-                            <p x-show="referidoForm.referido_aprobado_at" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></p>
-                            <p x-show="referidoForm.comision_pagada_at" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></p>
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <template x-if="referidoForm.referido_estado === 'aprobado' && referidoForm.referido_aprobado_at">
+                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-1 font-medium text-emerald-700" x-text="`Aprobado: ${formatDateTime(referidoForm.referido_aprobado_at)}`"></span>
+                            </template>
 
+                            <template x-if="referidoForm.referido_estado === 'aprobado' && referidoForm.comision_estado === 'pagada' && referidoForm.comision_pagada_at">
+                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 font-medium text-orange-700" x-text="`Comisión pagada: ${formatDateTime(referidoForm.comision_pagada_at)}`"></span>
+                            </template>
                         </div>
 
                         <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
