@@ -1025,10 +1025,18 @@ class EmpresaController extends Controller
             ->with('status', 'Empresa actualizada correctamente.');
     }
 
-    public function destroy(Empresa $empresa): RedirectResponse
+    public function destroy(Request $request, Empresa $empresa): RedirectResponse
     {
         if ((auth()->user()?->tipo_usuario ?? null) !== 'administracion') {
             abort(403);
+        }
+
+        $claveEliminacion = (string) $request->input('clave_eliminacion', '');
+
+        if ($claveEliminacion !== 'Admin2026') {
+            return back()
+                ->withErrors(['clave_eliminacion' => 'Clave incorrecta.'])
+                ->withInput();
         }
 
         $empresa->delete();
