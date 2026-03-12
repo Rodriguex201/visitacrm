@@ -9,6 +9,8 @@
             createCiudad: @js(old('ciudad', '')),
             createTipoUsuario: @js(old('tipo_usuario', 'freelance')),
             createBancoId: @js(old('banco_id', '')),
+            showCreatePassword: false,
+            showEditPassword: false,
             createCityResults: [],
             createCityLoading: false,
             editCityResults: [],
@@ -45,6 +47,7 @@
                 };
                 this.editCityResults = [];
                 this.editCityLoading = false;
+                this.showEditPassword = false;
                 this.openEditModal = true;
             },
             async searchCreateCity() {
@@ -474,7 +477,23 @@
 
                             <div class="md:col-span-2">
                                 <label for="create_password" class="mb-1.5 block font-semibold text-slate-700">Clave *</label>
-                                <input id="create_password" name="password" type="password" placeholder="••••••••" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+                                <div class="relative">
+                                    <input
+                                        id="create_password"
+                                        name="password"
+                                        :type="showCreatePassword ? 'text' : 'password'"
+                                        placeholder="••••••••"
+                                        class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 pr-24 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        required
+                                    >
+                                    <button
+                                        type="button"
+                                        @click="showCreatePassword = !showCreatePassword"
+                                        class="absolute inset-y-0 right-3 inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                    >
+                                        <span x-text="showCreatePassword ? 'Ocultar' : 'Mostrar'"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -625,7 +644,22 @@
 
                         <div class="md:col-span-2">
                             <label for="edit_password" class="mb-1.5 block font-semibold text-slate-700">Clave (opcional)</label>
-                            <input id="edit_password" name="password" type="password" placeholder="Dejar vacío para mantener la clave actual" class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <div class="relative">
+                                <input
+                                    id="edit_password"
+                                    name="password"
+                                    :type="showEditPassword ? 'text' : 'password'"
+                                    placeholder="Dejar vacío para mantener la clave actual"
+                                    class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 pr-24 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                >
+                                <button
+                                    type="button"
+                                    @click="showEditPassword = !showEditPassword"
+                                    class="absolute inset-y-0 right-3 inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                >
+                                    <span x-text="showEditPassword ? 'Ocultar' : 'Mostrar'"></span>
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700 md:col-span-2">
