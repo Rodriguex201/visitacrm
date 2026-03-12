@@ -69,7 +69,17 @@ class User extends Authenticatable
         return $this->belongsTo(self::class, 'usuario_de_id');
     }
 
+    public function referidoPor(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'usuario_de_id');
+    }
+
     public function usuariosHijos(): HasMany
+    {
+        return $this->hasMany(self::class, 'usuario_de_id');
+    }
+
+    public function referidos(): HasMany
     {
         return $this->hasMany(self::class, 'usuario_de_id');
     }
