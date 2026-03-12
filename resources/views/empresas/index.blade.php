@@ -334,6 +334,11 @@
 
                                                     </span>
                                                 @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
                                             @if ($empresa->creador?->referidoPor)
@@ -355,6 +360,11 @@
 
                                                     </span>
                                                 @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @elseif ($empresa->responsable_user_id)
                                             <p class="mt-1 truncate text-xs text-slate-500">
@@ -372,6 +382,12 @@
                                             @if (!is_null($empresa->referido_aprobado_at))
                                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                     Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+                                                </span>
+                                            @endif
+
+                                            @if (($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                    Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                 </span>
                                             @endif
                                         </div>
