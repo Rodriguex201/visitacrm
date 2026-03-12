@@ -78,7 +78,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with(['sector', 'responsable', 'creador'])
+            ->with(['sector', 'responsable.referidoPor', 'creador.referidoPor'])
             ->latest('id');
 
         if (! $esAdministracion) {
@@ -121,8 +121,14 @@ class EmpresaController extends Controller
 
         $totalEmpresas = (clone $empresasQuery)->count();
 
-        $totalComision = (clone $empresasQuery)
+        $totalPendiente = (clone $empresasQuery)
             ->where('referido_estado', 'aprobado')
+            ->where('comision_estado', 'pendiente')
+            ->sum('comision_valor');
+
+        $totalPagado = (clone $empresasQuery)
+            ->where('referido_estado', 'aprobado')
+            ->where('comision_estado', 'pagada')
             ->sum('comision_valor');
 
         $empresas = $empresasQuery
@@ -147,7 +153,8 @@ class EmpresaController extends Controller
             'filters',
 
             'soloAprobados',
-            'totalComision',
+            'totalPendiente',
+            'totalPagado',
             'totalEmpresas',
 
             'usaRangoPersonalizado',

@@ -315,9 +315,11 @@
 
                                     @if ($esAdministracion)
                                         @if ($empresa->referida_at)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
-                                            </span>
+                                            @if ($empresa->responsable?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
@@ -330,13 +332,20 @@
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
 
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->creador->codigo }}
-                                            </span>
+                                            @if ($empresa->creador?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
@@ -349,6 +358,11 @@
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
 
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -368,6 +382,12 @@
                                             @if (!is_null($empresa->referido_aprobado_at))
                                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                     Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+                                                </span>
+                                            @endif
+
+                                            @if (($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                    Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -460,16 +480,19 @@
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
                         <dl class="mt-4 space-y-3">
                             <div class="rounded-lg bg-slate-50 p-3">
-                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
-                                <dd class="mt-1 text-lg font-semibold text-slate-900">
-
-                                    $ {{ number_format((float) ($totalComision ?? 0), 0, ',', '.') }}
-
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pendiente</dt>
+                                <dd class="mt-1 text-lg font-semibold text-amber-600">
+                                    $ {{ number_format((float) ($totalPendiente ?? 0), 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
+                                <dd class="mt-1 text-lg font-semibold text-emerald-600">
+                                    $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
-
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
                             </div>
                         </dl>
