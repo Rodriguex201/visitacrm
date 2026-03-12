@@ -480,16 +480,19 @@
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
                         <dl class="mt-4 space-y-3">
                             <div class="rounded-lg bg-slate-50 p-3">
-                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
-                                <dd class="mt-1 text-lg font-semibold text-slate-900">
-
-                                    $ {{ number_format((float) ($totalComision ?? 0), 0, ',', '.') }}
-
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pendiente</dt>
+                                <dd class="mt-1 text-lg font-semibold text-amber-600">
+                                    $ {{ number_format((float) ($totalPendiente ?? 0), 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
+                                <dd class="mt-1 text-lg font-semibold text-emerald-600">
+                                    $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
-
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
                             </div>
                         </dl>
