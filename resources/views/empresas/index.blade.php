@@ -315,9 +315,11 @@
 
                                     @if ($esAdministracion)
                                         @if ($empresa->referida_at)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
-                                            </span>
+                                            @if ($empresa->responsable?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
@@ -334,9 +336,11 @@
                                                 @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->creador->codigo }}
-                                            </span>
+                                            @if ($empresa->creador?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
