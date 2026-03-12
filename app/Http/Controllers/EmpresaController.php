@@ -95,7 +95,7 @@ class EmpresaController extends Controller
         if ($q !== '') {
             $empresasQuery->where(function ($query) use ($q) {
                 $query->where('nombre', 'like', "%{$q}%")
-                    ->orWhere('ciudad', 'like', "%{$q}%");
+                    ->orWhere('codigo', 'like', "%{$q}%");
             });
         }
 
