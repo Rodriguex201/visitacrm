@@ -38,7 +38,7 @@ class EmpresaController extends Controller
             'q' => ['nullable', 'string'],
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date'],
-            'estado' => ['nullable', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
+            'estado' => ['nullable', Rule::in(['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'])],
         ]);
 
         $filterKeys = ['q', 'desde', 'hasta', 'estado'];
@@ -66,7 +66,7 @@ class EmpresaController extends Controller
         $desdeInput = $filters['desde'];
         $hastaInput = $filters['hasta'];
 
-        $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
+        $estadosValidos = ['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'];
         $estadoInput = in_array($filters['estado'], $estadosValidos, true) ? $filters['estado'] : '';
         $filters['estado'] = $estadoInput;
         $soloAprobados = $estadoInput === 'aprobado';
@@ -304,7 +304,7 @@ class EmpresaController extends Controller
             ->all();
 
         $referidoPayload = [
-            'referido_estado' => $empresa->referido_estado ?: 'pendiente',
+            'referido_estado' => $empresa->referido_estado,
             'referido_motivo_rechazo' => $empresa->referido_motivo_rechazo,
             'referido_aprobado_at' => optional($empresa->referido_aprobado_at)->toIso8601String(),
             'referido_aprobado_by' => $empresa->referido_aprobado_by,
@@ -488,6 +488,16 @@ class EmpresaController extends Controller
                 $empresa->save();
             }
 
+            if ($this->debeIniciarGestionInicial($empresa, [
+                'opciones' => $opciones,
+                'categoria_notas' => $categoriaNotas,
+                'como_llego' => $comoLlegoRows,
+                'cotizacion_enviada' => (bool) ($validated['cotizacion_enviada'] ?? false),
+                'cotizacion_numero' => $empresa->cotizacion_numero,
+            ])) {
+                $this->iniciarGestionInicial($empresa);
+            }
+
             EmpresaComoLlego::query()->where('empresa_id', $empresa->id)->delete();
 
             if ($comoLlegoRows->isNotEmpty()) {
@@ -575,6 +585,12 @@ class EmpresaController extends Controller
             ]
         );
 
+        if ($this->debeIniciarGestionInicial($empresa, [
+            'categoria_notas' => collect([$validated['categoria'] => $nota !== '' ? $nota : null]),
+        ])) {
+            $this->iniciarGestionInicial($empresa);
+        }
+
         return response()->json([
             'ok' => true,
             'categoria' => $validated['categoria'],
@@ -597,6 +613,12 @@ class EmpresaController extends Controller
         $empresa->cotizacion_enviada = $cotizacionEnviada;
         $empresa->cotizacion_enviada_at = $cotizacionEnviada ? now() : null;
         $empresa->save();
+
+        if ($this->debeIniciarGestionInicial($empresa, [
+            'cotizacion_enviada' => $cotizacionEnviada,
+        ])) {
+            $this->iniciarGestionInicial($empresa);
+        }
 
         return response()->json([
             'ok' => true,
@@ -1026,6 +1048,9 @@ class EmpresaController extends Controller
             $data['referida_at'] = now();
         }
 
+        $data['referido_estado'] = 'sin_iniciar';
+        $data['gestion_inicial_at'] = null;
+
         Empresa::query()->create($data);
 
         return redirect()
@@ -1096,6 +1121,57 @@ class EmpresaController extends Controller
         }
 
         return $validated;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function debeIniciarGestionInicial(Empresa $empresa, array $payload): bool
+    {
+        if (! $this->empresaSinEstadoReferido($empresa)) {
+            return false;
+        }
+
+        $opciones = $payload['opciones'] ?? collect();
+        if (collect($opciones)->isNotEmpty()) {
+            return true;
+        }
+
+        $comoLlego = $payload['como_llego'] ?? collect();
+        if (collect($comoLlego)->isNotEmpty()) {
+            return true;
+        }
+
+        $categoriaNotas = $payload['categoria_notas'] ?? collect();
+        if (collect($categoriaNotas)->filter(fn ($nota) => filled($nota))->isNotEmpty()) {
+            return true;
+        }
+
+        if ((bool) ($payload['cotizacion_enviada'] ?? false)) {
+            return true;
+        }
+
+        return filled($payload['cotizacion_numero'] ?? null);
+    }
+
+    private function iniciarGestionInicial(Empresa $empresa): void
+    {
+        if (! $this->empresaSinEstadoReferido($empresa)) {
+            return;
+        }
+
+        $empresa->referido_estado = 'pendiente';
+
+        if (! $empresa->gestion_inicial_at) {
+            $empresa->gestion_inicial_at = now();
+        }
+
+        $empresa->save();
+    }
+
+    private function empresaSinEstadoReferido(Empresa $empresa): bool
+    {
+        return in_array($empresa->referido_estado, [null, '', 'sin_iniciar'], true);
     }
 
     private function referidoEstadoColors(): array
