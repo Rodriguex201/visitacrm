@@ -271,8 +271,10 @@
             <div class="space-y-4 lg:col-span-2">
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
+
                         @php($estadoRef = in_array($empresa->referido_estado, ['pendiente', 'aprobado', 'rechazado'], true) ? $empresa->referido_estado : 'sin_iniciar')
                         @php($estadoRefColor = in_array($estadoRef, ['pendiente', 'aprobado', 'rechazado'], true) ? ($referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente']) : null)
+
                         @php($estadoRefStyle = $estadoRefColor ? ('border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';') : '')
                         @php($estadoRefBadgeStyle = $estadoRefColor ? ('background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';') : '')
                         <article
@@ -352,7 +354,9 @@
                                                 </p>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
+
                                                 @if ($estadoRef !== 'sin_iniciar')
+
                                                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @else
                                                     <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
@@ -387,7 +391,9 @@
                                                 </p>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
+
                                                 @if ($estadoRef !== 'sin_iniciar')
+
                                                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @else
                                                     <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
