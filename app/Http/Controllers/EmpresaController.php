@@ -38,7 +38,7 @@ class EmpresaController extends Controller
             'q' => ['nullable', 'string'],
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date'],
-            'estado' => ['nullable', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
+            'estado' => ['nullable', Rule::in(['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'])],
         ]);
 
         $filterKeys = ['q', 'desde', 'hasta', 'estado'];
@@ -66,7 +66,7 @@ class EmpresaController extends Controller
         $desdeInput = $filters['desde'];
         $hastaInput = $filters['hasta'];
 
-        $estadosValidos = ['pendiente', 'aprobado', 'rechazado'];
+        $estadosValidos = ['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'];
         $estadoInput = in_array($filters['estado'], $estadosValidos, true) ? $filters['estado'] : '';
         $filters['estado'] = $estadoInput;
         $soloAprobados = $estadoInput === 'aprobado';
@@ -1048,7 +1048,9 @@ class EmpresaController extends Controller
             $data['referida_at'] = now();
         }
 
-        $data['referido_estado'] = null;
+
+        $data['referido_estado'] = 'sin_iniciar';
+
         $data['gestion_inicial_at'] = null;
 
         Empresa::query()->create($data);
@@ -1171,7 +1173,9 @@ class EmpresaController extends Controller
 
     private function empresaSinEstadoReferido(Empresa $empresa): bool
     {
-        return blank($empresa->referido_estado);
+
+        return in_array($empresa->referido_estado, [null, '', 'sin_iniciar'], true);
+
     }
 
     private function referidoEstadoColors(): array

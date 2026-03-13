@@ -1764,12 +1764,15 @@
                         pendiente: 'Pendiente',
                         aprobado: 'Aprobado',
                         rechazado: 'Rechazado',
+                        sin_iniciar: 'Sin iniciar',
                     };
 
                     return labels[estado] || 'Sin iniciar';
                 },
                 referidoBadgeStyle(estado) {
-                    if (!estado) {
+
+                    if (!estado || estado === 'sin_iniciar') {
+
                         return 'background-color: #F1F5F9; color: #64748B;';
                     }
 
