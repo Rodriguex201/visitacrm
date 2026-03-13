@@ -294,8 +294,13 @@ class EmpresaController extends Controller
             ])
             ->all();
 
+        $notasPorCategoria = EmpresaCategoriaNota::where('empresa_id', $empresa->id)
+            ->pluck('nota', 'categoria')
+            ->toArray();
+
         $categoriaNotasPayload = collect($categoriasOpciones)
-            ->mapWithKeys(fn ($categoria) => [$categoria => $empresa->notaCategoria($categoria) ?? ''])
+            ->push('Cotizaciones')
+            ->mapWithKeys(fn ($categoria) => [$categoria => $notasPorCategoria[$categoria] ?? ''])
             ->all();
 
         $referidoPayload = [
@@ -378,6 +383,7 @@ class EmpresaController extends Controller
             'Aplicativos',
             'Procesos Electrónicos',
             'Equipos',
+            'Cotizaciones',
         ];
 
         $validated = $request->validate([
@@ -547,6 +553,7 @@ class EmpresaController extends Controller
             'Aplicativos',
             'Procesos Electrónicos',
             'Equipos',
+            'Cotizaciones',
         ];
 
         $validated = $request->validate([
