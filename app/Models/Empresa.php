@@ -24,6 +24,7 @@ class Empresa extends Model
         'user_id',
         'responsable_user_id',
         'referida_at',
+        'gestion_inicial_at',
         'cotizacion_numero',
         'referido_estado',
         'referido_motivo_rechazo',
@@ -36,6 +37,7 @@ class Empresa extends Model
 
     protected $casts = [
         'referida_at' => 'datetime',
+        'gestion_inicial_at' => 'datetime',
         'cotizacion_enviada' => 'boolean',
         'cotizacion_enviada_at' => 'datetime',
         'referido_aprobado_at' => 'datetime',
