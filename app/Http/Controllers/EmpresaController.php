@@ -129,14 +129,18 @@ class EmpresaController extends Controller
         $totalEmpresas = (clone $empresasQuery)->count();
 
         $totalPendiente = (clone $empresasQuery)
+
             ->where('referido_estado', 'aprobado')
             ->where('comision_estado', 'pendiente')
+
             ->sum('comision_valor');
 
         $totalPagado = (clone $empresasQuery)
             ->where('referido_estado', 'aprobado')
             ->where('comision_estado', 'pagada')
             ->sum('comision_valor');
+
+        $totalComisiones = (float) $totalPendiente + (float) $totalPagado;
 
         $empresas = $empresasQuery
             ->paginate(10)
@@ -162,6 +166,9 @@ class EmpresaController extends Controller
             'soloAprobados',
             'totalPendiente',
             'totalPagado',
+
+            'totalComisiones',
+
             'totalEmpresas',
 
             'usaRangoPersonalizado',
