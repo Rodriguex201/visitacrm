@@ -211,6 +211,7 @@
                             class="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2"
                         >
                             <option value="">Estado (Todos)</option>
+                            <option value="sin_iniciar" @selected(($filters['estado'] ?? '') === 'sin_iniciar')>Sin iniciar</option>
                             <option value="pendiente" @selected(($filters['estado'] ?? '') === 'pendiente')>Pendiente</option>
                             <option value="aprobado" @selected(($filters['estado'] ?? '') === 'aprobado')>Aprobado</option>
                             <option value="rechazado" @selected(($filters['estado'] ?? '') === 'rechazado')>Rechazado</option>
@@ -270,10 +271,10 @@
             <div class="space-y-4 lg:col-span-2">
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
-                        @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
-                        @php($estadoRefColor = $referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente'])
-                        @php($estadoRefStyle = 'border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';')
-                        @php($estadoRefBadgeStyle = 'background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';')
+                        @php($estadoRef = in_array($empresa->referido_estado, ['pendiente', 'aprobado', 'rechazado'], true) ? $empresa->referido_estado : 'sin_iniciar')
+                        @php($estadoRefColor = in_array($estadoRef, ['pendiente', 'aprobado', 'rechazado'], true) ? ($referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente']) : null)
+                        @php($estadoRefStyle = $estadoRefColor ? ('border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';') : '')
+                        @php($estadoRefBadgeStyle = $estadoRefColor ? ('background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';') : '')
                         <article
                             x-data="{ empresa: @js([
                                 'id' => $empresa->id,
@@ -345,8 +346,17 @@
                                                     🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
                                                 </span>
                                             @endif
+                                            @if ($empresa->gestion_inicial_at)
+                                                <p class="mt-1 text-xs text-slate-600">
+                                                    Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
+                                                </p>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoRef !== 'sin_iniciar')
+                                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
+                                                @endif
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
@@ -371,8 +381,17 @@
                                                     🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
                                                 </span>
                                             @endif
+                                            @if ($empresa->gestion_inicial_at)
+                                                <p class="mt-1 text-xs text-slate-600">
+                                                    Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
+                                                </p>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoRef !== 'sin_iniciar')
+                                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
+                                                @endif
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
