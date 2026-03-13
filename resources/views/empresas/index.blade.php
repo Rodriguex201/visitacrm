@@ -348,6 +348,11 @@
                                                     🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
                                                 </span>
                                             @endif
+                                            @if ($empresa->gestion_inicial_at)
+                                                <p class="mt-1 text-xs text-slate-600">
+                                                    Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
+                                                </p>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
 
                                                 @if ($estadoRef !== 'sin_iniciar')
@@ -379,6 +384,11 @@
                                                 <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
                                                     🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
                                                 </span>
+                                            @endif
+                                            @if ($empresa->gestion_inicial_at)
+                                                <p class="mt-1 text-xs text-slate-600">
+                                                    Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
+                                                </p>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
 
