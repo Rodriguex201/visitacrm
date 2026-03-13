@@ -333,6 +333,13 @@
                                     <p x-show="referidoErrors.comision_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_estado"></p>
                                 </div>
 
+
+                                <div>
+                                    <label for="referido_comision_nota" class="mb-1 block text-sm font-medium text-slate-700">Notas generales</label>
+                                    <textarea id="referido_comision_nota" x-model="referidoForm.referido_comision_nota" name="referido_comision_nota" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Escribe una nota general sobre referido / comisión..."></textarea>
+                                    <p x-show="referidoErrors.referido_comision_nota" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_comision_nota"></p>
+                                </div>
+
                                 <div class="flex justify-end">
                                     <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60" :disabled="referidoSaving">
                                         <span x-show="!referidoSaving">Guardar estado</span>
@@ -1812,6 +1819,7 @@
                             ? (this.referidoForm.referido_motivo_rechazo || '').trim()
                             : null,
                         comision_estado: this.referidoForm.comision_estado || 'pendiente',
+                        referido_comision_nota: (this.referidoForm.referido_comision_nota || '').trim() || null,
                     };
 
                     try {

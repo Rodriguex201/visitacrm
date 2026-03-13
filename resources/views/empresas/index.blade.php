@@ -376,8 +376,15 @@
                                                     </span>
                                                 @endif
                                                 @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
-                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                    <span class="group relative inline-flex">
+                                                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                            Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                        </span>
+                                                        @if (!empty($empresa->referido_comision_nota))
+                                                            <span class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block">
+                                                                {{ $empresa->referido_comision_nota }}
+                                                            </span>
+                                                        @endif
                                                     </span>
                                                 @endif
                                             </div>
@@ -415,8 +422,15 @@
                                                     </span>
                                                 @endif
                                                 @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
-                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                    <span class="group relative inline-flex">
+                                                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                            Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                        </span>
+                                                        @if (!empty($empresa->referido_comision_nota))
+                                                            <span class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block">
+                                                                {{ $empresa->referido_comision_nota }}
+                                                            </span>
+                                                        @endif
                                                     </span>
                                                 @endif
                                             </div>
@@ -440,8 +454,15 @@
                                             @endif
 
                                             @if (($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
-                                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                                    Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                <span class="group relative inline-flex">
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
+                                                    </span>
+                                                    @if (!empty($empresa->referido_comision_nota))
+                                                        <span class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block">
+                                                            {{ $empresa->referido_comision_nota }}
+                                                        </span>
+                                                    @endif
                                                 </span>
                                             @endif
                                         </div>
