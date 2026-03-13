@@ -506,12 +506,14 @@
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
                                 <dd class="mt-1 text-lg font-semibold text-emerald-600">
                                     $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
+
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total comisiones</dt>
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">
                                     $ {{ number_format((float) ($totalComisiones ?? 0), 0, ',', '.') }}
+
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">

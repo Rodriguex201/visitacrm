@@ -94,6 +94,7 @@ class EmpresaController extends Controller
 
         if ($q !== '') {
             $empresasQuery->where(function ($query) use ($q) {
+
                 $query->where('empresas.nombre', 'like', "%{$q}%")
                     ->orWhereHas('responsable', function ($responsableQuery) use ($q) {
                         $responsableQuery->where('codigo', 'like', "%{$q}%");
@@ -101,6 +102,7 @@ class EmpresaController extends Controller
                     ->orWhereHas('creador', function ($creadorQuery) use ($q) {
                         $creadorQuery->where('codigo', 'like', "%{$q}%");
                     });
+
             });
         }
 
@@ -127,8 +129,10 @@ class EmpresaController extends Controller
         $totalEmpresas = (clone $empresasQuery)->count();
 
         $totalPendiente = (clone $empresasQuery)
+
             ->where('referido_estado', 'aprobado')
             ->where('comision_estado', 'pendiente')
+
             ->sum('comision_valor');
 
         $totalPagado = (clone $empresasQuery)
@@ -162,7 +166,9 @@ class EmpresaController extends Controller
             'soloAprobados',
             'totalPendiente',
             'totalPagado',
+
             'totalComisiones',
+
             'totalEmpresas',
 
             'usaRangoPersonalizado',
