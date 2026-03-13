@@ -349,7 +349,9 @@
                                                 </span>
                                             @endif
                                             @if ($empresa->gestion_inicial_at)
-                                                <p class="mt-1 text-xs text-slate-600">
+
+                                                <p class="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+
                                                     Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
                                                 </p>
                                             @endif
@@ -386,7 +388,9 @@
                                                 </span>
                                             @endif
                                             @if ($empresa->gestion_inicial_at)
-                                                <p class="mt-1 text-xs text-slate-600">
+
+                                                <p class="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+
                                                     Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
                                                 </p>
                                             @endif
