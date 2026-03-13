@@ -650,6 +650,8 @@ class EmpresaController extends Controller
         ]);
 
         $referidoEstado = $validated['referido_estado'];
+        $estadoReferidoAnterior = $empresa->referido_estado;
+        $estadoComisionAnterior = $empresa->comision_estado;
         $motivoRechazo = isset($validated['referido_motivo_rechazo'])
             ? trim((string) $validated['referido_motivo_rechazo'])
             : null;
@@ -666,7 +668,7 @@ class EmpresaController extends Controller
         $empresa->referido_estado = $referidoEstado;
         $empresa->referido_motivo_rechazo = $referidoEstado === 'rechazado' ? $motivoRechazo : null;
 
-        if ($referidoEstado === 'aprobado' && ! $empresa->referido_aprobado_at) {
+        if ($estadoReferidoAnterior !== 'aprobado' && $referidoEstado === 'aprobado') {
             $empresa->referido_aprobado_at = now();
             $empresa->referido_aprobado_by = (int) $request->user()->id;
         }
@@ -680,12 +682,8 @@ class EmpresaController extends Controller
             $comisionEstado = $validated['comision_estado'] ?? 'pendiente';
             $empresa->comision_estado = $comisionEstado;
 
-            if ($comisionEstado === 'pagada') {
+            if ($estadoComisionAnterior !== 'pagada' && $comisionEstado === 'pagada') {
                 $empresa->comision_pagada_at = now();
-            }
-
-            if ($comisionEstado === 'pendiente') {
-                $empresa->comision_pagada_at = null;
             }
         }
 
