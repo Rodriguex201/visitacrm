@@ -1766,9 +1766,13 @@
                         rechazado: 'Rechazado',
                     };
 
-                    return labels[estado] || 'Pendiente';
+                    return labels[estado] || 'Sin iniciar';
                 },
                 referidoBadgeStyle(estado) {
+                    if (!estado) {
+                        return 'background-color: #F1F5F9; color: #64748B;';
+                    }
+
                     const fallback = this.referidoEstadoColors.pendiente || { bg_color: '#FEF3C7', text_color: '#92400E' };
                     const color = this.referidoEstadoColors[estado] || fallback;
 

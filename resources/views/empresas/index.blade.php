@@ -270,10 +270,10 @@
             <div class="space-y-4 lg:col-span-2">
                 <div class="space-y-3 pb-24">
                     @forelse ($empresas as $empresa)
-                        @php($estadoRef = $empresa->referido_estado ?? 'pendiente')
-                        @php($estadoRefColor = $referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente'])
-                        @php($estadoRefStyle = 'border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';')
-                        @php($estadoRefBadgeStyle = 'background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';')
+                        @php($estadoRef = filled($empresa->referido_estado) ? $empresa->referido_estado : null)
+                        @php($estadoRefColor = $estadoRef ? ($referidoEstadoColors[$estadoRef] ?? $referidoEstadoColors['pendiente']) : null)
+                        @php($estadoRefStyle = $estadoRefColor ? ('border-color: ' . $estadoRefColor['bg_color'] . '; background-color: ' . $estadoRefColor['bg_color'] . ';') : '')
+                        @php($estadoRefBadgeStyle = $estadoRefColor ? ('background-color: ' . $estadoRefColor['bg_color'] . '; color: ' . $estadoRefColor['text_color'] . ';') : '')
                         <article
                             x-data="{ empresa: @js([
                                 'id' => $empresa->id,
@@ -346,7 +346,11 @@
                                                 </span>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoRef)
+                                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
+                                                @endif
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
@@ -372,7 +376,11 @@
                                                 </span>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @if ($estadoRef)
+                                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
+                                                @endif
                                                 @if ($empresa->referido_estado === 'aprobado')
                                                     <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
                                                         Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
