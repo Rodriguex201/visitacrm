@@ -9,7 +9,18 @@
             openEdit: {{ old('modal_mode') === 'edit' ? 'true' : 'false' }},
             editId: {{ old('empresa_id') ? (int) old('empresa_id') : 'null' }},
             updateRouteTemplate: @js(route('empresas.update', ['empresa' => '__ID__'])),
+            destroyRouteTemplate: @js(route('empresas.destroy', ['empresa' => '__ID__'])),
             formAction: '{{ old('modal_mode') === 'edit' && old('empresa_id') ? route('empresas.update', ['empresa' => old('empresa_id')]) : route('empresas.store') }}',
+            deleteModalOpen: @js($errors->has('clave_eliminacion')),
+            deleteEmpresaId: @js((int) old('empresa_eliminar_id', 0)),
+            deleteAction: '',
+            deleteCompanyName: '',
+            deletePassword: '',
+            init() {
+                if (this.deleteEmpresaId > 0) {
+                    this.deleteAction = this.destroyRouteTemplate.replace('__ID__', this.deleteEmpresaId)
+                }
+            },
             form: {
                 nombre: @js(old('nombre', '')),
                 // nit: @js(old('nit', '')),
@@ -89,6 +100,20 @@
                 this.notesModalCompanyName = ''
                 this.notesModalContent = ''
             },
+            openDeleteModal(empresa) {
+                this.deleteEmpresaId = Number(empresa.id ?? 0)
+                this.deleteCompanyName = empresa.nombre ?? ''
+                this.deleteAction = this.destroyRouteTemplate.replace('__ID__', this.deleteEmpresaId)
+                this.deletePassword = ''
+                this.deleteModalOpen = true
+            },
+            closeDeleteModal() {
+                this.deleteModalOpen = false
+                this.deleteEmpresaId = 0
+                this.deleteAction = ''
+                this.deleteCompanyName = ''
+                this.deletePassword = ''
+            },
             async searchCity() {
                 const query = (this.form.ciudad ?? '').trim()
 
@@ -160,7 +185,7 @@
                                 type="text"
                                 name="q"
                                 value="{{ $filters['q'] ?? '' }}"
-                                placeholder="Buscar por nombre o ciudad..."
+                                placeholder="Buscar por nombre o código..."
                                 class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
                         </div>
@@ -315,9 +340,11 @@
 
                                     @if ($esAdministracion)
                                         @if ($empresa->referida_at)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->responsable?->codigo ?? 'S/C' }}
-                                            </span>
+                                            @if ($empresa->responsable?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
@@ -330,13 +357,20 @@
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
 
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                🔁 Referido por: {{ $empresa->creador->codigo }}
-                                            </span>
+                                            @if ($empresa->creador?->referidoPor)
+                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                    🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
+                                                </span>
+                                            @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
                                                 @if ($empresa->referido_estado === 'aprobado')
@@ -349,6 +383,11 @@
                                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                         Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
 
+                                                    </span>
+                                                @endif
+                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -368,6 +407,12 @@
                                             @if (!is_null($empresa->referido_aprobado_at))
                                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                                                     Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
+                                                </span>
+                                            @endif
+
+                                            @if (($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
+                                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
+                                                    Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -409,24 +454,16 @@
                                 </button>
 
                                 @if ($esAdministracion)
-                                    <form
-                                        method="POST"
-                                        action="{{ route('empresas.destroy', $empresa) }}"
-                                        @click.stop
-                                        onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa?')"
+                                    <button
+                                        type="button"
+                                        @click.stop="openDeleteModal(empresa)"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
+                                        aria-label="Eliminar {{ $empresa->nombre }}"
                                     >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 hover:text-rose-700"
-                                            aria-label="Eliminar {{ $empresa->nombre }}"
-                                        >
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9.75 0V6A1.5 1.5 0 019.75 4.5h4.5A1.5 1.5 0 0115.75 6v1.5m-8.25 0V18A1.5 1.5 0 009 19.5h6A1.5 1.5 0 0016.5 18V7.5m-6 3v6m3-6v6" />
+                                        </svg>
+                                    </button>
                                 @endif
 
 
@@ -460,16 +497,25 @@
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
                         <dl class="mt-4 space-y-3">
                             <div class="rounded-lg bg-slate-50 p-3">
-                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Comisión total</dt>
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pendiente</dt>
+                                <dd class="mt-1 text-lg font-semibold text-amber-600">
+                                    $ {{ number_format((float) ($totalPendiente ?? 0), 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
+                                <dd class="mt-1 text-lg font-semibold text-emerald-600">
+                                    $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 p-3">
+                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total comisiones</dt>
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">
-
-                                    $ {{ number_format((float) ($totalComision ?? 0), 0, ',', '.') }}
-
+                                    $ {{ number_format((float) ($totalComisiones ?? 0), 0, ',', '.') }}
                                 </dd>
                             </div>
                             <div class="rounded-lg bg-slate-50 p-3">
                                 <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
-
                                 <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
                             </div>
                         </dl>
@@ -478,6 +524,56 @@
 
         </div>
 
+
+        <div
+            x-show="deleteModalOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-40 bg-slate-900/45"
+            @click="closeDeleteModal()"
+            x-cloak
+        ></div>
+
+        <div
+            x-show="deleteModalOpen"
+            x-transition
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+            <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" @click.stop>
+                <div class="mb-3">
+                    <h2 class="text-lg font-bold text-slate-900">Confirmar eliminación</h2>
+                    <p class="mt-1 text-sm text-slate-600" x-text="`Ingresa la clave para eliminar ${deleteCompanyName || 'esta empresa'}.`"></p>
+                </div>
+
+                <form method="POST" :action="deleteAction" class="space-y-3">
+                    @csrf
+                    @method('DELETE')
+
+                    <input type="hidden" name="empresa_eliminar_id" :value="deleteEmpresaId">
+
+                    <div>
+                        <label for="clave_eliminacion" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Clave de eliminación</label>
+                        <input
+                            id="clave_eliminacion"
+                            name="clave_eliminacion"
+                            type="password"
+                            x-model="deletePassword"
+                            required
+                            class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="••••••••"
+                        >
+                        @error('clave_eliminacion')
+                            <p class="mt-1 text-xs font-medium text-rose-600">{{ $message }} No se pudo eliminar la empresa.</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-1">
+                        <button type="button" @click="closeDeleteModal()" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+                        <button type="submit" class="rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-rose-700">Confirmar eliminación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <div
             x-show="notesModalOpen"
             x-transition.opacity

@@ -78,7 +78,7 @@ class EmpresaController extends Controller
         $esAdministracion = ($request->user()?->tipo_usuario ?? null) === 'administracion';
 
         $empresasQuery = Empresa::query()
-            ->with(['sector', 'responsable', 'creador'])
+            ->with(['sector', 'responsable.referidoPor', 'creador.referidoPor'])
             ->latest('id');
 
         if (! $esAdministracion) {
@@ -94,8 +94,13 @@ class EmpresaController extends Controller
 
         if ($q !== '') {
             $empresasQuery->where(function ($query) use ($q) {
-                $query->where('nombre', 'like', "%{$q}%")
-                    ->orWhere('ciudad', 'like', "%{$q}%");
+                $query->where('empresas.nombre', 'like', "%{$q}%")
+                    ->orWhereHas('responsable', function ($responsableQuery) use ($q) {
+                        $responsableQuery->where('codigo', 'like', "%{$q}%");
+                    })
+                    ->orWhereHas('creador', function ($creadorQuery) use ($q) {
+                        $creadorQuery->where('codigo', 'like', "%{$q}%");
+                    });
             });
         }
 
@@ -121,9 +126,17 @@ class EmpresaController extends Controller
 
         $totalEmpresas = (clone $empresasQuery)->count();
 
-        $totalComision = (clone $empresasQuery)
+        $totalPendiente = (clone $empresasQuery)
             ->where('referido_estado', 'aprobado')
+            ->where('comision_estado', 'pendiente')
             ->sum('comision_valor');
+
+        $totalPagado = (clone $empresasQuery)
+            ->where('referido_estado', 'aprobado')
+            ->where('comision_estado', 'pagada')
+            ->sum('comision_valor');
+
+        $totalComisiones = (float) $totalPendiente + (float) $totalPagado;
 
         $empresas = $empresasQuery
             ->paginate(10)
@@ -147,7 +160,9 @@ class EmpresaController extends Controller
             'filters',
 
             'soloAprobados',
-            'totalComision',
+            'totalPendiente',
+            'totalPagado',
+            'totalComisiones',
             'totalEmpresas',
 
             'usaRangoPersonalizado',
@@ -1018,10 +1033,18 @@ class EmpresaController extends Controller
             ->with('status', 'Empresa actualizada correctamente.');
     }
 
-    public function destroy(Empresa $empresa): RedirectResponse
+    public function destroy(Request $request, Empresa $empresa): RedirectResponse
     {
         if ((auth()->user()?->tipo_usuario ?? null) !== 'administracion') {
             abort(403);
+        }
+
+        $claveEliminacion = (string) $request->input('clave_eliminacion', '');
+
+        if ($claveEliminacion !== 'Admin2026') {
+            return back()
+                ->withErrors(['clave_eliminacion' => 'Clave incorrecta.'])
+                ->withInput();
         }
 
         $empresa->delete();
