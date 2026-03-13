@@ -1048,7 +1048,9 @@ class EmpresaController extends Controller
             $data['referida_at'] = now();
         }
 
+
         $data['referido_estado'] = 'sin_iniciar';
+
         $data['gestion_inicial_at'] = null;
 
         Empresa::query()->create($data);
@@ -1171,7 +1173,9 @@ class EmpresaController extends Controller
 
     private function empresaSinEstadoReferido(Empresa $empresa): bool
     {
+
         return in_array($empresa->referido_estado, [null, '', 'sin_iniciar'], true);
+
     }
 
     private function referidoEstadoColors(): array

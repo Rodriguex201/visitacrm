@@ -1770,7 +1770,9 @@
                     return labels[estado] || 'Sin iniciar';
                 },
                 referidoBadgeStyle(estado) {
+
                     if (!estado || estado === 'sin_iniciar') {
+
                         return 'background-color: #F1F5F9; color: #64748B;';
                     }
 
