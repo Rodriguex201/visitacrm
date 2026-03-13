@@ -320,7 +320,7 @@
 
                                 <div x-show="referidoForm.referido_estado === 'aprobado'">
                                     <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión (automático)</label>
-                                    <input id="comision_valor" :value="formatCurrency(referidoForm.comision_valor)" type="text" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-600 focus:border-blue-500 focus:ring-blue-500" placeholder="$ 0">
+                                    <input id="comision_valor" :value="this.formatCurrency(referidoForm.comision_valor)" type="text" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-600 focus:border-blue-500 focus:ring-blue-500" placeholder="$ 0">
                                     <p class="mt-1 text-xs text-slate-500">Se calcula al guardar: suma de opciones activas (excepto Cotizaciones y Como Llego).</p>
                                 </div>
 
@@ -1065,7 +1065,7 @@
                 },
                 init() {
                     this.initNuevaVisitaModal();
-                    this.bindContactoEditButtons();
+                    this.bindContactEditButtons();
                     this.bindVisitaActions();
                     this.bindActividadActions();
 
@@ -1081,6 +1081,29 @@
                         if (['venta_realizada', 'en_seguimiento'].includes(value) && this.form.nivel_interes === 'sin_interes') {
                             this.form.nivel_interes = '';
                         }
+                    });
+                },
+
+                bindContactEditButtons() {
+                    this.$root.addEventListener('click', (event) => {
+                        const trigger = event.target.closest('[data-edit-contacto="true"]');
+                        if (!trigger) {
+                            return;
+                        }
+
+                        const contactoId = Number(trigger.dataset.contactoId || 0);
+                        if (!contactoId) {
+                            return;
+                        }
+
+                        this.abrirModalEditarContacto({
+                            id: contactoId,
+                            nombre: trigger.dataset.contactoNombre || '',
+                            cargo: trigger.dataset.contactoCargo || '',
+                            telefono: trigger.dataset.contactoTelefono || '',
+                            email: trigger.dataset.contactoEmail || '',
+                            es_principal: trigger.dataset.contactoEsPrincipal || '0',
+                        });
                     });
                 },
 
@@ -1806,6 +1829,19 @@
                         minute: '2-digit',
                         hour12: false,
                     }).format(fecha).replace(',', '');
+                },
+                formatCurrency(valor) {
+                    const monto = Number(valor ?? 0);
+                    if (!Number.isFinite(monto)) {
+                        return '$ 0';
+                    }
+
+                    return new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    }).format(monto);
                 },
                 async guardarReferidoEstado() {
                     this.referidoSaving = true;
