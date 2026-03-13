@@ -343,9 +343,9 @@
 
                                     @if ($esAdministracion)
                                         @if ($empresa->referida_at)
-                                            @if ($empresa->responsable?->referidoPor)
+                                            @if ($empresa->responsable?->codigo)
                                                 <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                    🔁 Referido por: {{ $empresa->responsable->referidoPor->codigo }} - {{ strtoupper($empresa->responsable->referidoPor->name ?? $empresa->responsable->referidoPor->nombre ?? 'Sin nombre') }}
+                                                    🔁 Referido por: {{ $empresa->responsable->codigo }} - {{ strtoupper($empresa->responsable->name ?? $empresa->responsable->nombre ?? 'Sin nombre') }}
                                                 </span>
                                             @endif
                                             @if ($empresa->gestion_inicial_at)
@@ -389,9 +389,9 @@
                                                 @endif
                                             </div>
                                         @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                            @if ($empresa->creador?->referidoPor)
+                                            @if ($empresa->creador?->codigo)
                                                 <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                    🔁 Referido por: {{ $empresa->creador->referidoPor->codigo }} - {{ strtoupper($empresa->creador->referidoPor->name ?? $empresa->creador->referidoPor->nombre ?? 'Sin nombre') }}
+                                                    🔁 Referido por: {{ $empresa->creador->codigo }} - {{ strtoupper($empresa->creador->name ?? $empresa->creador->nombre ?? 'Sin nombre') }}
                                                 </span>
                                             @endif
                                             @if ($empresa->gestion_inicial_at)
