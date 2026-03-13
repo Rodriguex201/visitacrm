@@ -33,6 +33,7 @@ class Empresa extends Model
         'comision_estado',
         'comision_valor',
         'comision_pagada_at',
+        'referido_comision_nota',
     ];
 
     protected $casts = [

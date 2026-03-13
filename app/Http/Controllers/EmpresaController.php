@@ -311,6 +311,7 @@ class EmpresaController extends Controller
             'comision_estado' => $empresa->comision_estado ?: 'pendiente',
             'comision_valor' => $empresa->comision_valor,
             'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
+            'referido_comision_nota' => $empresa->referido_comision_nota,
         ];
 
         $referidoEstadoColors = $this->referidoEstadoColors();
@@ -645,6 +646,7 @@ class EmpresaController extends Controller
             'referido_estado' => ['required', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
             'referido_motivo_rechazo' => ['nullable', 'string', 'min:5'],
             'comision_estado' => ['nullable', Rule::in(['pendiente', 'pagada'])],
+            'referido_comision_nota' => ['nullable', 'string'],
         ]);
 
         $referidoEstado = $validated['referido_estado'];
@@ -693,6 +695,9 @@ class EmpresaController extends Controller
 
         }
 
+        $empresa->referido_comision_nota = isset($validated['referido_comision_nota'])
+            ? trim((string) $validated['referido_comision_nota'])
+            : null;
 
         $empresa->save();
 
@@ -706,6 +711,7 @@ class EmpresaController extends Controller
                 'comision_estado' => $empresa->comision_estado,
                 'comision_valor' => $empresa->comision_valor,
                 'comision_pagada_at' => optional($empresa->comision_pagada_at)->toIso8601String(),
+                'referido_comision_nota' => $empresa->referido_comision_nota,
             ],
         ]);
     }
