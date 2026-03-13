@@ -1028,6 +1028,7 @@
                 referidoSuccess: '',
                 referidoErrors: {},
                 referidoForm: @js($referidoPayload),
+                referidoOriginal: @js($referidoPayload),
                 referidoEstadoColors: @js($referidoEstadoColors),
                 accionesCatalogo: @js($accionesCatalogo->map(fn ($accion) => ['id' => (int) $accion->id, 'nombre' => $accion->nombre])->values()),
                 accionUpdateUrlTemplate: @js(route('empresas.acciones.update', ['empresa' => $empresa, 'empresaAccion' => '__ACCION__'])),
@@ -1849,14 +1850,40 @@
                     this.referidoSuccess = '';
                     this.referidoErrors = {};
 
-                    const payload = {
-                        referido_estado: this.referidoForm.referido_estado,
-                        referido_motivo_rechazo: this.referidoForm.referido_estado === 'rechazado'
-                            ? (this.referidoForm.referido_motivo_rechazo || '').trim()
-                            : null,
-                        comision_estado: this.referidoForm.comision_estado || 'pendiente',
-                        referido_comision_nota: (this.referidoForm.referido_comision_nota || '').trim() || null,
-                    };
+                    const payload = {};
+                    const referidoEstado = this.referidoForm.referido_estado;
+                    const referidoEstadoOriginal = this.referidoOriginal.referido_estado;
+                    const comisionEstado = this.referidoForm.comision_estado || 'pendiente';
+                    const comisionEstadoOriginal = this.referidoOriginal.comision_estado || 'pendiente';
+                    const nota = (this.referidoForm.referido_comision_nota || '').trim() || null;
+                    const notaOriginal = (this.referidoOriginal.referido_comision_nota || '').trim() || null;
+                    const motivoRechazo = (this.referidoForm.referido_motivo_rechazo || '').trim() || null;
+                    const motivoRechazoOriginal = (this.referidoOriginal.referido_motivo_rechazo || '').trim() || null;
+
+                    if (referidoEstado !== referidoEstadoOriginal) {
+                        payload.referido_estado = referidoEstado;
+                        payload.referido_motivo_rechazo = referidoEstado === 'rechazado'
+                            ? motivoRechazo
+                            : null;
+                    }
+
+                    if (referidoEstado === 'rechazado' && motivoRechazo !== motivoRechazoOriginal) {
+                        payload.referido_motivo_rechazo = motivoRechazo;
+                    }
+
+                    if (comisionEstado !== comisionEstadoOriginal) {
+                        payload.comision_estado = comisionEstado;
+                    }
+
+                    if (nota !== notaOriginal) {
+                        payload.referido_comision_nota = nota;
+                    }
+
+                    if (!Object.keys(payload).length) {
+                        this.referidoSuccess = 'No hay cambios para guardar.';
+                        this.referidoSaving = false;
+                        return;
+                    }
 
                     try {
                         const response = await fetch(this.referidoUpdateUrl, {
@@ -1887,6 +1914,7 @@
                             ...(data.data || {}),
                             comision_valor: data.data?.comision_valor ?? null,
                         };
+                        this.referidoOriginal = { ...this.referidoForm };
                         this.referidoSuccess = 'Estado actualizado correctamente.';
                     } catch (error) {
                         this.referidoError = 'No fue posible conectar con el servidor.';

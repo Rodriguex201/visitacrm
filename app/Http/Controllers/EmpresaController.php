@@ -643,61 +643,99 @@ class EmpresaController extends Controller
         }
 
         $validated = $request->validate([
-            'referido_estado' => ['required', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
-            'referido_motivo_rechazo' => ['nullable', 'string', 'min:5'],
-            'comision_estado' => ['nullable', Rule::in(['pendiente', 'pagada'])],
-            'referido_comision_nota' => ['nullable', 'string'],
+            'referido_estado' => ['sometimes', Rule::in(['pendiente', 'aprobado', 'rechazado'])],
+            'referido_motivo_rechazo' => ['sometimes', 'nullable', 'string', 'min:5'],
+            'comision_estado' => ['sometimes', 'nullable', Rule::in(['pendiente', 'pagada'])],
+            'referido_comision_nota' => ['sometimes', 'nullable', 'string'],
         ]);
 
-        $referidoEstado = $validated['referido_estado'];
-        $motivoRechazo = isset($validated['referido_motivo_rechazo'])
-            ? trim((string) $validated['referido_motivo_rechazo'])
-            : null;
-
-        if ($referidoEstado === 'rechazado' && mb_strlen((string) $motivoRechazo) < 5) {
+        if (! array_intersect(array_keys($validated), ['referido_estado', 'comision_estado', 'referido_comision_nota', 'referido_motivo_rechazo'])) {
             return response()->json([
-                'message' => 'El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.',
-                'errors' => [
-                    'referido_motivo_rechazo' => ['El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.'],
-                ],
+                'message' => 'Debe enviar al menos un campo para actualizar.',
             ], 422);
         }
 
-        $empresa->referido_estado = $referidoEstado;
-        $empresa->referido_motivo_rechazo = $referidoEstado === 'rechazado' ? $motivoRechazo : null;
+        if (array_key_exists('referido_estado', $validated)) {
+            $referidoEstadoAnterior = $empresa->referido_estado;
+            $referidoEstado = $validated['referido_estado'];
+            $motivoRechazo = isset($validated['referido_motivo_rechazo'])
+                ? trim((string) $validated['referido_motivo_rechazo'])
+                : null;
 
-        if ($referidoEstado === 'aprobado' && ! $empresa->referido_aprobado_at) {
-            $empresa->referido_aprobado_at = now();
-            $empresa->referido_aprobado_by = (int) $request->user()->id;
+            if ($referidoEstado === 'rechazado' && mb_strlen((string) $motivoRechazo) < 5) {
+                return response()->json([
+                    'message' => 'El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.',
+                    'errors' => [
+                        'referido_motivo_rechazo' => ['El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.'],
+                    ],
+                ], 422);
+            }
+
+            $empresa->referido_estado = $referidoEstado;
+
+            if ($referidoEstado === 'rechazado') {
+                $empresa->referido_motivo_rechazo = $motivoRechazo;
+            } elseif ($referidoEstado !== 'rechazado') {
+                $empresa->referido_motivo_rechazo = null;
+            }
+
+            if ($referidoEstadoAnterior !== 'aprobado' && $referidoEstado === 'aprobado') {
+                $empresa->referido_aprobado_at = now();
+                $empresa->referido_aprobado_by = (int) $request->user()->id;
+            }
+
+            if ($referidoEstadoAnterior === 'aprobado' && $referidoEstado !== 'aprobado') {
+                $empresa->referido_aprobado_at = null;
+                $empresa->referido_aprobado_by = null;
+            }
+
+            if ($referidoEstado === 'aprobado') {
+                $empresa->comision_valor = $this->calcularComisionAutomatica($empresa);
+            }
         }
 
-        if ($referidoEstado !== 'aprobado') {
-            $empresa->referido_aprobado_at = null;
-            $empresa->referido_aprobado_by = null;
+        if (! array_key_exists('referido_estado', $validated) && array_key_exists('referido_motivo_rechazo', $validated)) {
+            $motivoRechazo = trim((string) ($validated['referido_motivo_rechazo'] ?? ''));
+
+            if ($empresa->referido_estado !== 'rechazado') {
+                return response()->json([
+                    'message' => 'Solo se puede actualizar el motivo cuando el referido está rechazado.',
+                    'errors' => [
+                        'referido_motivo_rechazo' => ['Solo se puede actualizar el motivo cuando el referido está rechazado.'],
+                    ],
+                ], 422);
+            }
+
+            if (mb_strlen($motivoRechazo) < 5) {
+                return response()->json([
+                    'message' => 'El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.',
+                    'errors' => [
+                        'referido_motivo_rechazo' => ['El motivo de rechazo es obligatorio y debe tener al menos 5 caracteres.'],
+                    ],
+                ], 422);
+            }
+
+            $empresa->referido_motivo_rechazo = $motivoRechazo;
         }
+
 
         if (array_key_exists('comision_estado', $validated)) {
+            $comisionEstadoAnterior = $empresa->comision_estado ?? 'pendiente';
             $comisionEstado = $validated['comision_estado'] ?? 'pendiente';
             $empresa->comision_estado = $comisionEstado;
 
-            if ($comisionEstado === 'pagada') {
+            if ($comisionEstadoAnterior !== 'pagada' && $comisionEstado === 'pagada') {
                 $empresa->comision_pagada_at = now();
             }
 
-            if ($comisionEstado === 'pendiente') {
+            if ($comisionEstadoAnterior === 'pagada' && $comisionEstado !== 'pagada') {
                 $empresa->comision_pagada_at = null;
             }
         }
 
-        if ($referidoEstado === 'aprobado') {
-
-            $empresa->comision_valor = $this->calcularComisionAutomatica($empresa);
-
+        if (array_key_exists('referido_comision_nota', $validated)) {
+            $empresa->referido_comision_nota = trim((string) ($validated['referido_comision_nota'] ?? '')) ?: null;
         }
-
-        $empresa->referido_comision_nota = isset($validated['referido_comision_nota'])
-            ? trim((string) $validated['referido_comision_nota'])
-            : null;
 
         $empresa->save();
 
