@@ -824,6 +824,22 @@
                                     :disabled="opcionesSaving"
                                 >
                             </div>
+
+                            <div class="mt-4">
+                                <label class="mb-1 block text-sm font-medium text-slate-700">
+                                    Notas de Cotización
+                                </label>
+
+                                <textarea
+                                    name="notas[Cotizaciones]"
+                                    rows="3"
+                                    class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    placeholder="Escribe una nota de la cotización..."
+                                    :value="notaCategoriaActual('Cotizaciones')"
+                                    @input="setNotaCategoria('Cotizaciones', $event.target.value)"
+                                    :disabled="opcionesSaving"
+                                ></textarea>
+                            </div>
                         </div>
                     </template>
 
