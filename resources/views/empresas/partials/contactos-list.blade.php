@@ -1,3 +1,5 @@
+@php($soloLectura = $soloLectura ?? ((auth()->user()?->tipo_usuario ?? null) !== 'administracion'))
+
 @if ($contactos->isEmpty())
     <p class="text-center text-sm text-slate-500">Sin contactos registrados</p>
 @else
@@ -30,25 +32,27 @@
                         </div>
                     </button>
 
-                    <button
-                        type="button"
-                        class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-                        title="Editar contacto"
-                        aria-label="Editar contacto"
-                        @click.stop="abrirModalEditarContacto({
-                            id: '{{ $contacto->id }}',
-                            nombre: @js($contacto->nombre),
-                            cargo: @js($contacto->cargo),
-                            telefono: @js($contacto->telefono),
-                            email: @js($contacto->email),
-                            es_principal: '{{ $contacto->es_principal ? '1' : '0' }}',
-                        })"
+                    @unless ($soloLectura)
+                        <button
+                            type="button"
+                            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                            title="Editar contacto"
+                            aria-label="Editar contacto"
+                            @click.stop="abrirModalEditarContacto({
+                                id: '{{ $contacto->id }}',
+                                nombre: @js($contacto->nombre),
+                                cargo: @js($contacto->cargo),
+                                telefono: @js($contacto->telefono),
+                                email: @js($contacto->email),
+                                es_principal: '{{ $contacto->es_principal ? '1' : '0' }}',
+                            })"
 
-                    >
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.1 2.1 0 113 2.97L7.5 18.82l-4.5 1.18 1.18-4.5 12.682-12.013z" />
-                        </svg>
-                    </button>
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.1 2.1 0 113 2.97L7.5 18.82l-4.5 1.18 1.18-4.5 12.682-12.013z" />
+                            </svg>
+                        </button>
+                    @endunless
 
                 </div>
 

@@ -1,4 +1,6 @@
 @php
+    $soloLectura = $soloLectura ?? ((auth()->user()?->tipo_usuario ?? null) !== 'administracion');
+
     $buildIcon = static function (string $icono, ?string $color = null): string {
         $stroke = $color ?: 'currentColor';
         $attrs = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' . e($stroke) . '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -46,7 +48,7 @@
                                     <div>
                                         <p x-show="nota" class="text-xs text-slate-500" x-text="nota"></p>
 
-                                        @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                                        @if (! $soloLectura)
 
                                             <button x-show="!nota" type="button" @click="editingNota = true"
                                                 class="text-xs font-semibold text-blue-600 hover:text-blue-700">Agregar nota</button>
@@ -55,7 +57,7 @@
                                 </template>
 
 
-                                @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                                @if (! $soloLectura)
 
                                     <template x-if="editingNota">
                                         <div class="space-y-2">
@@ -86,7 +88,7 @@
                         </div>
                     </div>
 
-                    @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                    @if (! $soloLectura)
                         <div class="flex items-center gap-2">
                             <button
                                     type="button"

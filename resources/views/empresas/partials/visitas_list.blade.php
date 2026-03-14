@@ -1,4 +1,6 @@
 @php
+    $soloLectura = $soloLectura ?? ((auth()->user()?->tipo_usuario ?? null) !== 'administracion');
+
     $resultadoLabels = [
         'venta_realizada' => 'Venta realizada',
         'en_seguimiento' => 'En seguimiento',
@@ -21,7 +23,7 @@
         @foreach ($visitas as $visita)
             @php
                 $isProgramada = $visita->fecha_hora?->isFuture();
-                $canUpdateResultado = ! $isProgramada && empty($visita->resultado);
+                $canUpdateResultado = ! $soloLectura && ! $isProgramada && empty($visita->resultado);
                 $estadoBadgeClass = match ($visita->estado) {
                     'realizada' => 'bg-emerald-100 text-emerald-700',
                     'cancelada' => 'bg-rose-100 text-rose-700',
