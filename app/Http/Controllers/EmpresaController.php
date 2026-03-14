@@ -190,23 +190,9 @@ class EmpresaController extends Controller
         $usuario = $request->user();
         $esAdministracion = ($usuario?->tipo_usuario ?? null) === 'administracion';
 
-        if (! $esAdministracion) {
-
-            $userId = (int) $usuario?->id;
-            $esCreador = (int) $empresa->user_id === $userId;
-            $esResponsable = (int) $empresa->responsable_user_id === $userId;
-
-            if (! $esCreador && ! $esResponsable) {
-
-                abort(404);
-            }
-
-            $empresa->load('sector');
-
-            return view('empresas.show_basic', compact('empresa'));
-        }
-
         $this->authorize('view', $empresa);
+
+        $soloLectura = ! $esAdministracion;
 
         $actRange = (string) $request->query('act_range', '7');
         $visRange = (string) $request->query('vis_range', '7');
@@ -316,7 +302,7 @@ class EmpresaController extends Controller
 
         $referidoEstadoColors = $this->referidoEstadoColors();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors', 'soloLectura'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
