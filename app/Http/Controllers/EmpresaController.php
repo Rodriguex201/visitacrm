@@ -1150,11 +1150,19 @@ class EmpresaController extends Controller
     {
         $esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion';
 
+        $ciudadRules = ['string', 'max:255'];
+
+        if ($esAdministracion) {
+            array_unshift($ciudadRules, 'required');
+        } else {
+            array_unshift($ciudadRules, 'nullable');
+        }
+
         $validated = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
             'contacto_nombre' => ['required', 'string', 'max:255'],
             'nit' => ['nullable', 'string', 'max:255'],
-            'ciudad' => ['required', 'string', 'max:255'],
+            'ciudad' => $ciudadRules,
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
