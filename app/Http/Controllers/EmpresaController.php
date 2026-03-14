@@ -1097,11 +1097,18 @@ class EmpresaController extends Controller
 
         $data['gestion_inicial_at'] = null;
 
-        Empresa::query()->create($data);
+        $empresa = Empresa::query()->create($data);
 
-        return redirect()
+        $redirect = redirect()
             ->route('empresas.index')
             ->with('status', 'Empresa creada correctamente.');
+
+        if ($this->debeMostrarNotificacionWhatsapp($authUser)) {
+            $redirect->with('show_whatsapp_notify', true)
+                ->with('whatsapp_url', $this->buildWhatsappNotificationUrl($empresa, $authUser));
+        }
+
+        return $redirect;
     }
 
     public function update(Request $request, Empresa $empresa): RedirectResponse
@@ -1220,6 +1227,29 @@ class EmpresaController extends Controller
 
         return in_array($empresa->referido_estado, [null, '', 'sin_iniciar'], true);
 
+    }
+
+    private function debeMostrarNotificacionWhatsapp(?User $user): bool
+    {
+        return in_array($user?->tipo_usuario, ['vinculado', 'freelance'], true);
+    }
+
+    private function buildWhatsappNotificationUrl(Empresa $empresa, ?User $user): string
+    {
+        $contacto = trim((string) ($empresa->contacto_nombre ?? ''));
+        $ciudad = trim((string) ($empresa->ciudad ?? ''));
+        $registradoPor = trim((string) ($user?->name ?? 'Sin nombre'));
+
+        $mensaje = implode("\n", [
+            'Hola Maria, se ha registrado un nuevo referido en VisitaCRM.',
+            '',
+            'Empresa: '.$empresa->nombre,
+            'Contacto: '.($contacto !== '' ? $contacto : 'No registrado'),
+            'Ciudad: '.($ciudad !== '' ? $ciudad : 'No registrada'),
+            'Registrado por: '.($registradoPor !== '' ? $registradoPor : 'Sin nombre'),
+        ]);
+
+        return 'https://wa.me/573235109140?text='.rawurlencode($mensaje);
     }
 
     private function referidoEstadoColors(): array
