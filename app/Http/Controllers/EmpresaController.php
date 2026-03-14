@@ -1107,7 +1107,7 @@ class EmpresaController extends Controller
         $debeMostrarWhatsapp = in_array($tipoUsuario, ['freelance', 'vinculado'], true);
 
         if ($debeMostrarWhatsapp) {
-            $mensaje = "Hola Mario, se ha registrado un nuevo referido en el CRM.\n\n";
+            $mensaje = "Hola Maria, se ha registrado un nuevo referido en VisitaCRM.\n\n";
             $mensaje .= "Empresa: {$empresa->nombre}\n";
             $mensaje .= 'Contacto: '.($empresa->contacto_nombre ?: 'Sin contacto')."\n";
             $mensaje .= 'Ciudad: '.($empresa->ciudad ?: 'Sin ciudad')."\n";
