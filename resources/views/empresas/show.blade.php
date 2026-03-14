@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    @php($soloLectura = $soloLectura ?? ((auth()->user()?->tipo_usuario ?? null) !== 'administracion'))
     <section class="space-y-4 pb-24" x-data="historialVisitas()" x-init="init()">
         <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-transparent">
             <div class="flex min-w-0 items-start gap-3">
@@ -19,14 +20,16 @@
                 </div>
             </div>
 
-            <button
-                type="button"
-                @click="openNuevaVisitaModal({ empresa_id: {{ (int) $empresa->id }}, empresa_label: @js($empresa->nombre), lock_empresa: true })"
-                class="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            >
-                <span class="text-base leading-none">+</span>
-                Nueva Visita
-            </button>
+            @unless ($soloLectura)
+                <button
+                    type="button"
+                    @click="openNuevaVisitaModal({ empresa_id: {{ (int) $empresa->id }}, empresa_label: @js($empresa->nombre), lock_empresa: true })"
+                    class="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                >
+                    <span class="text-base leading-none">+</span>
+                    Nueva Visita
+                </button>
+            @endunless
         </header>
 
 
@@ -110,27 +113,29 @@
                     },
                 }"
             >
-                <button
-                    type="button"
-                    @click="openEditModal({
-                        id: {{ (int) $empresa->id }},
-                        nombre: @js($empresa->nombre),
-                        ciudad: @js($empresa->ciudad),
-                        contacto_nombre: @js($empresa->contacto_nombre),
-                        direccion: @js($empresa->direccion),
-                        telefono: @js($empresa->telefono),
-                        email: @js($empresa->email),
-                        sector_id: @js($empresa->sector_id),
-                        notas: @js($empresa->notas),
-                    })"
-                    class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-                    title="Editar empresa"
-                    aria-label="Editar empresa"
-                >
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 013.536 3.536L12.536 14.5a4 4 0 01-1.414.943L8 16l.557-3.122A4 4 0 019.5 11.464zM5 19h14" />
-                    </svg>
-                </button>
+                @unless ($soloLectura)
+                    <button
+                        type="button"
+                        @click="openEditModal({
+                            id: {{ (int) $empresa->id }},
+                            nombre: @js($empresa->nombre),
+                            ciudad: @js($empresa->ciudad),
+                            contacto_nombre: @js($empresa->contacto_nombre),
+                            direccion: @js($empresa->direccion),
+                            telefono: @js($empresa->telefono),
+                            email: @js($empresa->email),
+                            sector_id: @js($empresa->sector_id),
+                            notas: @js($empresa->notas),
+                        })"
+                        class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                        title="Editar empresa"
+                        aria-label="Editar empresa"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 013.536 3.536L12.536 14.5a4 4 0 01-1.414.943L8 16l.557-3.122A4 4 0 019.5 11.464zM5 19h14" />
+                        </svg>
+                    </button>
+                @endunless
 
                 <div class="space-y-3 pr-10 text-slate-600">
                     <p class="flex items-center gap-2 text-sm">
@@ -185,7 +190,9 @@
                     @endif
                 </div>
 
-                @include('empresas.partials.modal_empresa', ['showModalErrors' => old('modal_mode') === 'edit' && (int) old('empresa_id', 0) === (int) $empresa->id])
+                @unless ($soloLectura)
+                    @include('empresas.partials.modal_empresa', ['showModalErrors' => old('modal_mode') === 'edit' && (int) old('empresa_id', 0) === (int) $empresa->id])
+                @endunless
             </article>
 
             <div class="space-y-4">
@@ -196,13 +203,15 @@
                             <p class="text-xs text-slate-500">Selección múltiple</p>
                         </div>
 
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            @click="abrirPerfilComercialModal()"
-                        >
-                            Configurar
-                        </button>
+                        @unless ($soloLectura)
+                            <button
+                                type="button"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                @click="abrirPerfilComercialModal()"
+                            >
+                                Configurar
+                            </button>
+                        @endunless
                     </div>
 
                     <div class="flex flex-wrap gap-2">
@@ -236,22 +245,22 @@
 
                 </article>
 
-                @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
-
-                    <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js($errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado'])) }">
+                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js(! $soloLectura && $errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado'])) }">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
                                 <p class="text-xs text-slate-500">Estado actual</p>
                             </div>
 
-                            <button
-                                type="button"
-                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                                @click="referidoModalOpen = true"
-                            >
-                                Opciones
-                            </button>
+                            @unless ($soloLectura)
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    @click="referidoModalOpen = true"
+                                >
+                                    Opciones
+                                </button>
+                            @endunless
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
@@ -276,9 +285,9 @@
                             </template>
                         </div>
 
-                        <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
-                        <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
-
+                        @unless ($soloLectura)
+                            <p x-show="referidoError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="referidoError"></p>
+                            <p x-show="referidoSuccess" x-transition.opacity class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="referidoSuccess"></p>
 
                     <div
                         x-cloak
@@ -349,9 +358,9 @@
                             </form>
                         </div>
                     </div>
+                        @endunless
 
                     </article>
-                @endif
             </div>
         </div>
 
@@ -393,27 +402,31 @@
         <article class="space-y-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold text-slate-950">Acciones</h2>
-                <a href="{{ route('acciones.manage') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
+                @unless ($soloLectura)
+                    <a href="{{ route('acciones.manage') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">Gestionar</a>
+                @endunless
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                @forelse($accionesCatalogo as $accion)
-                    <button
-                        type="button"
-                        class="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-                        @click="registrarAccion({{ (int) $accion->id }})"
-                        :disabled="accionesGuardando"
-                        title="{{ $accion->nombre }}"
-                    >
-                        <span class="sr-only">{{ $accion->nombre }}</span>
-                        <span aria-hidden="true"><x-lucide-icon :name="$accion->icono" :color="$accion->color ?: null" /></span>
-                        <span class="pointer-events-none absolute -top-9 left-1/2 hidden -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-sm group-hover:block">{{ $accion->nombre }}</span>
-                    </button>
-                @empty
-                    <p class="text-sm text-slate-500">No hay acciones activas.</p>
-                @endforelse
-            </div>
-            <p x-show="accionesError" class="text-sm text-rose-600" x-text="accionesError"></p>
-            <p x-show="accionSuccess" x-transition.opacity class="text-sm text-emerald-600" x-text="accionSuccess"></p>
+            @unless ($soloLectura)
+                <div class="flex flex-wrap items-center gap-2">
+                    @forelse($accionesCatalogo as $accion)
+                        <button
+                            type="button"
+                            class="group relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                            @click="registrarAccion({{ (int) $accion->id }})"
+                            :disabled="accionesGuardando"
+                            title="{{ $accion->nombre }}"
+                        >
+                            <span class="sr-only">{{ $accion->nombre }}</span>
+                            <span aria-hidden="true"><x-lucide-icon :name="$accion->icono" :color="$accion->color ?: null" /></span>
+                            <span class="pointer-events-none absolute -top-9 left-1/2 hidden -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-sm group-hover:block">{{ $accion->nombre }}</span>
+                        </button>
+                    @empty
+                        <p class="text-sm text-slate-500">No hay acciones activas.</p>
+                    @endforelse
+                </div>
+                <p x-show="accionesError" class="text-sm text-rose-600" x-text="accionesError"></p>
+                <p x-show="accionSuccess" x-transition.opacity class="text-sm text-emerald-600" x-text="accionSuccess"></p>
+            @endunless
         </article>
 
         <article class="space-y-5 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -439,7 +452,7 @@
             </div>
 
             <div id="actividad-list">
-                @include('empresas.partials.actividad_list', ['acciones' => $acciones, 'empresa' => $empresa])
+                @include('empresas.partials.actividad_list', ['acciones' => $acciones, 'empresa' => $empresa, 'soloLectura' => $soloLectura])
             </div>
         </article>
 
@@ -447,16 +460,19 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-xl font-semibold text-slate-950">Contactos</h2>
 
-                <button type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900" @click="abrirModalContacto()">
-                    <span class="text-base leading-none">+</span>
-                    Agregar
-                </button>
+                @unless ($soloLectura)
+                    <button type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900" @click="abrirModalContacto()">
+                        <span class="text-base leading-none">+</span>
+                        Agregar
+                    </button>
+                @endunless
             </div>
 
             <div id="contactos-list">
-                @include('empresas.partials.contactos-list', ['contactos' => $contactos])
+                @include('empresas.partials.contactos-list', ['contactos' => $contactos, 'soloLectura' => $soloLectura])
             </div>
 
+            @unless ($soloLectura)
             <div
                 x-cloak
                 x-show="showContactoModal"
@@ -524,6 +540,7 @@
                     </form>
                 </div>
             </div>
+            @endunless
         </article>
 
         <article class="space-y-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -549,9 +566,10 @@
             </div>
 
             <div id="visitas-list">
-                @include('empresas.partials.visitas_list', ['visitas' => $visitas, 'empresa' => $empresa])
+                @include('empresas.partials.visitas_list', ['visitas' => $visitas, 'empresa' => $empresa, 'soloLectura' => $soloLectura])
             </div>
 
+            @unless ($soloLectura)
             <div
                 x-cloak
                 x-show="showModal"
@@ -616,6 +634,7 @@
                     </form>
                 </div>
             </div>
+            @endunless
         </article>
 
             <div x-cloak x-show="showUsuarioModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" @keydown.escape.window="cerrarModalUsuario()">

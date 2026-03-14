@@ -190,23 +190,9 @@ class EmpresaController extends Controller
         $usuario = $request->user();
         $esAdministracion = ($usuario?->tipo_usuario ?? null) === 'administracion';
 
-        if (! $esAdministracion) {
-
-            $userId = (int) $usuario?->id;
-            $esCreador = (int) $empresa->user_id === $userId;
-            $esResponsable = (int) $empresa->responsable_user_id === $userId;
-
-            if (! $esCreador && ! $esResponsable) {
-
-                abort(404);
-            }
-
-            $empresa->load('sector');
-
-            return view('empresas.show_basic', compact('empresa'));
-        }
-
         $this->authorize('view', $empresa);
+
+        $soloLectura = ! $esAdministracion;
 
         $actRange = (string) $request->query('act_range', '7');
         $visRange = (string) $request->query('vis_range', '7');
@@ -316,7 +302,7 @@ class EmpresaController extends Controller
 
         $referidoEstadoColors = $this->referidoEstadoColors();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors', 'soloLectura'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -1164,11 +1150,19 @@ class EmpresaController extends Controller
     {
         $esAdministracion = (auth()->user()?->tipo_usuario ?? null) === 'administracion';
 
+        $ciudadRules = ['string', 'max:255'];
+
+        if ($esAdministracion) {
+            array_unshift($ciudadRules, 'required');
+        } else {
+            array_unshift($ciudadRules, 'nullable');
+        }
+
         $validated = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
             'contacto_nombre' => ['required', 'string', 'max:255'],
             'nit' => ['nullable', 'string', 'max:255'],
-            'ciudad' => ['required', 'string', 'max:255'],
+            'ciudad' => $ciudadRules,
             'telefono' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],

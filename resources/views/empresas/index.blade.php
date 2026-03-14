@@ -356,7 +356,7 @@
                                         </p>
                                     @endif
 
-                                    @if ($esAdministracion)
+                                    @if ($empresa)
                                         @if ($empresa->referida_at)
                                             @if ($empresa->responsable?->codigo)
                                                 <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
@@ -456,53 +456,21 @@
                                         @endif
                                     @endif
 
-                                    @if (! $esAdministracion && ($empresa->referido_estado === 'aprobado'))
-                                        <div class="mt-1 flex flex-wrap items-center gap-1">
-                                            <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
-                                            </span>
-
-                                            @if (!is_null($empresa->referido_aprobado_at))
-                                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                                    Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
-                                                </span>
-                                            @endif
-
-                                            @if (($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
-                                                <span class="group relative inline-flex">
-                                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                                        Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
-                                                    </span>
-                                                    @if (!empty($empresa->referido_comision_nota))
-                                                        <span class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block">
-                                                            {{ $empresa->referido_comision_nota }}
-                                                        </span>
-                                                    @endif
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @elseif (! $esAdministracion && ($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
-                                        <div class="mt-1 flex flex-wrap items-center gap-1">
-                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                                Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
-                                            </span>
-
-
-                                        </div>
-                                    @endif
                                 </div>
                             </div>
 
                             <div class="flex shrink-0 items-center gap-1">
-                                <button
-                                    type="button"
-                                    @click.stop="openEditModal(empresa)"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
-                                    </svg>
-                                </button>
+                                @if ($esAdministracion)
+                                    <button
+                                        type="button"
+                                        @click.stop="openEditModal(empresa)"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                    >
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.121 2.121 0 113 3L8.25 19.1l-4.5 1.5 1.5-4.5 11.612-11.613z" />
+                                        </svg>
+                                    </button>
+                                @endif
 
                                 <button
                                     type="button"

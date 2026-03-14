@@ -18,11 +18,12 @@ class EmpresaPolicy
             return true;
         }
 
-        return (int) $empresa->responsable_user_id === (int) $user->id;
+        return (int) $empresa->responsable_user_id === (int) $user->id
+            || (int) $empresa->user_id === (int) $user->id;
     }
 
     public function update(User $user, Empresa $empresa): bool
     {
-        return $this->view($user, $empresa);
+        return $user->tipo_usuario === 'administracion';
     }
 }
