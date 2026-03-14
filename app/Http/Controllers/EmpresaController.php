@@ -1097,11 +1097,30 @@ class EmpresaController extends Controller
 
         $data['gestion_inicial_at'] = null;
 
-        Empresa::query()->create($data);
+        $empresa = Empresa::query()->create($data);
 
-        return redirect()
+        $redirect = redirect()
             ->route('empresas.index')
             ->with('status', 'Empresa creada correctamente.');
+
+        $tipoUsuario = (string) ($authUser?->tipo_usuario ?? '');
+        $debeMostrarWhatsapp = in_array($tipoUsuario, ['freelance', 'vinculado'], true);
+
+        if ($debeMostrarWhatsapp) {
+            $mensaje = "Hola Mario, se ha registrado un nuevo referido en el CRM.\n\n";
+            $mensaje .= "Empresa: {$empresa->nombre}\n";
+            $mensaje .= 'Contacto: '.($empresa->contacto_nombre ?: 'Sin contacto')."\n";
+            $mensaje .= 'Ciudad: '.($empresa->ciudad ?: 'Sin ciudad')."\n";
+            $mensaje .= 'Registrado por: '.($authUser?->codigo ?: 'Sin código').' - '.($authUser?->name ?: 'Sin nombre');
+
+            $whatsappUrl = 'https://wa.me/573235109140?text='.urlencode($mensaje);
+
+            $redirect
+                ->with('show_whatsapp_notify', true)
+                ->with('whatsapp_url', $whatsappUrl);
+        }
+
+        return $redirect;
     }
 
     public function update(Request $request, Empresa $empresa): RedirectResponse

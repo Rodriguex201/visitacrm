@@ -172,6 +172,21 @@
             </div>
         @endif
 
+        @if (session('show_whatsapp_notify') && session('whatsapp_url') && ! $esAdministracion)
+            <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-4 text-sm text-slate-800 shadow-sm">
+                <p class="font-semibold text-slate-900">Empresa creada correctamente.</p>
+                <p class="mt-1">¿Deseas notificar a RM SOFT por WhatsApp?</p>
+                <a
+                    href="{{ session('whatsapp_url') }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-3 inline-flex items-center rounded-lg bg-green-600 px-4 py-2 font-semibold text-white transition hover:bg-green-700"
+                >
+                    Notificar a RM SOFT
+                </a>
+            </div>
+        @endif
+
 
         <form method="GET" action="{{ route('empresas.index') }}" class="space-y-2">
                     <div class="grid gap-2 md:grid-cols-12">
