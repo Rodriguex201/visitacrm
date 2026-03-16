@@ -1106,7 +1106,7 @@ class EmpresaController extends Controller
             $mensaje = "Hola Maria, se ha registrado un nuevo referido en VisitaCRM.\n\n";
             $mensaje .= "Empresa: {$empresa->nombre}\n";
             $mensaje .= 'Contacto: '.($empresa->contacto_nombre ?: 'Sin contacto')."\n";
-            $mensaje .= 'Ciudad: '.($empresa->ciudad ?: 'Sin ciudad')."\n";
+            // $mensaje .= 'Ciudad: '.($empresa->ciudad ?: 'Sin ciudad')."\n";
             $mensaje .= 'Registrado por: '.($authUser?->codigo ?: 'Sin código').' - '.($authUser?->name ?: 'Sin nombre');
 
             $whatsappUrl = 'https://wa.me/573235109140?text='.urlencode($mensaje);
