@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class EmpresaController extends Controller
 {
@@ -152,11 +153,16 @@ class EmpresaController extends Controller
             ->orderBy('nombre')
             ->get();
 
+        $otroSectorId = $sectores
+            ->first(fn ($sector) => mb_strtolower(trim((string) $sector->nombre)) === 'otro')
+            ?->id;
+
         $referidoEstadoColors = $this->referidoEstadoColors();
 
         return view('empresas.index', compact(
             'empresas',
             'sectores',
+            'otroSectorId',
             'q',
             'desdeInput',
             'hastaInput',
@@ -230,6 +236,10 @@ class EmpresaController extends Controller
             ->orderBy('nombre')
             ->get(['id', 'nombre']);
 
+        $otroSectorId = $sectores
+            ->first(fn ($sector) => mb_strtolower(trim((string) $sector->nombre)) === 'otro')
+            ?->id;
+
         $acciones = EmpresaAccion::query()
             ->with('accion')
             ->where('empresa_id', $empresa->id)
@@ -302,7 +312,7 @@ class EmpresaController extends Controller
 
         $referidoEstadoColors = $this->referidoEstadoColors();
 
-        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'referidoEstadoColors', 'soloLectura'));
+        return view('empresas.show', compact('empresa', 'visitas', 'actRange', 'visRange', 'contactos', 'categoriasOpciones', 'catalogoOpciones', 'opcionesSeleccionadas', 'acciones', 'accionesCatalogo', 'catalogoOpcionesPayload', 'categoriaNotasPayload', 'referidoPayload', 'comoLlegoOpciones', 'comoLlegoSeleccionado', 'sectores', 'otroSectorId', 'referidoEstadoColors', 'soloLectura'));
     }
 
     public function actividadPartial(Request $request, Empresa $empresa): View
@@ -1168,10 +1178,31 @@ class EmpresaController extends Controller
             'direccion' => ['nullable', 'string'],
             'notas' => ['nullable', 'string', 'max:5000'],
             'sector_id' => ['nullable', 'exists:sectores,id'],
+            'sector_otro' => ['nullable', 'string', 'max:150'],
             'modal_mode' => ['nullable', Rule::in(['create', 'edit'])],
             'empresa_id' => ['nullable', 'integer'],
             'responsable_user_id' => ['nullable', 'exists:users,id'],
         ]);
+
+        $sectorId = isset($validated['sector_id']) && $validated['sector_id'] !== null
+            ? (int) $validated['sector_id']
+            : null;
+
+        $sectorOtro = isset($validated['sector_otro'])
+            ? trim((string) $validated['sector_otro'])
+            : '';
+
+        if ($this->sectorEsOtro($sectorId)) {
+            if ($sectorOtro === '') {
+                throw ValidationException::withMessages([
+                    'sector_otro' => 'Debes especificar el sector cuando seleccionas Otro.',
+                ]);
+            }
+
+            $validated['sector_otro'] = $sectorOtro;
+        } else {
+            $validated['sector_otro'] = null;
+        }
 
         unset($validated['modal_mode'], $validated['empresa_id']);
 
@@ -1180,6 +1211,18 @@ class EmpresaController extends Controller
         }
 
         return $validated;
+    }
+
+    private function sectorEsOtro(?int $sectorId): bool
+    {
+        if (! $sectorId) {
+            return false;
+        }
+
+        $sectorNombre = Sector::query()->whereKey($sectorId)->value('nombre');
+
+        return is_string($sectorNombre)
+            && mb_strtolower(trim($sectorNombre)) === 'otro';
     }
 
     /**

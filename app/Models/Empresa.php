@@ -21,6 +21,7 @@ class Empresa extends Model
         'direccion',
         'notas',
         'sector_id',
+        'sector_otro',
         'user_id',
         'responsable_user_id',
         'referida_at',
@@ -105,5 +106,18 @@ class Empresa extends Model
         return $this->categoriaNotas
             ->firstWhere('categoria', $categoria)
             ?->nota;
+    }
+
+    public function getSectorDisplayAttribute(): ?string
+    {
+        $sectorNombre = $this->relationLoaded('sector')
+            ? $this->sector?->nombre
+            : $this->sector()->value('nombre');
+
+        if (is_string($sectorNombre) && mb_strtolower(trim($sectorNombre)) === 'otro' && filled($this->sector_otro)) {
+            return $this->sector_otro;
+        }
+
+        return $sectorNombre;
     }
 }

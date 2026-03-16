@@ -22,7 +22,7 @@
         <article class="rounded-xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
             <div class="space-y-3 text-slate-600">
                 <p class="text-sm"><span class="font-semibold text-slate-800">Ciudad:</span> {{ $empresa->ciudad ?: 'Sin ciudad' }}</p>
-                <p class="text-sm"><span class="font-semibold text-slate-800">Sector:</span> {{ $empresa->sector?->nombre ?: 'Sin sector' }}</p>
+                <p class="text-sm"><span class="font-semibold text-slate-800">Sector:</span> {{ $empresa->sector_display ?: 'Sin sector' }}</p>
                 <p class="text-sm"><span class="font-semibold text-slate-800">Teléfono:</span> {{ $empresa->telefono ?: 'Sin teléfono' }}</p>
                 <p class="text-sm">
                     <span class="font-semibold text-slate-800">Email:</span>
