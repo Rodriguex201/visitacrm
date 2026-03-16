@@ -16,6 +16,7 @@
             deleteAction: '',
             deleteCompanyName: '',
             deletePassword: '',
+            otroSectorId: @js($otroSectorId ? (string) $otroSectorId : ''),
             init() {
                 if (this.deleteEmpresaId > 0) {
                     this.deleteAction = this.destroyRouteTemplate.replace('__ID__', this.deleteEmpresaId)
@@ -31,6 +32,7 @@
                 telefono: @js(old('telefono', '')),
                 email: @js(old('email', '')),
                 sector_id: @js(old('sector_id', '')),
+                sector_otro: @js(old('sector_otro', '')),
                 notas: @js(old('notas', '')),
             },
             notesModalOpen: false,
@@ -49,6 +51,7 @@
                     telefono: '',
                     email: '',
                     sector_id: '',
+                    sector_otro: '',
                     notas: '',
                 }
             },
@@ -74,12 +77,21 @@
                     telefono: empresa.telefono ?? '',
                     email: empresa.email ?? '',
                     sector_id: empresa.sector_id ?? '',
+                    sector_otro: empresa.sector_otro ?? '',
                     notas: empresa.notas ?? '',
                 }
                 this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
                 this.cityResults = []
                 this.cityLoading = false
                 this.openModal = true
+            },
+            shouldShowSectorOtro() {
+                return this.otroSectorId !== '' && String(this.form.sector_id ?? '') === this.otroSectorId
+            },
+            onSectorChange() {
+                if (!this.shouldShowSectorOtro()) {
+                    this.form.sector_otro = ''
+                }
             },
             closeModal() {
                 this.openModal = false
@@ -303,6 +315,7 @@
                                 'telefono' => $empresa->telefono,
                                 'email' => $empresa->email,
                                 'sector_id' => $empresa->sector_id,
+                                'sector_otro' => $empresa->sector_otro,
                                 'notas' => $empresa->notas,
                             ]) }"
                             @click="window.location.href='{{ route('empresas.show', $empresa) }}'"
@@ -342,7 +355,7 @@
                                             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25h15m-13.5 0V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v13.5m-9-11.25h6m-6 3h6m-6 3h4.5" />
                                             </svg>
-                                            {{ $empresa->sector?->nombre ?: 'Sin sector' }}
+                                            {{ $empresa->sector_display ?: 'Sin sector' }}
                                         </span>
 
                                     </div>

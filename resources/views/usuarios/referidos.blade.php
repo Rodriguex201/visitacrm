@@ -46,7 +46,7 @@
                                 <td class="px-4 py-3">{{ $empresa->nombre }}</td>
                                 <td class="px-4 py-3">{{ $empresa->ciudad ?? '—' }}</td>
                                 <td class="px-4 py-3">{{ $empresa->telefono ?? '—' }}</td>
-                                <td class="px-4 py-3">{{ $empresa->sector?->nombre ?? '—' }}</td>
+                                <td class="px-4 py-3">{{ $empresa->sector_display ?? '—' }}</td>
                                 <td class="px-4 py-3">{{ optional($empresa->referida_at)->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td class="px-4 py-3 font-semibold text-slate-900">
                                     ${{ number_format($empresa->valor_total_referido, 0, ',', '.') }}

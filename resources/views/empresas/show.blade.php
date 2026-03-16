@@ -16,7 +16,7 @@
                         <h1 class="truncate text-xl font-bold md:text-2xl text-slate-950">{{ $empresa->nombre }}</h1>
                         <span class="text-sm text-slate-500">{{ $empresa->created_at?->format('d/m/Y') }}</span>
                     </div>
-                    <p class="text-sm text-slate-600">{{ $empresa->sector?->nombre ?: 'Sin sector' }}</p>
+                    <p class="text-sm text-slate-600">{{ $empresa->sector_display ?: 'Sin sector' }}</p>
                 </div>
             </div>
 
@@ -42,6 +42,7 @@
                     editId: {{ (int) $empresa->id }},
                     updateRouteTemplate: @js(route('empresas.update', ['empresa' => '__ID__'])),
                     formAction: '{{ route('empresas.update', ['empresa' => $empresa]) }}',
+                    otroSectorId: @js($otroSectorId ? (string) $otroSectorId : ''),
                     form: {
                         nombre: @js(old('nombre', $empresa->nombre ?? '')),
                         ciudad: @js(old('ciudad', $empresa->ciudad ?? '')),
@@ -51,6 +52,7 @@
                         telefono: @js(old('telefono', $empresa->telefono ?? '')),
                         email: @js(old('email', $empresa->email ?? '')),
                         sector_id: @js(old('sector_id', $empresa->sector_id ?? '')),
+                        sector_otro: @js(old('sector_otro', $empresa->sector_otro ?? '')),
                         notas: @js(old('notas', $empresa->notas ?? '')),
                     },
                     cityResults: [],
@@ -67,12 +69,21 @@
                             telefono: empresa.telefono ?? '',
                             email: empresa.email ?? '',
                             sector_id: empresa.sector_id ?? '',
+                            sector_otro: empresa.sector_otro ?? '',
                             notas: empresa.notas ?? '',
                         }
                         this.formAction = this.updateRouteTemplate.replace('__ID__', empresa.id)
                         this.cityResults = []
                         this.cityLoading = false
                         this.openModal = true
+                    },
+                    shouldShowSectorOtro() {
+                        return this.otroSectorId !== '' && String(this.form.sector_id ?? '') === this.otroSectorId
+                    },
+                    onSectorChange() {
+                        if (!this.shouldShowSectorOtro()) {
+                            this.form.sector_otro = ''
+                        }
                     },
                     closeModal() {
                         this.openModal = false
@@ -125,6 +136,7 @@
                             telefono: @js($empresa->telefono),
                             email: @js($empresa->email),
                             sector_id: @js($empresa->sector_id),
+                            sector_otro: @js($empresa->sector_otro),
                             notas: @js($empresa->notas),
                         })"
                         class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
