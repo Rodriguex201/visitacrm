@@ -54,6 +54,8 @@ class ConfiguracionController extends Controller
             'bancos' => $this->bancosListado(),
             'estadosReferidoColores' => $this->estadoReferidoColores(),
             'estadosReferidoLabels' => self::ESTADOS_REFERIDO,
+            'claveAdmin' => config('app.clave_admin'),
+            'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
         ]);
     }
 
