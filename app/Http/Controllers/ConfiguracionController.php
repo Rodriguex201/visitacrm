@@ -57,9 +57,10 @@ class ConfiguracionController extends Controller
             'estadosReferidoLabels' => self::ESTADOS_REFERIDO,
 
             'claveAdmin' => ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026'),
+            'clavesSistema' => $this->clavesSistema(),
             'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
             'validarClaveUrl' => route('configuracion.claves.validate'),
-
+            'actualizarClaveUrlTemplate' => route('configuracion.claves.update', ['configuracion' => '__ID__']),
         ]);
     }
 
@@ -181,6 +182,28 @@ class ConfiguracionController extends Controller
         ]);
     }
 
+    public function updateClaveSistema(Request $request, ConfiguracionSistema $configuracion): JsonResponse
+    {
+        $validated = $request->validate([
+            'valor' => ['required', 'string'],
+        ]);
+
+        $configuracion->update([
+            'valor' => $validated['valor'],
+        ]);
+
+        return response()->json([
+            'message' => 'Clave actualizada correctamente.',
+            'data' => [
+                'id' => $configuracion->id,
+                'clave' => $configuracion->clave,
+                'nombre' => $this->humanizarClave($configuracion->clave),
+                'valor' => $configuracion->valor,
+                'descripcion' => $configuracion->descripcion,
+            ],
+        ]);
+    }
+
 
 
     public function updateEstadoReferidoColor(Request $request): \Illuminate\Http\RedirectResponse
@@ -218,6 +241,28 @@ class ConfiguracionController extends Controller
                 'usuarios_count' => $banco->usuarios_count,
                 'can_delete' => $banco->usuarios_count === 0,
             ]);
+    }
+
+    private function clavesSistema()
+    {
+        return ConfiguracionSistema::query()
+            ->orderBy('clave')
+            ->get(['id', 'clave', 'valor', 'descripcion'])
+            ->map(fn (ConfiguracionSistema $configuracion) => [
+                'id' => $configuracion->id,
+                'clave' => $configuracion->clave,
+                'nombre' => $this->humanizarClave($configuracion->clave),
+                'valor' => $configuracion->valor,
+                'descripcion' => $configuracion->descripcion,
+            ]);
+    }
+
+    private function humanizarClave(string $clave): string
+    {
+        return str($clave)
+            ->replace('_', ' ')
+            ->upper()
+            ->value();
     }
 
     private function sectoresActivos()
