@@ -28,6 +28,14 @@
                     <li>Tamaño máximo: 2MB.</li>
                     <li>Ideal para logos horizontales o transparentes.</li>
                 </ul>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Logo sidebar</p>
+                    <p class="mt-1 text-sm text-slate-600">Ruta actual del logo mostrado en el sidebar.</p>
+                    <p class="mt-3 break-all rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-700">
+                        {{ $logoSidebarActual ?: 'Sin logo configurado' }}
+                    </p>
+                </div>
             </div>
 
             <div class="flex w-full max-w-sm justify-center lg:justify-end">
