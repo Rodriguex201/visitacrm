@@ -76,7 +76,7 @@
                     <div x-show="shouldShowLabels()" x-transition class="md:block">
                         @if ($sidebarLogoUrl)
 
-                            <div class="flex h-14 w-full max-w-[240px] items-center justify-start overflow-hidden rounded-lg">
+                            <div class="flex h-16 w-full max-w-[240px] items-center justify-start overflow-hidden rounded-lg">
                                 <img src="{{ $sidebarLogoUrl }}" alt="Logo principal" class="h-full w-full object-contain object-left">
                             </div>
                         @endif
