@@ -212,7 +212,7 @@
                                 type="text"
                                 name="q"
                                 value="{{ $filters['q'] ?? '' }}"
-                                placeholder="Buscar por nombre o código..."
+                                placeholder="Buscar por empresa, código o referido..."
                                 class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
                         </div>
