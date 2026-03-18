@@ -40,14 +40,16 @@ class EmpresaController extends Controller
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date'],
             'estado' => ['nullable', Rule::in(['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'])],
+            'resumen' => ['nullable', Rule::in(['pendiente', 'pagado'])],
         ]);
 
-        $filterKeys = ['q', 'desde', 'hasta', 'estado'];
+        $filterKeys = ['q', 'desde', 'hasta', 'estado', 'resumen'];
         $requestFilters = [
             'q' => trim((string) $request->query('q', '')),
             'desde' => trim((string) $request->query('desde', '')),
             'hasta' => trim((string) $request->query('hasta', '')),
             'estado' => strtolower(trim((string) $request->query('estado', ''))),
+            'resumen' => strtolower(trim((string) $request->query('resumen', ''))),
         ];
 
         $hasRequestFilters = collect($requestFilters)
@@ -70,6 +72,11 @@ class EmpresaController extends Controller
         $estadosValidos = ['sin_iniciar', 'pendiente', 'aprobado', 'rechazado'];
         $estadoInput = in_array($filters['estado'], $estadosValidos, true) ? $filters['estado'] : '';
         $filters['estado'] = $estadoInput;
+
+        $resumenesValidos = ['pendiente', 'pagado'];
+        $resumenInput = in_array($filters['resumen'], $resumenesValidos, true) ? $filters['resumen'] : '';
+        $filters['resumen'] = $resumenInput;
+
         $soloAprobados = $estadoInput === 'aprobado';
 
         $desde = $desdeInput ? Carbon::parse((string) $desdeInput)->startOfDay() : null;
@@ -149,6 +156,16 @@ class EmpresaController extends Controller
 
         $totalComisiones = (float) $totalPendiente + (float) $totalPagado;
 
+        if ($resumenInput === 'pendiente') {
+            $empresasQuery->where('referido_estado', 'aprobado')
+                ->where('comision_estado', 'pendiente');
+        }
+
+        if ($resumenInput === 'pagado') {
+            $empresasQuery->where('referido_estado', 'aprobado')
+                ->where('comision_estado', 'pagada');
+        }
+
         $empresas = $empresasQuery
             ->paginate(10)
             ->appends($filters);
@@ -173,6 +190,7 @@ class EmpresaController extends Controller
             'desdeInput',
             'hastaInput',
             'estadoInput',
+            'resumenInput',
             'filters',
 
             'soloAprobados',
