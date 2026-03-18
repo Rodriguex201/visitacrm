@@ -291,6 +291,7 @@ class ConfiguracionController extends Controller
     private function clavesSistema()
     {
         return ConfiguracionSistema::query()
+            ->where('clave', '!=', 'logo_sidebar')
             ->orderBy('clave')
             ->get(['id', 'clave', 'valor', 'descripcion'])
             ->map(fn (ConfiguracionSistema $configuracion) => [
