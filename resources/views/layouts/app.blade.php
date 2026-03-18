@@ -75,11 +75,13 @@
                 <div class="flex items-start justify-between border-b border-slate-200 px-5 py-5" :class="sidebarCollapsed ? 'md:px-3' : ''">
                     <div x-show="shouldShowLabels()" x-transition class="md:block">
                         @if ($sidebarLogoUrl)
+
                             <div class="flex h-14 w-full max-w-[240px] items-center justify-start overflow-hidden rounded-lg">
                                 <img src="{{ $sidebarLogoUrl }}" alt="Logo principal" class="h-full w-full object-contain object-left">
                             </div>
                         @endif
                         <p class="{{ $sidebarLogoUrl ? 'mt-2 text-lg' : 'text-3xl' }} font-bold leading-none text-slate-950">{{ $sidebarLogoUrl ? 'VisitaCRM' : $sidebarBrandTitle }}</p>
+
                         <p class="mt-1 text-sm text-slate-600">{{ $sidebarLogoUrl ? 'Gestión comercial' : $sidebarBrandSubtitle }}</p>
 
                     </div>
@@ -198,7 +200,9 @@
                     </button>
                     <div class="flex min-w-0 items-center gap-3">
                         @if ($sidebarLogoUrl)
+
                             <div class="flex h-12 w-32 items-center overflow-hidden rounded-md">
+
                                 <img src="{{ $sidebarLogoUrl }}" alt="Logo principal" class="h-full w-full object-contain object-left">
                             </div>
                         @endif
