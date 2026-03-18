@@ -667,9 +667,11 @@ class EmpresaController extends Controller
             'referido_motivo_rechazo' => ['sometimes', 'nullable', 'string', 'min:5'],
             'comision_estado' => ['sometimes', 'nullable', Rule::in(['pendiente', 'pagada'])],
             'referido_comision_nota' => ['sometimes', 'nullable', 'string'],
+            'referido_aprobado_at' => ['sometimes', 'nullable', 'date_format:Y-m-d\TH:i'],
+            'comision_pagada_at' => ['sometimes', 'nullable', 'date_format:Y-m-d\TH:i'],
         ]);
 
-        if (! array_intersect(array_keys($validated), ['referido_estado', 'comision_estado', 'referido_comision_nota', 'referido_motivo_rechazo'])) {
+        if (! array_intersect(array_keys($validated), ['referido_estado', 'comision_estado', 'referido_comision_nota', 'referido_motivo_rechazo', 'referido_aprobado_at', 'comision_pagada_at'])) {
             return response()->json([
                 'message' => 'Debe enviar al menos un campo para actualizar.',
             ], 422);
@@ -755,6 +757,20 @@ class EmpresaController extends Controller
 
         if (array_key_exists('referido_comision_nota', $validated)) {
             $empresa->referido_comision_nota = trim((string) ($validated['referido_comision_nota'] ?? '')) ?: null;
+        }
+
+        if (($request->user()?->tipo_usuario ?? null) === 'administracion') {
+            if (array_key_exists('referido_aprobado_at', $validated) && $empresa->referido_estado === 'aprobado') {
+                $empresa->referido_aprobado_at = $validated['referido_aprobado_at']
+                    ? \Illuminate\Support\Carbon::createFromFormat('Y-m-d\TH:i', (string) $validated['referido_aprobado_at'])
+                    : null;
+            }
+
+            if (array_key_exists('comision_pagada_at', $validated) && $empresa->comision_estado === 'pagada') {
+                $empresa->comision_pagada_at = $validated['comision_pagada_at']
+                    ? \Illuminate\Support\Carbon::createFromFormat('Y-m-d\TH:i', (string) $validated['comision_pagada_at'])
+                    : null;
+            }
         }
 
         $empresa->save();
