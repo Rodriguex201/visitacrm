@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="space-y-5" x-data="configuracionPage({ esAdministracion: @js($esAdministracion), claveAdmin: @js($claveAdmin) })">
+
+<section class="space-y-5" x-data="configuracionPage({ esAdministracion: @js($esAdministracion), validarClaveUrl: @js($validarClaveUrl) })">
+
     <header>
         <h1 class="text-2xl font-bold text-slate-950">Configuración</h1>
         <p class="mt-1 text-sm text-slate-600">Gestión inicial de catálogos del sistema.</p>
@@ -100,7 +102,9 @@
 </section>
 
 <script>
-    function configuracionPage({ esAdministracion, claveAdmin }) {
+
+    function configuracionPage({ esAdministracion, validarClaveUrl }) {
+
         const unlockedStorageKey = 'configuracion-claves-unlocked'
 
         return {
@@ -134,8 +138,22 @@
 
                 this.activeTab = tab.key
             },
-            submitClaveAccess() {
-                if (this.claveInput !== claveAdmin) {
+
+            async submitClaveAccess() {
+                this.claveError = ''
+
+                const response = await fetch(validarClaveUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify({ clave: this.claveInput }),
+                })
+
+                if (!response.ok) {
+
                     this.claveError = 'Clave incorrecta'
                     return
                 }
@@ -149,6 +167,8 @@
                 this.showClaveModal = false
                 this.pendingProtectedTab = null
                 this.claveInput = ''
+                this.claveError = ''
+
             },
         }
     }

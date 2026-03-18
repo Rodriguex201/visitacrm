@@ -54,7 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'clave_admin' => env('CLAVE_ADMIN', 'Admin2026'),
+
 
     /*
     |--------------------------------------------------------------------------
