@@ -55,9 +55,11 @@ class ConfiguracionController extends Controller
             'bancos' => $this->bancosListado(),
             'estadosReferidoColores' => $this->estadoReferidoColores(),
             'estadosReferidoLabels' => self::ESTADOS_REFERIDO,
+
             'claveAdmin' => ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026'),
             'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
             'validarClaveUrl' => route('configuracion.claves.validate'),
+
         ]);
     }
 

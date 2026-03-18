@@ -1207,6 +1207,7 @@ class EmpresaController extends Controller
         $claveSistema = (string) ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026');
 
         if (! hash_equals($claveSistema, $claveEliminacion)) {
+
             return back()
                 ->withErrors(['clave_eliminacion' => 'Clave incorrecta.'])
                 ->withInput();
