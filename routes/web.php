@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'destroyCatalogo'])->name('configuracion.catalogo.destroy');
 
         Route::post('/configuracion/estado-referido-colores', [ConfiguracionController::class, 'updateEstadoReferidoColor'])->name('configuracion.estado-referido-colores.update');
+        Route::post('/configuracion/logo', [ConfiguracionController::class, 'updateLogoSidebar'])->name('configuracion.logo.update');
         Route::post('/configuracion/claves/validar', [ConfiguracionController::class, 'validarClaveAdmin'])->name('configuracion.claves.validate');
         Route::patch('/configuracion/claves/{configuracion}', [ConfiguracionController::class, 'updateClaveSistema'])->name('configuracion.claves.update');
 

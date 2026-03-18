@@ -48,6 +48,14 @@
         </div>
 
         @if ($esAdministracion)
+            <div class="mt-4" x-show="activeTab === 'logo'" x-cloak>
+                @include('configuracion.partials.logo', [
+                    'logoSidebarActual' => $logoSidebarActual,
+                ])
+            </div>
+        @endif
+
+        @if ($esAdministracion)
             <div class="mt-4" x-show="activeTab === 'claves'" x-cloak>
                 @include('configuracion.partials.claves', [
                     'clavesSistema' => $clavesSistema,
@@ -117,9 +125,9 @@
                 { key: 'equipos', label: 'Equipos' },
                 { key: 'estados-colores', label: 'Estados (Colores)' },
                 { key: 'bancos', label: 'Bancos' },
-                ...(esAdministracion ? [{ key: 'claves', label: 'Claves', protected: true }] : []),
+                ...(esAdministracion ? [{ key: 'logo', label: 'Logo' }, { key: 'claves', label: 'Claves', protected: true }] : []),
             ],
-            activeTab: 'sectores',
+            activeTab: new URLSearchParams(window.location.search).get('tab') || 'sectores',
             showClaveModal: false,
             claveInput: '',
             claveError: '',
