@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-
+use App\Models\ConfiguracionSistema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -35,9 +35,13 @@ class AppServiceProvider extends ServiceProvider
                 $brandSubtitle = $user->codigo ?: "S/C";
             }
 
+            $sidebarLogoPath = ConfiguracionSistema::valor('logo_sidebar');
+
             $view->with([
                 "sidebarBrandTitle" => $brandTitle,
                 "sidebarBrandSubtitle" => $brandSubtitle,
+                "sidebarLogoPath" => $sidebarLogoPath,
+                "sidebarLogoUrl" => $sidebarLogoPath ? asset($sidebarLogoPath) : null,
             ]);
         });
     }
