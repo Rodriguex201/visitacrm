@@ -98,10 +98,16 @@ class EmpresaController extends Controller
 
                 $query->where('empresas.nombre', 'like', "%{$q}%")
                     ->orWhereHas('responsable', function ($responsableQuery) use ($q) {
-                        $responsableQuery->where('codigo', 'like', "%{$q}%");
+                        $responsableQuery->where(function ($responsableFilter) use ($q) {
+                            $responsableFilter->where('codigo', 'like', "%{$q}%")
+                                ->orWhere('name', 'like', "%{$q}%");
+                        });
                     })
                     ->orWhereHas('creador', function ($creadorQuery) use ($q) {
-                        $creadorQuery->where('codigo', 'like', "%{$q}%");
+                        $creadorQuery->where(function ($creadorFilter) use ($q) {
+                            $creadorFilter->where('codigo', 'like', "%{$q}%")
+                                ->orWhere('name', 'like', "%{$q}%");
+                        });
                     });
 
             });
