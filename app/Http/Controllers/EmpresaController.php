@@ -854,43 +854,58 @@ class EmpresaController extends Controller
 
     public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse
     {
-        $this->authorize('update', $empresa);
+        $this->authorize('view', $empresa);
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
 
         $validated = $request->validate([
-            'responsable_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'responsable_user_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        $empresa->responsable_user_id = $validated['responsable_user_id'] ?? null;
-        $empresa->referida_at = null;
+        $nuevoResponsable = User::query()
+            ->select(['id', 'codigo', 'name', 'tipo_usuario'])
+            ->findOrFail((int) $validated['responsable_user_id']);
+
+        $empresa->responsable_user_id = $nuevoResponsable->id;
+        $empresa->user_id = $nuevoResponsable->id;
+
+        if (is_null($empresa->referida_at)) {
+            $empresa->referida_at = now();
+        }
 
         $empresa->save();
 
         return response()->json([
             'ok' => true,
-
-            'message' => $empresa->responsable_user_id
-                ? 'Usuario vinculado con éxito'
-                : 'Usuario desvinculado correctamente',
-
-            'empresa' => $empresa->load('responsable'),
+            'message' => 'Responsable actualizado correctamente.',
+            'empresa' => $empresa->fresh()->load('responsable'),
         ]);
     }
 
     public function searchUsuarios(Request $request): JsonResponse
     {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
         $query = trim((string) $request->query('query', ''));
 
         $usuarios = User::query()
-            ->select(['id', 'codigo', 'name', 'telefono'])
+            ->select(['id', 'codigo', 'name', 'telefono', 'tipo_usuario'])
+            ->whereIn('tipo_usuario', ['administracion', 'vinculado', 'freelance'])
             ->when($query !== '', function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('codigo', 'like', "%{$query}%")
                         ->orWhere('name', 'like', "%{$query}%")
-                        ->orWhere('telefono', 'like', "%{$query}%");
+                        ->orWhere('telefono', 'like', "%{$query}%")
+                        ->orWhere('tipo_usuario', 'like', "%{$query}%");
                 });
             })
+            ->orderBy('codigo')
             ->orderBy('name')
-            ->limit(20)
+            ->limit(25)
             ->get();
 
         return response()->json($usuarios);
