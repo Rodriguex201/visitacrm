@@ -8,6 +8,7 @@ use App\Http\Requests\Configuracion\UpdateCatalogoOpcionRequest;
 use App\Http\Requests\Configuracion\UpdateSectorRequest;
 use App\Models\Banco;
 use App\Models\CatalogoOpcion;
+use App\Models\ConfiguracionSistema;
 use App\Models\EstadoReferidoColor;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +55,9 @@ class ConfiguracionController extends Controller
             'bancos' => $this->bancosListado(),
             'estadosReferidoColores' => $this->estadoReferidoColores(),
             'estadosReferidoLabels' => self::ESTADOS_REFERIDO,
+            'claveAdmin' => ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026'),
+            'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
+            'validarClaveUrl' => route('configuracion.claves.validate'),
         ]);
     }
 
@@ -155,6 +159,23 @@ class ConfiguracionController extends Controller
 
         return response()->json([
             'message' => 'Opción desactivada correctamente.',
+        ]);
+    }
+
+
+    public function validarClaveAdmin(Request $request): JsonResponse
+    {
+        $claveIngresada = (string) $request->input('clave', '');
+        $claveSistema = (string) ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026');
+
+        if (! hash_equals($claveSistema, $claveIngresada)) {
+            return response()->json([
+                'message' => 'Clave incorrecta',
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Clave válida.',
         ]);
     }
 

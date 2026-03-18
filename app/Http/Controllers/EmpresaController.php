@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CatalogoOpcion;
+use App\Models\ConfiguracionSistema;
 use App\Models\Empresa;
 use App\Models\EmpresaCategoriaNota;
 use App\Models\EmpresaOpcion;
@@ -1203,7 +1204,9 @@ class EmpresaController extends Controller
 
         $claveEliminacion = (string) $request->input('clave_eliminacion', '');
 
-        if ($claveEliminacion !== 'Admin2026') {
+        $claveSistema = (string) ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026');
+
+        if (! hash_equals($claveSistema, $claveEliminacion)) {
             return back()
                 ->withErrors(['clave_eliminacion' => 'Clave incorrecta.'])
                 ->withInput();

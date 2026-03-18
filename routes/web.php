@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/configuracion/catalogo/{catalogoOpcion}', [ConfiguracionController::class, 'destroyCatalogo'])->name('configuracion.catalogo.destroy');
 
         Route::post('/configuracion/estado-referido-colores', [ConfiguracionController::class, 'updateEstadoReferidoColor'])->name('configuracion.estado-referido-colores.update');
+        Route::post('/configuracion/claves/validar', [ConfiguracionController::class, 'validarClaveAdmin'])->name('configuracion.claves.validate');
 
         Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
         Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');
