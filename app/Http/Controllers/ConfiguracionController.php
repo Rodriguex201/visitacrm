@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Configuracion\StoreCatalogoOpcionRequest;
 use App\Http\Requests\Configuracion\StoreSectorRequest;
 use App\Http\Requests\Configuracion\UpdateCatalogoOpcionRequest;
+use App\Http\Requests\Configuracion\UpdateLogoSidebarRequest;
 use App\Http\Requests\Configuracion\UpdateSectorRequest;
 use App\Models\Banco;
 use App\Models\CatalogoOpcion;
@@ -12,7 +13,9 @@ use App\Models\ConfiguracionSistema;
 use App\Models\EstadoReferidoColor;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
 class ConfiguracionController extends Controller
@@ -58,6 +61,7 @@ class ConfiguracionController extends Controller
 
             'claveAdmin' => ConfiguracionSistema::valor('clave_eliminar_empresa', 'Admin2026'),
             'clavesSistema' => $this->clavesSistema(),
+            'logoSidebarActual' => ConfiguracionSistema::valor('logo_sidebar'),
             'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
             'validarClaveUrl' => route('configuracion.claves.validate'),
             'actualizarClaveUrlTemplate' => route('configuracion.claves.update', ['configuracion' => '__ID__']),
@@ -205,6 +209,47 @@ class ConfiguracionController extends Controller
     }
 
 
+
+    public function updateLogoSidebar(UpdateLogoSidebarRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+        $archivo = $validated['logo'];
+
+        $directorioRelativo = 'imagenes/logo';
+        $directorioAbsoluto = public_path($directorioRelativo);
+
+        if (! File::exists($directorioAbsoluto)) {
+            File::ensureDirectoryExists($directorioAbsoluto);
+        }
+
+        $logoAnterior = ConfiguracionSistema::valor('logo_sidebar');
+        $extension = strtolower($archivo->getClientOriginalExtension() ?: $archivo->extension() ?: 'png');
+        $nombreArchivo = 'sidebar-logo-' . now()->format('YmdHis') . '-' . str()->random(8) . '.' . $extension;
+
+        $archivo->move($directorioAbsoluto, $nombreArchivo);
+
+        $rutaRelativa = $directorioRelativo . '/' . $nombreArchivo;
+
+        ConfiguracionSistema::query()->updateOrCreate(
+            ['clave' => 'logo_sidebar'],
+            [
+                'valor' => $rutaRelativa,
+                'descripcion' => 'Ruta del logo principal mostrado en el sidebar',
+            ]
+        );
+
+        if ($logoAnterior) {
+            $rutaAnterior = public_path($logoAnterior);
+
+            if (str_starts_with($logoAnterior, $directorioRelativo . '/') && File::exists($rutaAnterior)) {
+                File::delete($rutaAnterior);
+            }
+        }
+
+        return redirect()
+            ->route('configuracion.index', ['tab' => 'logo'])
+            ->with('success', 'Logo actualizado correctamente.');
+    }
 
     public function updateEstadoReferidoColor(Request $request): \Illuminate\Http\RedirectResponse
     {

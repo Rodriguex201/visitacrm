@@ -74,8 +74,13 @@
             >
                 <div class="flex items-start justify-between border-b border-slate-200 px-5 py-5" :class="sidebarCollapsed ? 'md:px-3' : ''">
                     <div x-show="shouldShowLabels()" x-transition class="md:block">
-                        <p class="text-3xl font-bold leading-none text-slate-950">{{ $sidebarBrandTitle }}</p>
-                        <p class="mt-1 text-sm text-slate-600">{{ $sidebarBrandSubtitle }}</p>
+                        @if ($sidebarLogoUrl)
+                            <div class="flex h-14 w-full max-w-[240px] items-center justify-start overflow-hidden rounded-lg">
+                                <img src="{{ $sidebarLogoUrl }}" alt="Logo principal" class="h-full w-full object-contain object-left">
+                            </div>
+                        @endif
+                        <p class="{{ $sidebarLogoUrl ? 'mt-2 text-lg' : 'text-3xl' }} font-bold leading-none text-slate-950">{{ $sidebarLogoUrl ? 'VisitaCRM' : $sidebarBrandTitle }}</p>
+                        <p class="mt-1 text-sm text-slate-600">{{ $sidebarLogoUrl ? 'Gestión comercial' : $sidebarBrandSubtitle }}</p>
 
                     </div>
 
@@ -191,7 +196,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
                         </svg>
                     </button>
-                    <p class="text-lg font-semibold text-slate-900">VisitaCRM</p>
+                    <div class="flex min-w-0 items-center gap-3">
+                        @if ($sidebarLogoUrl)
+                            <div class="flex h-12 w-32 items-center overflow-hidden rounded-md">
+                                <img src="{{ $sidebarLogoUrl }}" alt="Logo principal" class="h-full w-full object-contain object-left">
+                            </div>
+                        @endif
+                        <p class="truncate text-lg font-semibold text-slate-900">{{ $sidebarLogoUrl ? 'VisitaCRM' : $sidebarBrandTitle }}</p>
+                    </div>
                 </div>
 
                 <div class="mx-auto w-full max-w-[1300px] px-4 py-2 md:px-5 md:py-5">
