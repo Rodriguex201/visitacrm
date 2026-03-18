@@ -1203,7 +1203,7 @@ class EmpresaController extends Controller
 
         $claveEliminacion = (string) $request->input('clave_eliminacion', '');
 
-        if ($claveEliminacion !== 'Admin2026') {
+        if (! hash_equals((string) config('app.clave_admin'), $claveEliminacion)) {
             return back()
                 ->withErrors(['clave_eliminacion' => 'Clave incorrecta.'])
                 ->withInput();
