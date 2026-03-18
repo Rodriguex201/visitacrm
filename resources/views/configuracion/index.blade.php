@@ -50,7 +50,8 @@
         @if ($esAdministracion)
             <div class="mt-4" x-show="activeTab === 'claves'" x-cloak>
                 @include('configuracion.partials.claves', [
-                    'claveAdmin' => $claveAdmin,
+                    'clavesSistema' => $clavesSistema,
+                    'actualizarClaveUrlTemplate' => $actualizarClaveUrlTemplate,
                 ])
             </div>
         @endif
