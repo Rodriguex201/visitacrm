@@ -401,7 +401,7 @@
 
             <template x-if="empresaUser && empresaReferidaAt">
                 <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                    <span x-text="`🔁 Referido por: ${empresaUser?.codigo || 'S/C'}`"></span>
+                    <span x-text="`🔁 Referido por: ${empresaUser?.codigo || 'S/C'} - ${(empresaUser?.name || empresaUser?.nombre || 'Sin nombre').toUpperCase()}`"></span>
                 </span>
             </template>
 
