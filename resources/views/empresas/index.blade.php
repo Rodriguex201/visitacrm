@@ -370,58 +370,15 @@
                                     @endif
 
                                     @if ($empresa)
+                                        @php($usuarioReferente = $empresa->responsable_user_id ? $empresa->responsable : ((($empresa->creador?->tipo_usuario ?? null) === 'administracion') ? $empresa->creador : null))
+
+                                        @if ($empresa->referida_at && $usuarioReferente?->codigo)
+                                            <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
+                                                🔁 Referido por: {{ $usuarioReferente->codigo }} - {{ strtoupper($usuarioReferente->name ?? $usuarioReferente->nombre ?? 'Sin nombre') }}
+                                            </span>
+                                        @endif
+
                                         @if ($empresa->referida_at)
-                                            @if ($empresa->responsable?->codigo)
-                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                    🔁 Referido por: {{ $empresa->responsable->codigo }} - {{ strtoupper($empresa->responsable->name ?? $empresa->responsable->nombre ?? 'Sin nombre') }}
-                                                </span>
-                                            @endif
-                                            @if ($empresa->gestion_inicial_at)
-
-                                                <p class="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
-
-                                                    Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
-                                                </p>
-                                            @endif
-                                            <div class="mt-1 flex flex-wrap items-center gap-1">
-
-                                                @if ($estadoRef !== 'sin_iniciar')
-
-                                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style="{{ $estadoRefBadgeStyle }}">Estado: {{ ucfirst($estadoRef) }}</span>
-                                                @else
-                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Sin iniciar</span>
-                                                @endif
-                                                @if ($empresa->referido_estado === 'aprobado')
-                                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                                        Comisión: $ {{ number_format((float) ($empresa->comision_valor ?? 0), 0, ',', '.') }}
-
-                                                    </span>
-                                                @endif
-                                                @if (($empresa->referido_estado === 'aprobado') && !is_null($empresa->referido_aprobado_at))
-                                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                                        Aprobado: {{ optional($empresa->referido_aprobado_at)->format('d/m/Y H:i') }}
-
-                                                    </span>
-                                                @endif
-                                                @if (($empresa->referido_estado === 'aprobado') && ($empresa->comision_estado === 'pagada') && !is_null($empresa->comision_pagada_at))
-                                                    <span class="group relative inline-flex">
-                                                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                                            Comisión pagada: {{ optional($empresa->comision_pagada_at)->format('d/m/Y H:i') }}
-                                                        </span>
-                                                        @if (!empty($empresa->referido_comision_nota))
-                                                            <span class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-700 shadow-lg group-hover:block">
-                                                                {{ $empresa->referido_comision_nota }}
-                                                            </span>
-                                                        @endif
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        @elseif (($empresa->creador?->tipo_usuario === 'administracion') && $empresa->creador?->codigo)
-                                            @if ($empresa->creador?->codigo)
-                                                <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                                                    🔁 Referido por: {{ $empresa->creador->codigo }} - {{ strtoupper($empresa->creador->name ?? $empresa->creador->nombre ?? 'Sin nombre') }}
-                                                </span>
-                                            @endif
                                             @if ($empresa->gestion_inicial_at)
 
                                                 <p class="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">

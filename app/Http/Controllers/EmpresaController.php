@@ -1105,13 +1105,21 @@ class EmpresaController extends Controller
 
         $authUser = auth()->user();
 
-        if ($authUser && $authUser->tipo_usuario !== 'administracion') {
-            $data['responsable_user_id'] = $authUser->id;
-            $data['referida_at'] = now();
+        if ($authUser) {
+            $data['user_id'] = $authUser->id;
+
+            if ($authUser->tipo_usuario === 'administracion') {
+                $data['responsable_user_id'] = $authUser->id;
+                $data['referida_at'] = now();
+            } elseif (! empty($data['responsable_user_id'])) {
+                $data['referida_at'] = now();
+            } else {
+                $data['responsable_user_id'] = $authUser->id;
+                $data['referida_at'] = now();
+            }
         } elseif (! empty($data['responsable_user_id'])) {
             $data['referida_at'] = now();
         }
-
 
         $data['referido_estado'] = 'sin_iniciar';
 
