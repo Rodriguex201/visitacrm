@@ -667,9 +667,11 @@ class EmpresaController extends Controller
             'referido_motivo_rechazo' => ['sometimes', 'nullable', 'string', 'min:5'],
             'comision_estado' => ['sometimes', 'nullable', Rule::in(['pendiente', 'pagada'])],
             'referido_comision_nota' => ['sometimes', 'nullable', 'string'],
+            'referido_aprobado_at' => ['sometimes', 'nullable', 'date_format:Y-m-d\TH:i'],
+            'comision_pagada_at' => ['sometimes', 'nullable', 'date_format:Y-m-d\TH:i'],
         ]);
 
-        if (! array_intersect(array_keys($validated), ['referido_estado', 'comision_estado', 'referido_comision_nota', 'referido_motivo_rechazo'])) {
+        if (! array_intersect(array_keys($validated), ['referido_estado', 'comision_estado', 'referido_comision_nota', 'referido_motivo_rechazo', 'referido_aprobado_at', 'comision_pagada_at'])) {
             return response()->json([
                 'message' => 'Debe enviar al menos un campo para actualizar.',
             ], 422);
@@ -755,6 +757,20 @@ class EmpresaController extends Controller
 
         if (array_key_exists('referido_comision_nota', $validated)) {
             $empresa->referido_comision_nota = trim((string) ($validated['referido_comision_nota'] ?? '')) ?: null;
+        }
+
+        if (($request->user()?->tipo_usuario ?? null) === 'administracion') {
+            if (array_key_exists('referido_aprobado_at', $validated) && $empresa->referido_estado === 'aprobado') {
+                $empresa->referido_aprobado_at = $validated['referido_aprobado_at']
+                    ? \Illuminate\Support\Carbon::createFromFormat('Y-m-d\TH:i', (string) $validated['referido_aprobado_at'])
+                    : null;
+            }
+
+            if (array_key_exists('comision_pagada_at', $validated) && $empresa->comision_estado === 'pagada') {
+                $empresa->comision_pagada_at = $validated['comision_pagada_at']
+                    ? \Illuminate\Support\Carbon::createFromFormat('Y-m-d\TH:i', (string) $validated['comision_pagada_at'])
+                    : null;
+            }
         }
 
         $empresa->save();
@@ -854,43 +870,58 @@ class EmpresaController extends Controller
 
     public function asignarUsuario(Request $request, Empresa $empresa): JsonResponse
     {
-        $this->authorize('update', $empresa);
+        $this->authorize('view', $empresa);
+
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
 
         $validated = $request->validate([
-            'responsable_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'responsable_user_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        $empresa->responsable_user_id = $validated['responsable_user_id'] ?? null;
-        $empresa->referida_at = null;
+        $nuevoResponsable = User::query()
+            ->select(['id', 'codigo', 'name', 'tipo_usuario'])
+            ->findOrFail((int) $validated['responsable_user_id']);
+
+        $empresa->responsable_user_id = $nuevoResponsable->id;
+        $empresa->user_id = $nuevoResponsable->id;
+
+        if (is_null($empresa->referida_at)) {
+            $empresa->referida_at = now();
+        }
 
         $empresa->save();
 
         return response()->json([
             'ok' => true,
-
-            'message' => $empresa->responsable_user_id
-                ? 'Usuario vinculado con éxito'
-                : 'Usuario desvinculado correctamente',
-
-            'empresa' => $empresa->load('responsable'),
+            'message' => 'Responsable actualizado correctamente.',
+            'empresa' => $empresa->fresh()->load('responsable'),
         ]);
     }
 
     public function searchUsuarios(Request $request): JsonResponse
     {
+        if (($request->user()?->tipo_usuario ?? null) !== 'administracion') {
+            abort(403);
+        }
+
         $query = trim((string) $request->query('query', ''));
 
         $usuarios = User::query()
-            ->select(['id', 'codigo', 'name', 'telefono'])
+            ->select(['id', 'codigo', 'name', 'telefono', 'tipo_usuario'])
+            ->whereIn('tipo_usuario', ['administracion', 'vinculado', 'freelance'])
             ->when($query !== '', function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('codigo', 'like', "%{$query}%")
                         ->orWhere('name', 'like', "%{$query}%")
-                        ->orWhere('telefono', 'like', "%{$query}%");
+                        ->orWhere('telefono', 'like', "%{$query}%")
+                        ->orWhere('tipo_usuario', 'like', "%{$query}%");
                 });
             })
+            ->orderBy('codigo')
             ->orderBy('name')
-            ->limit(20)
+            ->limit(25)
             ->get();
 
         return response()->json($usuarios);

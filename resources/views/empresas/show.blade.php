@@ -125,31 +125,48 @@
                 }"
             >
                 @unless ($soloLectura)
-                    <button
-                        type="button"
-                        @click="openEditModal({
-                            id: {{ (int) $empresa->id }},
-                            nombre: @js($empresa->nombre),
-                            ciudad: @js($empresa->ciudad),
-                            contacto_nombre: @js($empresa->contacto_nombre),
-                            direccion: @js($empresa->direccion),
-                            telefono: @js($empresa->telefono),
-                            email: @js($empresa->email),
-                            sector_id: @js($empresa->sector_id),
-                            sector_otro: @js($empresa->sector_otro),
-                            notas: @js($empresa->notas),
-                        })"
-                        class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-                        title="Editar empresa"
-                        aria-label="Editar empresa"
-                    >
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 013.536 3.536L12.536 14.5a4 4 0 01-1.414.943L8 16l.557-3.122A4 4 0 019.5 11.464zM5 19h14" />
-                        </svg>
-                    </button>
+                    <div class="absolute right-3 top-3 flex items-center gap-2">
+                        @if ((auth()->user()?->tipo_usuario ?? null) === 'administracion')
+                            <button
+                                type="button"
+                                @click="abrirModalUsuario()"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                                title="Cambiar referido"
+                            >
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 21l-5-5 5-5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 3l5 5-5 5" />
+                                </svg>
+                                <span>Cambiar referido</span>
+                            </button>
+                        @endif
+
+                        <button
+                            type="button"
+                            @click="openEditModal({
+                                id: {{ (int) $empresa->id }},
+                                nombre: @js($empresa->nombre),
+                                ciudad: @js($empresa->ciudad),
+                                contacto_nombre: @js($empresa->contacto_nombre),
+                                direccion: @js($empresa->direccion),
+                                telefono: @js($empresa->telefono),
+                                email: @js($empresa->email),
+                                sector_id: @js($empresa->sector_id),
+                                sector_otro: @js($empresa->sector_otro),
+                                notas: @js($empresa->notas),
+                            })"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                            title="Editar empresa"
+                            aria-label="Editar empresa"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 013.536 3.536L12.536 14.5a4 4 0 01-1.414.943L8 16l.557-3.122A4 4 0 019.5 11.464zM5 19h14" />
+                            </svg>
+                        </button>
+                    </div>
                 @endunless
 
-                <div class="space-y-3 pr-10 text-slate-600">
+                <div class="space-y-3 pr-10 md:pr-44 text-slate-600">
                     <p class="flex items-center gap-2 text-sm">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6.75-6.03 6.75-11.25a6.75 6.75 0 10-13.5 0C5.25 14.97 12 21 12 21z" />
@@ -191,6 +208,17 @@
                         </svg>
                         {{ $empresa->ciudad }}
                     </p>
+
+                    <template x-if="empresaUser">
+                        <p class="flex items-center gap-2 text-sm">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V4H2v16h5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 20a6 6 0 0112 0" />
+                            </svg>
+                            <span x-text="`Referido por: ${empresaUser?.codigo || 'S/C'} - ${(empresaUser?.name || empresaUser?.nombre || 'Sin nombre').toUpperCase()}`"></span>
+                        </p>
+                    </template>
                 </div>
 
                 <div class="mt-4 border-t border-slate-100 pt-4">
@@ -257,7 +285,7 @@
 
                 </article>
 
-                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js(! $soloLectura && $errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado'])) }">
+                <article class="space-y-3 rounded-xl border border-slate-100 bg-white p-5 shadow-sm" x-data="{ referidoModalOpen: @js(! $soloLectura && $errors->hasAny(['referido_estado', 'referido_motivo_rechazo', 'comision_estado', 'referido_aprobado_at', 'comision_pagada_at'])) }">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-slate-950">Referido / Comisión</h2>
@@ -345,6 +373,21 @@
                                     <p class="mt-1 text-xs text-slate-500">Se calcula al guardar: suma de opciones activas (excepto Cotizaciones y Como Llego).</p>
                                 </div>
 
+                                <template x-if="esAdministracion && referidoForm.referido_estado === 'aprobado'">
+                                    <div>
+                                        <label for="referido_aprobado_at" class="mb-1 block text-sm font-medium text-slate-700">Fecha de aprobación</label>
+                                        <input
+                                            id="referido_aprobado_at"
+                                            type="datetime-local"
+                                            name="referido_aprobado_at"
+                                            :value="toDateTimeLocalValue(referidoForm.referido_aprobado_at)"
+                                            @input="referidoForm.referido_aprobado_at = $event.target.value"
+                                            class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        >
+                                        <p x-show="referidoErrors.referido_aprobado_at" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.referido_aprobado_at"></p>
+                                    </div>
+                                </template>
+
                                 <div>
                                     <label for="comision_estado" class="mb-1 block text-sm font-medium text-slate-700">Estado de comisión</label>
                                     <select id="comision_estado" x-model="referidoForm.comision_estado" name="comision_estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
@@ -354,6 +397,21 @@
                                     <p x-show="referidoErrors.comision_estado" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_estado"></p>
                                 </div>
 
+
+                                <template x-if="esAdministracion && referidoForm.referido_estado === 'aprobado' && referidoForm.comision_estado === 'pagada'">
+                                    <div>
+                                        <label for="comision_pagada_at" class="mb-1 block text-sm font-medium text-slate-700">Fecha de comisión pagada</label>
+                                        <input
+                                            id="comision_pagada_at"
+                                            type="datetime-local"
+                                            name="comision_pagada_at"
+                                            :value="toDateTimeLocalValue(referidoForm.comision_pagada_at)"
+                                            @input="referidoForm.comision_pagada_at = $event.target.value"
+                                            class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        >
+                                        <p x-show="referidoErrors.comision_pagada_at" class="mt-1 text-xs text-rose-600" x-text="referidoErrors.comision_pagada_at"></p>
+                                    </div>
+                                </template>
 
                                 <div>
                                     <label for="referido_comision_nota" class="mb-1 block text-sm font-medium text-slate-700">Notas generales</label>
@@ -654,7 +712,7 @@
 
                 <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-5 shadow-xl">
                     <div class="mb-4 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-slate-900">Vincular usuario</h3>
+                        <h3 class="text-lg font-semibold text-slate-900">Cambiar referido</h3>
                         <button type="button" class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800" @click="cerrarModalUsuario()">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -667,29 +725,40 @@
 
                     <div class="space-y-3">
                         <div class="flex gap-2">
-                            <input type="text" x-model="usuarioQuery" @input.debounce.300ms="buscarUsuarios()" placeholder="Buscar por código, nombre o teléfono" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <input type="text" x-model="usuarioQuery" @input.debounce.300ms="buscarUsuarios()" placeholder="Buscar por código, nombre, teléfono o tipo" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                             <button type="button" @click="buscarUsuarios()" class="rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Buscar</button>
                         </div>
 
                         <div class="max-h-64 overflow-y-auto rounded-lg border border-slate-200">
                             <template x-if="usuarioLoading">
-                                <p class="px-3 py-2 text-sm text-slate-500">Buscando usuarios...</p>
+                                <p class="px-3 py-2 text-sm text-slate-500">Buscando usuarios activos...</p>
                             </template>
                             <template x-if="!usuarioLoading && !usuariosResultados.length">
                                 <p class="px-3 py-2 text-sm text-slate-500">Sin resultados</p>
                             </template>
                             <template x-for="usuario in usuariosResultados" :key="usuario.id">
-                                <button type="button" @click="usuarioSeleccionadoId = usuario.id" class="flex w-full items-start justify-between border-b border-slate-100 px-3 py-2 text-left hover:bg-slate-50">
-                                    <span class="text-sm text-slate-700" x-text="`${usuario.codigo || 'S/C'} - ${usuario.name || usuario.nombre || 'Sin nombre'}`"></span>
-                                    <span class="text-xs text-slate-500" x-text="usuario.telefono || 'Sin teléfono'"></span>
+                                <button
+                                    type="button"
+                                    @click="usuarioSeleccionadoId = usuario.id"
+                                    class="flex w-full items-start justify-between border-b border-slate-100 px-3 py-2 text-left transition hover:bg-slate-50"
+                                    :class="usuarioSeleccionadoId === usuario.id ? 'bg-blue-50' : ''"
+                                >
+                                    <div>
+                                        <span class="block text-sm font-medium text-slate-700" x-text="`${usuario.codigo || 'S/C'} - ${usuario.name || usuario.nombre || 'Sin nombre'} - ${usuario.tipo_usuario || 'sin tipo'}`"></span>
+                                        <span class="text-xs text-slate-500" x-text="usuario.telefono || 'Sin teléfono'"></span>
+                                    </div>
+
+                                    <span
+                                        x-show="usuarioSeleccionadoId === usuario.id"
+                                        class="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700"
+                                    >Seleccionado</span>
                                 </button>
                             </template>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-2">
                             <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="cerrarModalUsuario()">Cancelar</button>
-                            <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="guardarUsuarioAsignado(null)" :disabled="usuarioSaving">Quitar</button>
-                            <button type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" @click="guardarUsuarioAsignado(usuarioSeleccionadoId)" :disabled="usuarioSaving || !usuarioSeleccionadoId">
+                            <button type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" @click="guardarUsuarioAsignado(usuarioSeleccionadoId)" :disabled="usuarioSaving || !usuarioSeleccionadoId || usuarioSeleccionadoId === empresaUser?.id">
                                 <span x-show="!usuarioSaving">Confirmar</span>
                                 <span x-show="usuarioSaving">Guardando...</span>
                             </button>
@@ -1862,6 +1931,25 @@
                         hour12: false,
                     }).format(fecha).replace(',', '');
                 },
+                toDateTimeLocalValue(valor) {
+                    if (!valor) {
+                        return '';
+                    }
+
+                    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(valor)) {
+                        return valor;
+                    }
+
+                    const fecha = new Date(valor);
+                    if (Number.isNaN(fecha.getTime())) {
+                        return '';
+                    }
+
+                    const offset = fecha.getTimezoneOffset();
+                    const local = new Date(fecha.getTime() - (offset * 60 * 1000));
+
+                    return local.toISOString().slice(0, 16);
+                },
                 formatCurrency(valor) {
                     const monto = Number(valor ?? 0);
                     if (!Number.isFinite(monto)) {
@@ -1890,6 +1978,10 @@
                     const notaOriginal = (this.referidoOriginal.referido_comision_nota || '').trim() || null;
                     const motivoRechazo = (this.referidoForm.referido_motivo_rechazo || '').trim() || null;
                     const motivoRechazoOriginal = (this.referidoOriginal.referido_motivo_rechazo || '').trim() || null;
+                    const referidoAprobadoAt = this.toDateTimeLocalValue(referidoEstado === 'aprobado' ? this.referidoForm.referido_aprobado_at : null) || null;
+                    const referidoAprobadoAtOriginal = this.toDateTimeLocalValue(referidoEstadoOriginal === 'aprobado' ? this.referidoOriginal.referido_aprobado_at : null) || null;
+                    const comisionPagadaAt = this.toDateTimeLocalValue(comisionEstado === 'pagada' ? this.referidoForm.comision_pagada_at : null) || null;
+                    const comisionPagadaAtOriginal = this.toDateTimeLocalValue(comisionEstadoOriginal === 'pagada' ? this.referidoOriginal.comision_pagada_at : null) || null;
 
                     if (referidoEstado !== referidoEstadoOriginal) {
                         payload.referido_estado = referidoEstado;
@@ -1908,6 +2000,14 @@
 
                     if (nota !== notaOriginal) {
                         payload.referido_comision_nota = nota;
+                    }
+
+                    if (this.esAdministracion && referidoEstado === 'aprobado' && referidoAprobadoAt !== referidoAprobadoAtOriginal) {
+                        payload.referido_aprobado_at = referidoAprobadoAt;
+                    }
+
+                    if (this.esAdministracion && referidoEstado === 'aprobado' && comisionEstado === 'pagada' && comisionPagadaAt !== comisionPagadaAtOriginal) {
+                        payload.comision_pagada_at = comisionPagadaAt;
                     }
 
                     if (!Object.keys(payload).length) {
