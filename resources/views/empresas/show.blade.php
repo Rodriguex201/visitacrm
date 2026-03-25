@@ -369,7 +369,7 @@
 
                                 <div x-show="referidoForm.referido_estado === 'aprobado'">
                                     <label for="comision_valor" class="mb-1 block text-sm font-medium text-slate-700">Valor comisión (automático)</label>
-                                    <input id="comision_valor" :value="this.formatCurrency(referidoForm.comision_valor)" type="text" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-600 focus:border-blue-500 focus:ring-blue-500" placeholder="$ 0">
+                                    <input id="comision_valor" :value="formatCurrency(referidoForm.comision_valor)" type="text" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-600 focus:border-blue-500 focus:ring-blue-500" placeholder="$ 0">
                                     <p class="mt-1 text-xs text-slate-500">Se calcula al guardar: suma de opciones activas (excepto Cotizaciones y Como Llego).</p>
                                 </div>
 
