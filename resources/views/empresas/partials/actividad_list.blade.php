@@ -36,60 +36,18 @@
             <div class="rounded-xl border border-slate-100 p-3" data-actividad-item="{{ (int) $item->id }}" data-accion-id="{{ (int) ($item->accion_id ?? 0) }}"
                 x-data="{ editingNota:false, draftNota:@js($notaInicial), nota:@js($notaInicial), savingNota:false, notaFlash:'', notaFlashType:'ok', async guardarNota(url){ if(!url){ return; } this.savingNota=true; this.notaFlash=''; try{ const response = await fetch(url,{ method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':'{{ csrf_token() }}', Accept:'application/json' }, body: JSON.stringify({ nota:this.draftNota }) }); const data = await response.json(); if(!response.ok){ throw new Error(data.message || 'No se pudo guardar la nota.'); } this.nota = data.nota || ''; this.draftNota = this.nota; this.editingNota = false; this.notaFlashType='ok'; this.notaFlash = data.message || 'Nota guardada'; } catch(error){ this.notaFlashType='error'; this.notaFlash = error.message || 'No se pudo guardar la nota.'; } finally { this.savingNota=false; setTimeout(()=>{ this.notaFlash=''; }, 2500); } } }">
                 <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-3">
+                    <div class="flex min-w-0 flex-1 items-start gap-3">
                         <span data-role="actividad-icon" class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
 
                         <div class="min-w-0 flex-1">
                             <p data-role="actividad-nombre" class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
                             <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
 
-                            <div class="mt-1">
-                                <template x-if="!editingNota">
-                                    <div>
-                                        <p x-show="nota" class="text-xs text-slate-500" x-text="nota"></p>
-
-                                        @if (! $soloLectura)
-
-                                            <button x-show="!nota" type="button" @click="editingNota = true"
-                                                class="text-xs font-semibold text-blue-600 hover:text-blue-700">Agregar nota</button>
-                                        @endif
-                                    </div>
-                                </template>
-
-
-                                @if (! $soloLectura)
-
-                                    <template x-if="editingNota">
-                                        <div class="w-full space-y-2">
-                                            <textarea x-model="draftNota" rows="2" maxlength="2000"
-                                                class="w-full min-h-[100px] max-h-[150px] overflow-y-auto rounded-lg border border-slate-300 p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                                                placeholder="Escribe una nota..."></textarea>
-                                            <div class="flex items-center gap-2">
-                                                <button type="button" :disabled="savingNota"
-
-                                                    @click="guardarNota('{{ $notaUpdateUrl }}')"
-
-                                                    class="inline-flex items-center rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
-                                                    Guardar
-                                                </button>
-                                                <button type="button" :disabled="savingNota"
-                                                    @click="editingNota = false; draftNota = nota"
-                                                    class="inline-flex items-center rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60">
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
-                                @endif
-
-                                <p x-show="notaFlash" x-text="notaFlash" class="mt-1 text-xs"
-                                    :class="notaFlashType === 'ok' ? 'text-emerald-600' : 'text-rose-600'"></p>
-                            </div>
                         </div>
                     </div>
 
                     @if (! $soloLectura)
-                        <div class="flex items-center gap-2">
+                        <div class="flex shrink-0 items-center gap-2">
                             <button
                                     type="button"
                                     class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
@@ -132,6 +90,51 @@
                             </button>
                         </div>
                     @endif
+                </div>
+
+                <div class="mt-3 w-full">
+                    <template x-if="!editingNota">
+                        <div>
+                            <p x-show="nota" class="text-xs text-slate-500" x-text="nota"></p>
+
+                            @if (! $soloLectura)
+                                <button x-show="!nota" type="button" @click="editingNota = true"
+                                    class="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                                    Agregar nota
+                                </button>
+                            @endif
+                        </div>
+                    </template>
+
+                    @if (! $soloLectura)
+                        <template x-if="editingNota">
+                            <div class="w-full space-y-2">
+                                <textarea
+                                    x-model="draftNota"
+                                    rows="4"
+                                    maxlength="2000"
+                                    class="block w-full min-h-[120px] max-h-[220px] overflow-y-auto resize-none rounded-lg border border-slate-300 p-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Escribe una nota..."></textarea>
+
+                                <div class="flex items-center gap-2">
+                                    <button type="button" :disabled="savingNota"
+                                        @click="guardarNota('{{ $notaUpdateUrl }}')"
+                                        class="inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
+                                        Guardar
+                                    </button>
+
+                                    <button type="button" :disabled="savingNota"
+                                        @click="editingNota = false; draftNota = nota"
+                                        class="inline-flex items-center rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    @endif
+
+                    <p x-show="notaFlash" x-text="notaFlash" class="mt-1 text-xs"
+                        :class="notaFlashType === 'ok' ? 'text-emerald-600' : 'text-rose-600'"></p>
                 </div>
             </div>
         @endforeach
