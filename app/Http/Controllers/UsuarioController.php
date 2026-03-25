@@ -225,6 +225,31 @@ class UsuarioController extends Controller
             ->with('success', 'Usuario actualizado correctamente.');
     }
 
+    public function destroy(User $user): RedirectResponse
+    {
+        if ((int) auth()->id() === (int) $user->id) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'No puedes eliminar tu propio usuario.');
+        }
+
+        $hasRelatedRecords = $user->empresas()->exists()
+            || $user->empresasReferidas()->exists()
+            || $user->usuariosHijos()->exists();
+
+        if ($hasRelatedRecords) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'No se puede eliminar este usuario porque tiene información relacionada.');
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario eliminado correctamente.');
+    }
+
     private function generateCodigo(string $tipoUsuario): string
     {
         $prefix = $this->codigoPrefix($tipoUsuario);

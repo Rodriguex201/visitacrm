@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/usuarios/{user}/referidos', [UsuarioController::class, 'referidos'])->name('usuarios.referidos');
         Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
         Route::put('/usuarios/{user}', [UsuarioController::class, 'update'])->name('usuarios.update');
+        Route::delete('/usuarios/{user}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
         Route::put('/usuarios/tipos/{tipoUsuario}', [UsuarioController::class, 'updateTipoUsuario'])->name('usuarios.tipos.update');
 
 

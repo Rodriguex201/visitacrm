@@ -168,6 +168,12 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <form method="GET" action="{{ route('usuarios.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <label for="q" class="sr-only">Buscar</label>
@@ -287,6 +293,22 @@
                                         >
                                             <span aria-hidden="true">🎨</span>
                                         </button>
+                                        <form method="POST" action="{{ route('usuarios.destroy', $u) }}" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.');" class="inline-flex">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="submit"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                                                title="Eliminar usuario"
+                                            >
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
