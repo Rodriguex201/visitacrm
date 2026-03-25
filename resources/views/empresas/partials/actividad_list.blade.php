@@ -39,7 +39,7 @@
                     <div class="flex items-start gap-3">
                         <span data-role="actividad-icon" class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">{!! $buildIcon($item->accion?->icono ?? 'circle', $item->accion?->color) !!}</span>
 
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <p data-role="actividad-nombre" class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
                             <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
 
@@ -60,9 +60,9 @@
                                 @if (! $soloLectura)
 
                                     <template x-if="editingNota">
-                                        <div class="space-y-2">
+                                        <div class="w-full space-y-2">
                                             <textarea x-model="draftNota" rows="2" maxlength="2000"
-                                                class="w-full rounded-md border-slate-300 text-xs text-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                                                class="w-full min-h-[100px] max-h-[150px] overflow-y-auto rounded-lg border border-slate-300 p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                                                 placeholder="Escribe una nota..."></textarea>
                                             <div class="flex items-center gap-2">
                                                 <button type="button" :disabled="savingNota"
