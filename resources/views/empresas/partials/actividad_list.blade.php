@@ -42,6 +42,7 @@
                         <div class="min-w-0 flex-1">
                             <p data-role="actividad-nombre" class="text-sm font-semibold text-slate-900">{{ $item->accion?->nombre ?? 'Acción' }}</p>
                             <p class="text-xs text-slate-500">Acción · {{ $item->created_at?->format('d/m/Y H:i') }}</p>
+
                         </div>
                     </div>
 
