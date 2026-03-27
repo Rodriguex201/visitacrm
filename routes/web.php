@@ -50,6 +50,8 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
+    Route::get('/mi-usuario', [UsuarioController::class, 'miUsuario'])->name('mi-usuario.index');
+
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
         Route::post('/acciones', [AccionesController::class, 'store'])->name('acciones.store');

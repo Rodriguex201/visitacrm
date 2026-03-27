@@ -15,6 +15,21 @@ use Illuminate\View\View;
 
 class UsuarioController extends Controller
 {
+    public function miUsuario(): View
+    {
+        $usuario = User::query()
+            ->with(['banco', 'usuarioDe:id,codigo,name'])
+            ->withCount('empresasReferidas')
+            ->findOrFail(auth()->id());
+
+        $tipos = TipoUsuario::query()
+            ->where('nombre', $usuario->tipo_usuario)
+            ->get()
+            ->keyBy('nombre');
+
+        return view('mi-usuario.index', compact('usuario', 'tipos'));
+    }
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
