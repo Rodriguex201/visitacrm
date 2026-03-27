@@ -51,6 +51,7 @@
             $isEmpresas = request()->routeIs('empresas.*');
             $isAgenda = request()->routeIs('agenda.*');
             $isUsuarios = request()->routeIs('usuarios.*');
+            $isMiUsuario = request()->routeIs('mi-usuario.*');
             $isConfiguracion = request()->routeIs('configuracion.*');
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
         @endphp
@@ -134,6 +135,15 @@
 
                         <span x-show="shouldShowLabels()" x-transition>Agenda</span>
 
+                    </a>
+
+                    <a href="{{ route('mi-usuario.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isMiUsuario ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Mi usuario">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75a4.125 4.125 0 100-8.25 4.125 4.125 0 000 8.25z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 19.5a6.75 6.75 0 0113.5 0"/>
+                        </svg>
+
+                        <span x-show="shouldShowLabels()" x-transition>Mi usuario</span>
                     </a>
 
 
