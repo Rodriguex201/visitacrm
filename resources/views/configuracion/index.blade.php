@@ -47,6 +47,13 @@
             ])
         </div>
 
+
+        <div class="mt-4" x-show="activeTab === 'herramientas'" x-cloak>
+            @include('configuracion.partials.herramientas', [
+                'herramientas' => $herramientas,
+            ])
+        </div>
+
         @if ($esAdministracion)
             <div class="mt-4" x-show="activeTab === 'logo'" x-cloak>
                 @include('configuracion.partials.logo', [
@@ -125,6 +132,7 @@
                 { key: 'equipos', label: 'Equipos' },
                 { key: 'estados-colores', label: 'Estados (Colores)' },
                 { key: 'bancos', label: 'Bancos' },
+                { key: 'herramientas', label: 'Herramientas' },
                 ...(esAdministracion ? [{ key: 'logo', label: 'Logo' }, { key: 'claves', label: 'Claves', protected: true }] : []),
             ],
             activeTab: new URLSearchParams(window.location.search).get('tab') || 'sectores',

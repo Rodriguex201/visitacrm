@@ -11,6 +11,7 @@ use App\Models\Banco;
 use App\Models\CatalogoOpcion;
 use App\Models\ConfiguracionSistema;
 use App\Models\EstadoReferidoColor;
+use App\Models\HerramientaDisponible;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -65,6 +66,7 @@ class ConfiguracionController extends Controller
             'esAdministracion' => (auth()->user()?->tipo_usuario ?? null) === 'administracion',
             'validarClaveUrl' => route('configuracion.claves.validate'),
             'actualizarClaveUrlTemplate' => route('configuracion.claves.update', ['configuracion' => '__ID__']),
+            'herramientas' => $this->herramientasListado(),
         ]);
     }
 
@@ -210,6 +212,69 @@ class ConfiguracionController extends Controller
 
 
 
+
+    public function herramientas(): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->herramientasListado(),
+        ]);
+    }
+
+    public function storeHerramienta(Request $request): JsonResponse
+    {
+        $validated = $this->validarHerramienta($request);
+
+        $herramienta = HerramientaDisponible::query()->create($validated + [
+            'orden' => $validated['orden'] ?? 0,
+            'activo' => $validated['activo'] ?? true,
+            'abrir_en_nueva_pestana' => $validated['abrir_en_nueva_pestana'] ?? true,
+        ]);
+
+        return response()->json([
+            'message' => 'Herramienta creada correctamente.',
+            'data' => $herramienta,
+        ], 201);
+    }
+
+    public function updateHerramienta(Request $request, HerramientaDisponible $herramientaDisponible): JsonResponse
+    {
+        $validated = $this->validarHerramienta($request);
+
+        $herramientaDisponible->update($validated);
+
+        return response()->json([
+            'message' => 'Herramienta actualizada correctamente.',
+            'data' => $herramientaDisponible->fresh(),
+        ]);
+    }
+
+    public function activarHerramienta(HerramientaDisponible $herramientaDisponible): JsonResponse
+    {
+        $herramientaDisponible->update(['activo' => true]);
+
+        return response()->json([
+            'message' => 'Herramienta activada correctamente.',
+        ]);
+    }
+
+    public function desactivarHerramienta(HerramientaDisponible $herramientaDisponible): JsonResponse
+    {
+        $herramientaDisponible->update(['activo' => false]);
+
+        return response()->json([
+            'message' => 'Herramienta desactivada correctamente.',
+        ]);
+    }
+
+    public function destroyHerramienta(HerramientaDisponible $herramientaDisponible): JsonResponse
+    {
+        $herramientaDisponible->delete();
+
+        return response()->json([
+            'message' => 'Herramienta eliminada correctamente.',
+        ]);
+    }
+
     public function updateLogoSidebar(UpdateLogoSidebarRequest $request): RedirectResponse
     {
         $validated = $request->validated();
@@ -271,6 +336,30 @@ class ConfiguracionController extends Controller
         return redirect()
             ->route('configuracion.index')
             ->with('success', 'Colores del estado del referido actualizados correctamente.');
+    }
+
+
+    private function herramientasListado()
+    {
+        return HerramientaDisponible::query()
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function validarHerramienta(Request $request): array
+    {
+        return $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string', 'max:255'],
+            'url' => ['required', 'url', 'max:2048'],
+            'icono' => ['nullable', 'string', 'max:255'],
+            'color_fondo' => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'color_texto' => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'orden' => ['nullable', 'integer', 'min:0'],
+            'activo' => ['nullable', 'boolean'],
+            'abrir_en_nueva_pestana' => ['nullable', 'boolean'],
+        ]);
     }
 
     private function bancosListado()
