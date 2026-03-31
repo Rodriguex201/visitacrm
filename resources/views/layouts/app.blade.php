@@ -85,6 +85,13 @@
 
                         <p class="mt-1 text-sm text-slate-600">{{ $sidebarLogoUrl ? 'Gestión comercial' : $sidebarBrandSubtitle }}</p>
 
+                        <p class="mt-2 text-sm font-semibold text-slate-800 truncate">
+                            {{ auth()->user()->name ?? 'Usuario' }}
+                        </p>
+                        <span class="inline-block mt-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                            {{ ucfirst(auth()->user()->tipo_usuario ?? 'Usuario') }}
+                        </span>
+
                     </div>
 
                     <button
