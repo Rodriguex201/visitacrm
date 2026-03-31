@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracionBancoController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\HerramientaDisponibleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VisitaController;
 use App\Http\Controllers\UsuarioController;
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
     Route::get('/mi-usuario', [UsuarioController::class, 'miUsuario'])->name('mi-usuario.index');
+    Route::get('/herramientas-disponibles', [HerramientaDisponibleController::class, 'index'])->name('herramientas-disponibles.index');
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
@@ -81,6 +83,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/configuracion/logo', [ConfiguracionController::class, 'updateLogoSidebar'])->name('configuracion.logo.update');
         Route::post('/configuracion/claves/validar', [ConfiguracionController::class, 'validarClaveAdmin'])->name('configuracion.claves.validate');
         Route::patch('/configuracion/claves/{configuracion}', [ConfiguracionController::class, 'updateClaveSistema'])->name('configuracion.claves.update');
+
+        Route::get('/configuracion/herramientas', [ConfiguracionController::class, 'herramientas'])->name('configuracion.herramientas.index');
+        Route::post('/configuracion/herramientas', [ConfiguracionController::class, 'storeHerramienta'])->name('configuracion.herramientas.store');
+        Route::patch('/configuracion/herramientas/{herramientaDisponible}', [ConfiguracionController::class, 'updateHerramienta'])->name('configuracion.herramientas.update');
+        Route::patch('/configuracion/herramientas/{herramientaDisponible}/activar', [ConfiguracionController::class, 'activarHerramienta'])->name('configuracion.herramientas.activate');
+        Route::patch('/configuracion/herramientas/{herramientaDisponible}/desactivar', [ConfiguracionController::class, 'desactivarHerramienta'])->name('configuracion.herramientas.deactivate');
+        Route::delete('/configuracion/herramientas/{herramientaDisponible}', [ConfiguracionController::class, 'destroyHerramienta'])->name('configuracion.herramientas.destroy');
 
         Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
         Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');

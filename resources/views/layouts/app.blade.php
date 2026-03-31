@@ -52,6 +52,7 @@
             $isAgenda = request()->routeIs('agenda.*');
             $isUsuarios = request()->routeIs('usuarios.*');
             $isMiUsuario = request()->routeIs('mi-usuario.*');
+            $isHerramientasDisponibles = request()->routeIs('herramientas-disponibles.*');
             $isConfiguracion = request()->routeIs('configuracion.*');
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
         @endphp
@@ -155,6 +156,14 @@
                         <span x-show="shouldShowLabels()" x-transition>Mi usuario</span>
                     </a>
 
+
+
+                    <a href="{{ route('herramientas-disponibles.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isHerramientasDisponibles ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Herramientas disponibles">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.75h5.25v5.25m0-5.25L12 14.25m-3.75-7.5h-3a1.5 1.5 0 00-1.5 1.5v10.5a1.5 1.5 0 001.5 1.5h10.5a1.5 1.5 0 001.5-1.5v-3"/>
+                        </svg>
+                        <span x-show="shouldShowLabels()" x-transition>Herramientas disponibles</span>
+                    </a>
 
                     @if ($isAdmin)
 
