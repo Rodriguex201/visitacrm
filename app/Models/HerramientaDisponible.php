@@ -21,7 +21,7 @@ class HerramientaDisponible extends Model
         'orden',
         'activo',
         'abrir_en_nueva_pestana',
-        'slug',
+
     ];
 
     protected $casts = [

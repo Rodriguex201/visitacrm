@@ -60,13 +60,6 @@
                         <p class="mt-1 text-xs text-rose-600" x-text="fieldError('nombre')"></p>
 
                     </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Slug (opcional)</label>
-                        <input type="text" x-model="form.slug" maxlength="255" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
-
-                        <p class="mt-1 text-xs text-rose-600" x-text="fieldError('slug')"></p>
-
-                    </div>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
@@ -122,12 +115,10 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
 
         errorMessage: '',
         validationErrors: {},
-
-        form: { nombre: '', slug: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true },
+        form: { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true },
         openCreateModal() {
             this.editingId = null
-            this.form = { nombre: '', slug: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true }
-
+            this.form = { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true }
             this.errorMessage = ''
             this.validationErrors = {}
 
@@ -137,7 +128,7 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
             this.editingId = herramienta.id
             this.form = {
                 nombre: herramienta.nombre ?? '',
-                slug: herramienta.slug ?? '',
+
                 descripcion: herramienta.descripcion ?? '',
                 url: herramienta.url ?? '',
                 icono: herramienta.icono ?? '',
@@ -159,7 +150,7 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
         payload() {
             return {
                 nombre: (this.form.nombre || '').trim(),
-                slug: (this.form.slug || '').trim() || null,
+
                 descripcion: (this.form.descripcion || '').trim() || null,
                 url: (this.form.url || '').trim(),
                 icono: (this.form.icono || '').trim() || null,

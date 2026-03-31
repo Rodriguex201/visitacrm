@@ -349,12 +349,6 @@ class ConfiguracionController extends Controller
 
     private function validarHerramienta(Request $request): array
     {
-        $herramienta = $request->route('herramientaDisponible');
-        $slugUnique = 'unique:herramientas_disponibles,slug';
-
-        if ($herramienta) {
-            $slugUnique .= ',' . $herramienta->id;
-        }
 
         return $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
@@ -366,7 +360,7 @@ class ConfiguracionController extends Controller
             'orden' => ['nullable', 'integer', 'min:0'],
             'activo' => ['nullable', 'boolean'],
             'abrir_en_nueva_pestana' => ['nullable', 'boolean'],
-            'slug' => ['nullable', 'string', 'max:255', $slugUnique],
+
         ]);
     }
 
