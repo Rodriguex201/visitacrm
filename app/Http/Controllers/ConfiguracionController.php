@@ -349,6 +349,7 @@ class ConfiguracionController extends Controller
 
     private function validarHerramienta(Request $request): array
     {
+
         return $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string', 'max:255'],
@@ -359,6 +360,7 @@ class ConfiguracionController extends Controller
             'orden' => ['nullable', 'integer', 'min:0'],
             'activo' => ['nullable', 'boolean'],
             'abrir_en_nueva_pestana' => ['nullable', 'boolean'],
+
         ]);
     }
 

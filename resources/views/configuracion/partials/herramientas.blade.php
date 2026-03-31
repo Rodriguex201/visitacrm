@@ -49,12 +49,16 @@
         <div class="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
             <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar herramienta' : 'Nueva herramienta'"></h3>
             <form class="mt-4 space-y-4" @submit.prevent="saveItem()">
+
                 <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
+
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
                         <input type="text" x-model="form.nombre" maxlength="255" required class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
+
                         <p class="mt-1 text-xs text-rose-600" x-text="fieldError('nombre')"></p>
+
                     </div>
                 </div>
                 <div>
@@ -64,7 +68,9 @@
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">URL</label>
                     <input type="url" x-model="form.url" required class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm" placeholder="https://...">
+
                     <p class="mt-1 text-xs text-rose-600" x-text="fieldError('url')"></p>
+
                 </div>
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
@@ -106,6 +112,7 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
         showModal: false,
         editingId: null,
         loading: false,
+
         errorMessage: '',
         validationErrors: {},
         form: { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true },
@@ -114,12 +121,14 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
             this.form = { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true }
             this.errorMessage = ''
             this.validationErrors = {}
+
             this.showModal = true
         },
         openEditModal(herramienta) {
             this.editingId = herramienta.id
             this.form = {
                 nombre: herramienta.nombre ?? '',
+
                 descripcion: herramienta.descripcion ?? '',
                 url: herramienta.url ?? '',
                 icono: herramienta.icono ?? '',
@@ -129,16 +138,19 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
                 activo: Boolean(herramienta.activo),
                 abrir_en_nueva_pestana: Boolean(herramienta.abrir_en_nueva_pestana),
             }
+
             this.errorMessage = ''
             this.validationErrors = {}
             this.showModal = true
         },
         closeModal() { this.showModal = false; this.editingId = null },
         fieldError(field) { return this.validationErrors[field]?.[0] || '' },
+
         csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
         payload() {
             return {
                 nombre: (this.form.nombre || '').trim(),
+
                 descripcion: (this.form.descripcion || '').trim() || null,
                 url: (this.form.url || '').trim(),
                 icono: (this.form.icono || '').trim() || null,
@@ -156,6 +168,7 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
         },
         async saveItem() {
             this.loading = true
+
             this.errorMessage = ''
             this.validationErrors = {}
 
@@ -188,6 +201,7 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
             } finally {
                 this.loading = false
             }
+
         },
         async toggleEstado(herramienta) {
             const url = herramienta.activo ? deactivateUrlTemplate.replace('__ID__', herramienta.id) : activateUrlTemplate.replace('__ID__', herramienta.id)
