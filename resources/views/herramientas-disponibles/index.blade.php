@@ -25,14 +25,22 @@
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/20 to-transparent"></div>
 
                     <div class="relative flex items-start justify-between gap-4">
-                        <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/65 ring-1 ring-black/10 backdrop-blur-sm">
-                            <x-tool-icon
-                                :name="$herramienta->icono"
-                                size="28"
-                                class="shrink-0"
-                                style="color: {{ $herramienta->color_texto ?: '#0F172A' }}"
-                            />
-                        </div>
+                        @if ($herramienta->imagen)
+                            <img
+                                src="{{ asset('storage/' . $herramienta->imagen) }}"
+                                alt="Ícono de {{ $herramienta->nombre }}"
+                                class="h-14 w-14 rounded-xl object-cover ring-1 ring-black/10"
+                            >
+                        @else
+                            <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/65 ring-1 ring-black/10 backdrop-blur-sm">
+                                <x-tool-icon
+                                    :name="$herramienta->icono"
+                                    size="28"
+                                    class="shrink-0"
+                                    style="color: {{ $herramienta->color_texto ?: '#0F172A' }}"
+                                />
+                            </div>
+                        @endif
 
                         <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/55 text-current ring-1 ring-black/10 transition group-hover:translate-x-0.5">
                             <x-lucide-icon name="link" size="18" class="opacity-90" />

@@ -16,6 +16,7 @@ class HerramientaDisponible extends Model
         'descripcion',
         'url',
         'icono',
+        'imagen',
         'color_fondo',
         'color_texto',
         'orden',
