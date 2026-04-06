@@ -16,8 +16,11 @@ use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use RuntimeException;
 
 class ConfiguracionController extends Controller
 {
@@ -224,6 +227,10 @@ class ConfiguracionController extends Controller
     {
         $validated = $this->validarHerramienta($request);
 
+        if ($request->hasFile('imagen')) {
+            $validated['imagen'] = $this->procesarImagenHerramienta($request->file('imagen'));
+        }
+
         $herramienta = HerramientaDisponible::query()->create($validated + [
             'orden' => $validated['orden'] ?? 0,
             'activo' => $validated['activo'] ?? true,
@@ -239,6 +246,15 @@ class ConfiguracionController extends Controller
     public function updateHerramienta(Request $request, HerramientaDisponible $herramientaDisponible): JsonResponse
     {
         $validated = $this->validarHerramienta($request);
+        $imagenAnterior = $herramientaDisponible->imagen;
+
+        if ($request->hasFile('imagen')) {
+            $validated['imagen'] = $this->procesarImagenHerramienta($request->file('imagen'));
+
+            if ($imagenAnterior) {
+                Storage::disk('public')->delete($imagenAnterior);
+            }
+        }
 
         $herramientaDisponible->update($validated);
 
@@ -268,6 +284,10 @@ class ConfiguracionController extends Controller
 
     public function destroyHerramienta(HerramientaDisponible $herramientaDisponible): JsonResponse
     {
+        if ($herramientaDisponible->imagen) {
+            Storage::disk('public')->delete($herramientaDisponible->imagen);
+        }
+
         $herramientaDisponible->delete();
 
         return response()->json([
@@ -355,6 +375,7 @@ class ConfiguracionController extends Controller
             'descripcion' => ['nullable', 'string', 'max:255'],
             'url' => ['required', 'url', 'max:2048'],
             'icono' => ['nullable', 'string', 'max:255'],
+            'imagen' => ['nullable', 'image', 'max:2048'],
             'color_fondo' => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
             'color_texto' => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
             'orden' => ['nullable', 'integer', 'min:0'],
@@ -362,6 +383,67 @@ class ConfiguracionController extends Controller
             'abrir_en_nueva_pestana' => ['nullable', 'boolean'],
 
         ]);
+    }
+
+    private function procesarImagenHerramienta(UploadedFile $imagen): string
+    {
+        $origen = @imagecreatefromstring($imagen->get());
+
+        if (! $origen) {
+            throw new RuntimeException('No se pudo procesar la imagen cargada.');
+        }
+
+        $anchoOrigen = imagesx($origen);
+        $altoOrigen = imagesy($origen);
+        $lado = min($anchoOrigen, $altoOrigen);
+        $origenX = (int) floor(($anchoOrigen - $lado) / 2);
+        $origenY = (int) floor(($altoOrigen - $lado) / 2);
+
+        $destino = imagecreatetruecolor(56, 56);
+        imagealphablending($destino, false);
+        imagesavealpha($destino, true);
+        $fondoTransparente = imagecolorallocatealpha($destino, 0, 0, 0, 127);
+        imagefill($destino, 0, 0, $fondoTransparente);
+
+        imagecopyresampled(
+            $destino,
+            $origen,
+            0,
+            0,
+            $origenX,
+            $origenY,
+            56,
+            56,
+            $lado,
+            $lado
+        );
+
+        $mime = strtolower((string) $imagen->getMimeType());
+        $extension = 'png';
+
+        ob_start();
+
+        if (str_contains($mime, 'jpeg') || str_contains($mime, 'jpg')) {
+            $extension = 'jpg';
+            imagejpeg($destino, null, 90);
+        } elseif (str_contains($mime, 'webp') && function_exists('imagewebp')) {
+            $extension = 'webp';
+            imagewebp($destino, null, 90);
+        } else {
+            imagepng($destino, null, 7);
+        }
+
+        $contenido = ob_get_clean();
+
+        imagedestroy($origen);
+        imagedestroy($destino);
+
+        $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
+        $rutaRelativa = 'herramientas/' . $nombreArchivo;
+
+        Storage::disk('public')->put($rutaRelativa, $contenido);
+
+        return $rutaRelativa;
     }
 
     private function bancosListado()
