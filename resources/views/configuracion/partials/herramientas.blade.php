@@ -6,6 +6,7 @@
     activateUrlTemplate: @js(route('configuracion.herramientas.activate', ['herramientaDisponible' => '__ID__'])),
     deactivateUrlTemplate: @js(route('configuracion.herramientas.deactivate', ['herramientaDisponible' => '__ID__'])),
     destroyUrlTemplate: @js(route('configuracion.herramientas.destroy', ['herramientaDisponible' => '__ID__'])),
+    storageBaseUrl: @js(asset('storage')),
 })">
     <div class="flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-slate-900">Herramientas</h2>
@@ -37,7 +38,12 @@
                             <a :href="herramienta.url" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">Abrir</a>
                         </td>
                         <td class="px-4 py-3">
-                            <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700" x-text="herramienta.icono || 'fallback'"></span>
+                            <template x-if="herramienta.imagen">
+                                <img :src="storageImageUrl(herramienta.imagen)" alt="Ícono" class="h-14 w-14 rounded-xl object-cover ring-1 ring-slate-200">
+                            </template>
+                            <template x-if="!herramienta.imagen">
+                                <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700" x-text="herramienta.icono || 'fallback'"></span>
+                            </template>
                         </td>
                         <td class="px-4 py-3 text-slate-600" x-text="herramienta.orden"></td>
                         <td class="px-4 py-3">
@@ -62,11 +68,13 @@
     </div>
 
     <div x-cloak x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4" @click.self="closeModal()">
-        <div class="w-full max-w-3xl rounded-2xl bg-white p-5 shadow-xl">
-            <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar herramienta' : 'Nueva herramienta'"></h3>
-            <form class="mt-4 space-y-4" @submit.prevent="saveItem()">
+            <form class="flex w-full max-w-3xl max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-xl" @submit.prevent="saveItem()">
+                <div class="border-b border-slate-200 px-5 py-4">
+                    <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar herramienta' : 'Nueva herramienta'"></h3>
+                </div>
 
-                <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
+                <div class="flex-1 space-y-4 overflow-y-auto p-5">
+                    <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
 
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
@@ -104,6 +112,21 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Imagen del ícono</label>
+                    <input type="file" name="imagen" accept="image/*" @change="onImageSelected($event)" class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700">
+                    <p class="mt-1 text-xs text-slate-500">Se recorta automáticamente al centro y se guarda en 56x56 px. Máximo 2MB.</p>
+                    <p class="mt-1 text-xs text-rose-600" x-text="fieldError('imagen')"></p>
+
+                    <div x-show="form.imagenPreview || form.imagenActual" x-cloak class="mt-3 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                        <img :src="form.imagenPreview || form.imagenActual" alt="Vista previa del ícono" class="h-14 w-14 rounded-xl object-cover ring-1 ring-slate-200">
+                        <div class="text-xs text-slate-600">
+                            <p class="font-medium">Vista previa</p>
+                            <p x-text="form.imagenPreview ? 'Imagen nueva seleccionada' : 'Imagen actual guardada'"></p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Color de fondo</label>
@@ -126,6 +149,9 @@
                 <div class="rounded-xl border border-slate-200 p-3">
                     <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Vista previa rápida</p>
                     <div class="rounded-2xl p-4 shadow-sm ring-1 ring-black/5" :style="`background:${form.color_fondo || '#F8FAFC'}; color:${form.color_texto || '#0F172A'}`">
+                        <div class="mb-2">
+                            <img x-show="form.imagenPreview || form.imagenActual" x-cloak :src="form.imagenPreview || form.imagenActual" alt="Preview ícono" class="h-14 w-14 rounded-xl object-cover ring-1 ring-black/10">
+                        </div>
                         <p class="text-sm font-semibold" x-text="form.nombre || 'Nombre de herramienta'"></p>
                         <p class="text-xs opacity-80" x-text="form.descripcion || 'Descripción de la herramienta'"></p>
                         <p class="mt-2 text-[11px] opacity-70" x-text="`Icono: ${form.icono || 'fallback'}`"></p>
@@ -136,29 +162,31 @@
                     <label class="inline-flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" x-model="form.activo" class="rounded border-slate-300 text-blue-600"> Activo</label>
                     <label class="inline-flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" x-model="form.abrir_en_nueva_pestana" class="rounded border-slate-300 text-blue-600"> Abrir en nueva pestaña</label>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                </div>
+
+                <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4">
                     <button type="button" @click="closeModal()" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
                     <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white" :disabled="loading">Guardar</button>
                 </div>
             </form>
-        </div>
     </div>
 </section>
 
 <script>
-function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUrlTemplate, activateUrlTemplate, deactivateUrlTemplate, destroyUrlTemplate }) {
+function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUrlTemplate, activateUrlTemplate, deactivateUrlTemplate, destroyUrlTemplate, storageBaseUrl }) {
     return {
         herramientas: initialHerramientas ?? [],
         showModal: false,
         editingId: null,
         loading: false,
+        storageBaseUrl,
         quickIcons: ['whatsapp', 'globe', 'web', 'link', 'support', 'catalogo'],
         errorMessage: '',
         validationErrors: {},
-        form: { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true },
+        form: { nombre: '', descripcion: '', url: '', icono: '', imagenFile: null, imagenPreview: '', imagenActual: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true },
         openCreateModal() {
             this.editingId = null
-            this.form = { nombre: '', descripcion: '', url: '', icono: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true }
+            this.form = { nombre: '', descripcion: '', url: '', icono: '', imagenFile: null, imagenPreview: '', imagenActual: '', color_fondo: '#F8FAFC', color_texto: '#0F172A', orden: 0, activo: true, abrir_en_nueva_pestana: true }
             this.errorMessage = ''
             this.validationErrors = {}
             this.showModal = true
@@ -170,6 +198,9 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
                 descripcion: herramienta.descripcion ?? '',
                 url: herramienta.url ?? '',
                 icono: herramienta.icono ?? '',
+                imagenFile: null,
+                imagenPreview: '',
+                imagenActual: herramienta.imagen ? this.storageImageUrl(herramienta.imagen) : '',
                 color_fondo: herramienta.color_fondo ?? '#F8FAFC',
                 color_texto: herramienta.color_texto ?? '#0F172A',
                 orden: herramienta.orden ?? 0,
@@ -183,18 +214,47 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
         closeModal() { this.showModal = false; this.editingId = null },
         fieldError(field) { return this.validationErrors[field]?.[0] || '' },
         csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
-        payload() {
-            return {
-                nombre: (this.form.nombre || '').trim(),
-                descripcion: (this.form.descripcion || '').trim() || null,
-                url: (this.form.url || '').trim(),
-                icono: (this.form.icono || '').trim().toLowerCase() || null,
-                color_fondo: this.form.color_fondo || null,
-                color_texto: this.form.color_texto || null,
-                orden: this.form.orden === '' ? 0 : Number(this.form.orden),
-                activo: Boolean(this.form.activo),
-                abrir_en_nueva_pestana: Boolean(this.form.abrir_en_nueva_pestana),
+        storageImageUrl(path) {
+            const base = (this.storageBaseUrl || '').replace(/\/$/, '')
+            const cleanPath = (path || '').replace(/^\//, '')
+            return `${base}/${cleanPath}`
+        },
+        onImageSelected(event) {
+            const file = event?.target?.files?.[0] || null
+            this.form.imagenFile = file
+
+            if (!file) {
+                this.form.imagenPreview = ''
+                return
             }
+
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                this.form.imagenPreview = e.target?.result || ''
+            }
+            reader.readAsDataURL(file)
+        },
+        payload(editing) {
+            const data = new FormData()
+            data.append('nombre', (this.form.nombre || '').trim())
+            data.append('descripcion', (this.form.descripcion || '').trim())
+            data.append('url', (this.form.url || '').trim())
+            data.append('icono', (this.form.icono || '').trim().toLowerCase())
+            data.append('color_fondo', this.form.color_fondo || '')
+            data.append('color_texto', this.form.color_texto || '')
+            data.append('orden', this.form.orden === '' ? 0 : Number(this.form.orden))
+            data.append('activo', Boolean(this.form.activo) ? 1 : 0)
+            data.append('abrir_en_nueva_pestana', Boolean(this.form.abrir_en_nueva_pestana) ? 1 : 0)
+
+            if (this.form.imagenFile instanceof File) {
+                data.append('imagen', this.form.imagenFile)
+            }
+
+            if (editing) {
+                data.append('_method', 'PATCH')
+            }
+
+            return data
         },
         async refreshList() {
             const r = await fetch(indexUrl, { headers: { Accept: 'application/json' } })
@@ -208,17 +268,13 @@ function herramientasManager({ initialHerramientas, indexUrl, storeUrl, updateUr
 
             const editing = Boolean(this.editingId)
             const endpoint = editing ? updateUrlTemplate.replace('__ID__', this.editingId) : storeUrl
-            const payload = this.payload()
-
-            if (editing) {
-                payload._method = 'PATCH'
-            }
+            const payload = this.payload(editing)
 
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' },
-                    body: JSON.stringify(payload),
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' },
+                    body: payload,
                 })
 
                 if (!response.ok) {
