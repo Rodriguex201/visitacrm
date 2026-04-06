@@ -68,11 +68,13 @@
     </div>
 
     <div x-cloak x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4" @click.self="closeModal()">
-        <div class="w-full max-w-3xl rounded-2xl bg-white p-5 shadow-xl">
-            <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar herramienta' : 'Nueva herramienta'"></h3>
-            <form class="mt-4 space-y-4" @submit.prevent="saveItem()">
+            <form class="flex w-full max-w-3xl max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-xl" @submit.prevent="saveItem()">
+                <div class="border-b border-slate-200 px-5 py-4">
+                    <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar herramienta' : 'Nueva herramienta'"></h3>
+                </div>
 
-                <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
+                <div class="flex-1 space-y-4 overflow-y-auto p-5">
+                    <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
 
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
@@ -160,12 +162,13 @@
                     <label class="inline-flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" x-model="form.activo" class="rounded border-slate-300 text-blue-600"> Activo</label>
                     <label class="inline-flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" x-model="form.abrir_en_nueva_pestana" class="rounded border-slate-300 text-blue-600"> Abrir en nueva pestaña</label>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                </div>
+
+                <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4">
                     <button type="button" @click="closeModal()" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
                     <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white" :disabled="loading">Guardar</button>
                 </div>
             </form>
-        </div>
     </div>
 </section>
 
