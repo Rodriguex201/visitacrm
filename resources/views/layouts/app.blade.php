@@ -52,7 +52,9 @@
             $isAgenda = request()->routeIs('agenda.*');
             $isUsuarios = request()->routeIs('usuarios.*');
             $isMiUsuario = request()->routeIs('mi-usuario.*');
-            $isHerramientasDisponibles = request()->routeIs('herramientas-disponibles.*');
+            $isHerramientasRedes = request()->routeIs('herramientas.redes');
+            $isHerramientasOfrecer = request()->routeIs('herramientas.ofrecer');
+            $isHerramientasMenuActivo = $isHerramientasRedes || $isHerramientasOfrecer;
             $isConfiguracion = request()->routeIs('configuracion.*');
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
         @endphp
@@ -156,14 +158,37 @@
                         <span x-show="shouldShowLabels()" x-transition>Mi usuario</span>
                     </a>
 
+                    <div x-data="{ herramientasOpen: @js($isHerramientasMenuActivo) }" class="space-y-1">
+                        <button type="button"
+                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition"
+                            :class="[
+                                {{ $isHerramientasMenuActivo ? "'bg-blue-600 text-white'" : "'text-slate-500 hover:bg-slate-100 hover:text-slate-700'" }},
+                                sidebarCollapsed ? 'md:justify-center md:px-2' : ''
+                            ]"
+                            @click="herramientasOpen = !herramientasOpen"
+                            title="Herramientas disponibles">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.75h5.25v5.25m0-5.25L12 14.25m-3.75-7.5h-3a1.5 1.5 0 00-1.5 1.5v10.5a1.5 1.5 0 001.5 1.5h10.5a1.5 1.5 0 001.5-1.5v-3"/>
+                            </svg>
+                            <span x-show="shouldShowLabels()" x-transition class="flex-1 text-left">Herramientas disponibles</span>
+                            <svg x-show="shouldShowLabels()" x-transition class="h-4 w-4 transition-transform" :class="herramientasOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
 
-
-                    <a href="{{ route('herramientas-disponibles.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold transition {{ $isHerramientasDisponibles ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}" :class="sidebarCollapsed ? 'md:justify-center md:px-2' : ''" @click="sidebarOpen = false" title="Herramientas disponibles">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.75h5.25v5.25m0-5.25L12 14.25m-3.75-7.5h-3a1.5 1.5 0 00-1.5 1.5v10.5a1.5 1.5 0 001.5 1.5h10.5a1.5 1.5 0 001.5-1.5v-3"/>
-                        </svg>
-                        <span x-show="shouldShowLabels()" x-transition>Herramientas disponibles</span>
-                    </a>
+                        <div x-show="herramientasOpen && shouldShowLabels()" x-transition.opacity x-cloak class="space-y-1 pl-8">
+                            <a href="{{ route('herramientas.redes') }}"
+                                class="block rounded-lg px-3 py-2 text-sm font-semibold transition {{ $isHerramientasRedes ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}"
+                                @click="sidebarOpen = false">
+                                Redes
+                            </a>
+                            <a href="{{ route('herramientas.ofrecer') }}"
+                                class="block rounded-lg px-3 py-2 text-sm font-semibold transition {{ $isHerramientasOfrecer ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}"
+                                @click="sidebarOpen = false">
+                                Qué puedo ofrecer
+                            </a>
+                        </div>
+                    </div>
 
                     @if ($isAdmin)
 
