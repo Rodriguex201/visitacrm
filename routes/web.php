@@ -52,7 +52,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/visitas/{visita}/resultado', [VisitaController::class, 'updateResultado'])->name('visitas.update-resultado');
 
     Route::get('/mi-usuario', [UsuarioController::class, 'miUsuario'])->name('mi-usuario.index');
-    Route::get('/herramientas-disponibles', [HerramientaDisponibleController::class, 'index'])->name('herramientas-disponibles.index');
+    Route::prefix('herramientas')->name('herramientas.')->group(function () {
+        Route::get('/redes', [HerramientaDisponibleController::class, 'redes'])->name('redes');
+        Route::get('/ofrecer', [HerramientaDisponibleController::class, 'ofrecer'])->name('ofrecer');
+    });
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/acciones/gestionar', [AccionesController::class, 'manage'])->name('acciones.manage');
