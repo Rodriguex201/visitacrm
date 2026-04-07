@@ -91,6 +91,13 @@ Route::middleware('auth')->group(function () {
         Route::patch('/configuracion/herramientas/{herramientaDisponible}/desactivar', [ConfiguracionController::class, 'desactivarHerramienta'])->name('configuracion.herramientas.deactivate');
         Route::delete('/configuracion/herramientas/{herramientaDisponible}', [ConfiguracionController::class, 'destroyHerramienta'])->name('configuracion.herramientas.destroy');
 
+        Route::get('/configuracion/ofrecer', [ConfiguracionController::class, 'ofrecer'])->name('configuracion.ofrecer.index');
+        Route::post('/configuracion/ofrecer', [ConfiguracionController::class, 'storeOfrecer'])->name('configuracion.ofrecer.store');
+        Route::patch('/configuracion/ofrecer/{herramientaOfrecer}', [ConfiguracionController::class, 'updateOfrecer'])->name('configuracion.ofrecer.update');
+        Route::patch('/configuracion/ofrecer/{herramientaOfrecer}/activar', [ConfiguracionController::class, 'activarOfrecer'])->name('configuracion.ofrecer.activate');
+        Route::patch('/configuracion/ofrecer/{herramientaOfrecer}/desactivar', [ConfiguracionController::class, 'desactivarOfrecer'])->name('configuracion.ofrecer.deactivate');
+        Route::delete('/configuracion/ofrecer/{herramientaOfrecer}', [ConfiguracionController::class, 'destroyOfrecer'])->name('configuracion.ofrecer.destroy');
+
         Route::get('/configuracion/bancos', [ConfiguracionBancoController::class, 'index'])->name('configuracion.bancos.index');
         Route::post('/configuracion/bancos', [ConfiguracionBancoController::class, 'store'])->name('configuracion.bancos.store');
         Route::patch('/configuracion/bancos/{banco}', [ConfiguracionBancoController::class, 'update'])->name('configuracion.bancos.update');

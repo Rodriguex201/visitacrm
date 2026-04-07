@@ -12,6 +12,7 @@ use App\Models\CatalogoOpcion;
 use App\Models\ConfiguracionSistema;
 use App\Models\EstadoReferidoColor;
 use App\Models\HerramientaDisponible;
+use App\Models\HerramientaOfrecer;
 use App\Models\Sector;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -70,6 +71,7 @@ class ConfiguracionController extends Controller
             'validarClaveUrl' => route('configuracion.claves.validate'),
             'actualizarClaveUrlTemplate' => route('configuracion.claves.update', ['configuracion' => '__ID__']),
             'herramientas' => $this->herramientasListado(),
+            'ofrecerItems' => $this->ofrecerListado(),
         ]);
     }
 
@@ -358,10 +360,93 @@ class ConfiguracionController extends Controller
             ->with('success', 'Colores del estado del referido actualizados correctamente.');
     }
 
+    public function ofrecer(): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->ofrecerListado(),
+        ]);
+    }
+
+    public function storeOfrecer(Request $request): JsonResponse
+    {
+        $validated = $this->validarOfrecer($request);
+        $validated['imagen'] = $this->procesarImagenOfrecer($request->file('imagen'));
+
+        $item = HerramientaOfrecer::query()->create($validated + [
+            'orden' => $validated['orden'] ?? 0,
+            'activo' => $validated['activo'] ?? true,
+        ]);
+
+        return response()->json([
+            'message' => 'Elemento creado correctamente.',
+            'data' => $item,
+        ], 201);
+    }
+
+    public function updateOfrecer(Request $request, HerramientaOfrecer $herramientaOfrecer): JsonResponse
+    {
+        $validated = $this->validarOfrecer($request, true);
+        $imagenAnterior = $herramientaOfrecer->imagen;
+
+        if ($request->hasFile('imagen')) {
+            $validated['imagen'] = $this->procesarImagenOfrecer($request->file('imagen'));
+
+            if ($imagenAnterior) {
+                Storage::disk('public')->delete($imagenAnterior);
+            }
+        }
+
+        $herramientaOfrecer->update($validated);
+
+        return response()->json([
+            'message' => 'Elemento actualizado correctamente.',
+            'data' => $herramientaOfrecer->fresh(),
+        ]);
+    }
+
+    public function activarOfrecer(HerramientaOfrecer $herramientaOfrecer): JsonResponse
+    {
+        $herramientaOfrecer->update(['activo' => true]);
+
+        return response()->json([
+            'message' => 'Elemento activado correctamente.',
+        ]);
+    }
+
+    public function desactivarOfrecer(HerramientaOfrecer $herramientaOfrecer): JsonResponse
+    {
+        $herramientaOfrecer->update(['activo' => false]);
+
+        return response()->json([
+            'message' => 'Elemento desactivado correctamente.',
+        ]);
+    }
+
+    public function destroyOfrecer(HerramientaOfrecer $herramientaOfrecer): JsonResponse
+    {
+        if ($herramientaOfrecer->imagen) {
+            Storage::disk('public')->delete($herramientaOfrecer->imagen);
+        }
+
+        $herramientaOfrecer->delete();
+
+        return response()->json([
+            'message' => 'Elemento eliminado correctamente.',
+        ]);
+    }
+
 
     private function herramientasListado()
     {
         return HerramientaDisponible::query()
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function ofrecerListado()
+    {
+        return HerramientaOfrecer::query()
             ->orderBy('orden')
             ->orderBy('id')
             ->get();
@@ -440,6 +525,85 @@ class ConfiguracionController extends Controller
 
         $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
         $rutaRelativa = 'herramientas/' . $nombreArchivo;
+
+        Storage::disk('public')->put($rutaRelativa, $contenido);
+
+        return $rutaRelativa;
+    }
+
+    private function validarOfrecer(Request $request, bool $actualizacion = false): array
+    {
+        return $request->validate([
+            'titulo' => ['nullable', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string', 'max:1000'],
+            'imagen' => [$actualizacion ? 'nullable' : 'required', 'image', 'max:4096'],
+            'orden' => ['nullable', 'integer', 'min:0'],
+            'activo' => ['nullable', 'boolean'],
+        ]);
+    }
+
+    private function procesarImagenOfrecer(UploadedFile $imagen): string
+    {
+        $origen = @imagecreatefromstring($imagen->get());
+
+        if (! $origen) {
+            throw new RuntimeException('No se pudo procesar la imagen cargada.');
+        }
+
+        $anchoOrigen = imagesx($origen);
+        $altoOrigen = imagesy($origen);
+        $anchoDestino = 400;
+        $altoDestino = 300;
+        $ratioDestino = $anchoDestino / $altoDestino;
+        $ratioOrigen = $anchoOrigen / $altoOrigen;
+
+        if ($ratioOrigen > $ratioDestino) {
+            $altoRecorte = $altoOrigen;
+            $anchoRecorte = (int) floor($altoRecorte * $ratioDestino);
+            $origenX = (int) floor(($anchoOrigen - $anchoRecorte) / 2);
+            $origenY = 0;
+        } else {
+            $anchoRecorte = $anchoOrigen;
+            $altoRecorte = (int) floor($anchoRecorte / $ratioDestino);
+            $origenX = 0;
+            $origenY = (int) floor(($altoOrigen - $altoRecorte) / 2);
+        }
+
+        $destino = imagecreatetruecolor($anchoDestino, $altoDestino);
+        imagecopyresampled(
+            $destino,
+            $origen,
+            0,
+            0,
+            $origenX,
+            $origenY,
+            $anchoDestino,
+            $altoDestino,
+            $anchoRecorte,
+            $altoRecorte
+        );
+
+        $mime = strtolower((string) $imagen->getMimeType());
+        $extension = 'jpg';
+        ob_start();
+
+        if (str_contains($mime, 'png')) {
+            $extension = 'png';
+            imagepng($destino, null, 7);
+        } elseif (str_contains($mime, 'webp') && function_exists('imagewebp')) {
+            $extension = 'webp';
+            imagewebp($destino, null, 90);
+        } else {
+            imagejpeg($destino, null, 90);
+        }
+
+        $contenido = ob_get_clean();
+
+        imagedestroy($origen);
+        imagedestroy($destino);
+
+        $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
+        $rutaRelativa = 'ofrecer/' . $nombreArchivo;
 
         Storage::disk('public')->put($rutaRelativa, $contenido);
 
