@@ -51,12 +51,12 @@
     </div>
 
     <div x-cloak x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4" @click.self="closeModal()">
-        <form class="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl" @submit.prevent="saveItem()">
+        <form class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" @submit.prevent="saveItem()">
             <div class="border-b border-slate-200 px-5 py-4">
                 <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar elemento' : 'Nuevo elemento'"></h3>
             </div>
 
-            <div class="space-y-4 p-5">
+            <div class="flex-1 space-y-4 overflow-y-auto p-5">
                 <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
 
                 <div>
