@@ -29,7 +29,7 @@
                 <template x-for="item in items" :key="item.id">
                     <tr>
                         <td class="px-4 py-3">
-                            <img :src="storageImageUrl(item.imagen)" alt="Imagen ofrecer" class="h-16 w-24 rounded-lg object-cover ring-1 ring-slate-200">
+                            <img :src="storageImageUrl(item.imagen)" alt="Imagen ofrecer" class="h-16 w-24 rounded-lg bg-white object-contain ring-1 ring-slate-200">
                         </td>
                         <td class="px-4 py-3 font-medium text-slate-800" x-text="item.titulo || 'Sin título'"></td>
                         <td class="px-4 py-3 text-slate-600" x-text="item.descripcion || 'Sin descripción'"></td>
@@ -74,10 +74,10 @@
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Imagen *</label>
                     <input type="file" accept="image/*" @change="onImageSelected($event)" :required="!editingId" class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700">
-                    <p class="mt-1 text-xs text-slate-500">Se recorta automáticamente a 400x300 px y se guarda en /storage/ofrecer.</p>
+                    <p class="mt-1 text-xs text-slate-500">Se mantiene la imagen completa y solo se redimensiona si supera 1200px de ancho.</p>
                     <p class="mt-1 text-xs text-rose-600" x-text="fieldError('imagen')"></p>
 
-                    <img x-show="form.imagenPreview || form.imagenActual" x-cloak :src="form.imagenPreview || form.imagenActual" alt="Vista previa imagen" class="mt-3 h-40 w-full rounded-xl object-cover ring-1 ring-slate-200">
+                    <img x-show="form.imagenPreview || form.imagenActual" x-cloak :src="form.imagenPreview || form.imagenActual" alt="Vista previa imagen" class="mt-3 h-40 w-full rounded-xl bg-white object-contain ring-1 ring-slate-200">
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-2">
