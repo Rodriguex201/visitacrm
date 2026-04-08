@@ -552,36 +552,29 @@ class ConfiguracionController extends Controller
 
         $anchoOrigen = imagesx($origen);
         $altoOrigen = imagesy($origen);
-        $anchoDestino = 400;
-        $altoDestino = 300;
-        $ratioDestino = $anchoDestino / $altoDestino;
-        $ratioOrigen = $anchoOrigen / $altoOrigen;
+        $maxAncho = 1200;
+        $debeRedimensionar = $anchoOrigen > $maxAncho;
 
-        if ($ratioOrigen > $ratioDestino) {
-            $altoRecorte = $altoOrigen;
-            $anchoRecorte = (int) floor($altoRecorte * $ratioDestino);
-            $origenX = (int) floor(($anchoOrigen - $anchoRecorte) / 2);
-            $origenY = 0;
+        if ($debeRedimensionar) {
+            $anchoDestino = $maxAncho;
+            $altoDestino = (int) round(($altoOrigen * $anchoDestino) / $anchoOrigen);
+            $destino = imagecreatetruecolor($anchoDestino, $altoDestino);
+
+            imagecopyresampled(
+                $destino,
+                $origen,
+                0,
+                0,
+                0,
+                0,
+                $anchoDestino,
+                $altoDestino,
+                $anchoOrigen,
+                $altoOrigen
+            );
         } else {
-            $anchoRecorte = $anchoOrigen;
-            $altoRecorte = (int) floor($anchoRecorte / $ratioDestino);
-            $origenX = 0;
-            $origenY = (int) floor(($altoOrigen - $altoRecorte) / 2);
+            $destino = $origen;
         }
-
-        $destino = imagecreatetruecolor($anchoDestino, $altoDestino);
-        imagecopyresampled(
-            $destino,
-            $origen,
-            0,
-            0,
-            $origenX,
-            $origenY,
-            $anchoDestino,
-            $altoDestino,
-            $anchoRecorte,
-            $altoRecorte
-        );
 
         $mime = strtolower((string) $imagen->getMimeType());
         $extension = 'jpg';
@@ -589,18 +582,20 @@ class ConfiguracionController extends Controller
 
         if (str_contains($mime, 'png')) {
             $extension = 'png';
-            imagepng($destino, null, 7);
+            imagepng($destino, null, 6);
         } elseif (str_contains($mime, 'webp') && function_exists('imagewebp')) {
             $extension = 'webp';
-            imagewebp($destino, null, 90);
+            imagewebp($destino, null, 95);
         } else {
-            imagejpeg($destino, null, 90);
+            imagejpeg($destino, null, 95);
         }
 
         $contenido = ob_get_clean();
 
         imagedestroy($origen);
-        imagedestroy($destino);
+        if ($debeRedimensionar) {
+            imagedestroy($destino);
+        }
 
         $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
         $rutaRelativa = 'ofrecer/' . $nombreArchivo;

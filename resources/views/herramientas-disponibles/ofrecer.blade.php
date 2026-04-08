@@ -16,7 +16,7 @@
             @foreach ($ofrecerItems as $item)
                 <article class="group overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                     @if($item->imagen)
-                        <img src="{{ asset('storage/' . $item->imagen) }}" class="h-48 w-full rounded-xl object-cover">
+                        <img src="{{ asset('storage/' . $item->imagen) }}" class="h-64 w-full rounded-xl bg-white object-contain">
                     @endif
                     <div class="space-y-2 p-4">
                         @if ($item->titulo)
