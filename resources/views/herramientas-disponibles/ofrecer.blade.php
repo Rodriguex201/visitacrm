@@ -8,6 +8,7 @@
             <p class="mt-1 text-sm text-slate-600 md:text-base">Galería de soluciones y servicios disponibles para mostrar a tus clientes.</p>
         </header>
 
+
         @if ($ofrecerItems->isEmpty())
             <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
                 Aún no hay elementos activos para ofrecer.
@@ -22,6 +23,7 @@
                                 class="h-64 w-full cursor-pointer rounded-xl bg-white object-contain"
                                 @click="open = true; imagen = {{ @js(asset('storage/' . $item->imagen)) }}"
                             >
+
                         @endif
                         <div class="space-y-2 p-4">
                             @if ($item->titulo)
