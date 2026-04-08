@@ -39,9 +39,12 @@
     </div>
 
     <div x-cloak x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4" @click.self="closeModal()">
-        <div class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl">
-            <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar sector' : 'Nuevo sector'"></h3>
-            <form class="mt-4 space-y-4" @submit.prevent="saveSector()">
+        <div class="bg-white w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col rounded-2xl shadow-xl">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar sector' : 'Nuevo sector'"></h3>
+            </div>
+            <form class="flex max-h-[90vh] flex-1 flex-col" @submit.prevent="saveSector()">
+                <div class="flex-1 space-y-4 overflow-y-auto p-5">
                 <div>
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
                     <input type="text" x-model="form.nombre" maxlength="255" required class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
@@ -50,7 +53,8 @@
                     <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Orden</label>
                     <input type="number" x-model="form.orden" min="0" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                </div>
+                <div class="flex justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4">
                     <button type="button" @click="closeModal()" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
                     <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white" :disabled="loading">Guardar</button>
                 </div>
