@@ -5,7 +5,7 @@
     <section class="space-y-6">
         <header class="rounded-3xl border border-slate-200 bg-gradient-to-r from-sky-50 via-white to-indigo-50 p-6 shadow-sm md:p-8">
             <h1 class="text-2xl font-bold text-slate-950 md:text-3xl">Qué puedo ofrecer</h1>
-            <p class="mt-1 text-sm text-slate-600 md:text-base">Galería de soluciones y servicios disponibles para mostrar a tus clientes.</p>
+            <p class="mt-1 text-sm text-slate-600 md:text-base">Galería de soluciones y servicios disponibles.</p>
         </header>
 
 
@@ -21,7 +21,7 @@
                             <img
                                 src="{{ asset('storage/' . $item->imagen) }}"
                                 class="h-64 w-full cursor-pointer rounded-xl bg-white object-contain"
-                                @click="open = true; imagen = {{ @js(asset('storage/' . $item->imagen)) }}"
+                               @click="open = true; imagen = '{{ asset('storage/' . $item->imagen) }}'"
                             >
 
                         @endif

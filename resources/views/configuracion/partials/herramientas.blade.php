@@ -9,7 +9,7 @@
     storageBaseUrl: @js(asset('storage')),
 })">
     <div class="flex items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-slate-900">Herramientas</h2>
+        <h2 class="text-lg font-semibold text-slate-900">Redes Sociales</h2>
         <button type="button" @click="openCreateModal()" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700">+ Agregar</button>
     </div>
 
