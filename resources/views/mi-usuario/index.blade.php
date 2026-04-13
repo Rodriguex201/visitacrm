@@ -31,7 +31,7 @@
                     {{ $tipoNombre ?: $valorVacio }}
                 </span>
 
-                @if ($usuario->usuarioDe)
+                @if ($usuario->tipo_usuario === 'administracion' && $usuario->usuarioDe)
                     <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                         Usuario de: {{ $usuario->usuarioDe->codigo ?? $usuario->usuarioDe->name }}
                     </span>
@@ -59,12 +59,14 @@
                     </div>
                 </article>
 
-                <article class="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Usuario de</p>
-                    <p class="mt-1 text-sm font-medium text-slate-900">
-                        {{ $usuario->usuarioDe?->codigo ? 'Usuario de: '.$usuario->usuarioDe->codigo : $valorVacio }}
-                    </p>
-                </article>
+                @if ($usuario->tipo_usuario === 'administracion')
+                    <article class="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Usuario de</p>
+                        <p class="mt-1 text-sm font-medium text-slate-900">
+                            {{ $usuario->usuarioDe?->codigo ? 'Usuario de: '.$usuario->usuarioDe->codigo : $valorVacio }}
+                        </p>
+                    </article>
+                @endif
 
                 <article class="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad de referidos</p>
