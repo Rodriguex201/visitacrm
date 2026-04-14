@@ -371,6 +371,11 @@
 
                                     @if ($empresa)
                                         @php($usuarioReferente = $empresa->responsable_user_id ? $empresa->responsable : ((($empresa->creador?->tipo_usuario ?? null) === 'administracion') ? $empresa->creador : null))
+                                        @php($comoLlegoComentario = $empresa->comoLlego
+                                            ->pluck('texto')
+                                            ->map(fn ($texto) => trim((string) $texto))
+                                            ->filter()
+                                            ->implode(' · '))
 
                                         @if ($empresa->referida_at && $usuarioReferente?->codigo)
                                             <span class="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
@@ -384,6 +389,12 @@
                                                 <p class="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
 
                                                     Gestión inicial: {{ \Illuminate\Support\Carbon::parse($empresa->gestion_inicial_at)->format('d/m/Y H:i') }}
+                                                </p>
+                                            @endif
+
+                                            @if ($comoLlegoComentario !== '')
+                                                <p class="mt-1 inline-flex items-center rounded-full bg-cyan-50 px-2 py-0.5 text-[11px] font-medium text-cyan-700">
+                                                    Cómo llegó: {{ $comoLlegoComentario }}
                                                 </p>
                                             @endif
                                             <div class="mt-1 flex flex-wrap items-center gap-1">
