@@ -142,6 +142,15 @@ class EmpresaController extends Controller
 
 
         $totalEmpresas = (clone $empresasQuery)->count();
+        $totalPendientesCantidad = (clone $empresasQuery)
+            ->where('referido_estado', 'pendiente')
+            ->count();
+        $totalEfectivosCantidad = (clone $empresasQuery)
+            ->where('referido_estado', 'aprobado')
+            ->count();
+        $totalRechazadosCantidad = (clone $empresasQuery)
+            ->where('referido_estado', 'rechazado')
+            ->count();
 
         $totalPendiente = (clone $empresasQuery)
 
@@ -201,6 +210,9 @@ class EmpresaController extends Controller
             'totalComisiones',
 
             'totalEmpresas',
+            'totalPendientesCantidad',
+            'totalEfectivosCantidad',
+            'totalRechazadosCantidad',
 
             'usaRangoPersonalizado',
             'desde',
