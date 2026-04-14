@@ -499,38 +499,53 @@
                     <aside class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
                         <h2 class="text-base font-semibold text-slate-900">Resumen</h2>
                         @php($summaryFilters = array_filter($filters, fn ($value) => $value !== ''))
-                        <dl class="mt-4 space-y-3">
-                            <div>
-                                <a href="{{ route('empresas.index', array_merge($summaryFilters, ['resumen' => 'pendiente'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === 'pendiente' ? 'ring-2 ring-amber-200' : '' }}">
-                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pendiente</dt>
-                                    <dd class="mt-1 text-lg font-semibold text-amber-600">
-                                        $ {{ number_format((float) ($totalPendiente ?? 0), 0, ',', '.') }}
+                        <div class="mt-4 grid gap-3 md:grid-cols-2">
+                            <dl class="space-y-3">
+                                <div>
+                                    <a href="{{ route('empresas.index', array_merge($summaryFilters, ['resumen' => 'pendiente'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === 'pendiente' ? 'ring-2 ring-amber-200' : '' }}">
+                                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pendiente</dt>
+                                        <dd class="mt-1 text-lg font-semibold text-amber-600">
+                                            $ {{ number_format((float) ($totalPendiente ?? 0), 0, ',', '.') }}
+                                        </dd>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a href="{{ route('empresas.index', array_merge($summaryFilters, ['resumen' => 'pagado'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === 'pagado' ? 'ring-2 ring-emerald-200' : '' }}">
+                                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
+                                        <dd class="mt-1 text-lg font-semibold text-emerald-600">
+                                            $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
+                                        </dd>
+                                    </a>
+                                </div>
+                                <div class="rounded-lg bg-slate-50 p-3">
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total comisiones</dt>
+                                    <dd class="mt-1 text-lg font-semibold text-slate-900">
+                                        $ {{ number_format((float) ($totalComisiones ?? 0), 0, ',', '.') }}
                                     </dd>
-                                </a>
-                            </div>
-                            <div>
-                                <a href="{{ route('empresas.index', array_merge($summaryFilters, ['resumen' => 'pagado'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === 'pagado' ? 'ring-2 ring-emerald-200' : '' }}">
-                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total pagado</dt>
-                                    <dd class="mt-1 text-lg font-semibold text-emerald-600">
-                                        $ {{ number_format((float) ($totalPagado ?? 0), 0, ',', '.') }}
+                                </div>
+                                <div>
+                                    <a href="{{ route('empresas.index', \Illuminate\Support\Arr::except($summaryFilters, ['resumen'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === '' ? 'ring-2 ring-slate-200' : '' }}">
+                                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
+                                        <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
+                                    </a>
+                                </div>
+                            </dl>
 
-                                    </dd>
-                                </a>
-                            </div>
-                            <div class="rounded-lg bg-slate-50 p-3">
-                                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total comisiones</dt>
-                                <dd class="mt-1 text-lg font-semibold text-slate-900">
-                                    $ {{ number_format((float) ($totalComisiones ?? 0), 0, ',', '.') }}
-
-                                </dd>
-                            </div>
-                            <div>
-                                <a href="{{ route('empresas.index', \Illuminate\Support\Arr::except($summaryFilters, ['resumen'])) }}" class="block rounded-lg bg-slate-50 p-3 transition hover:bg-slate-100 {{ $resumenInput === '' ? 'ring-2 ring-slate-200' : '' }}">
-                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Total empresas</dt>
-                                    <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEmpresas ?? 0 }}</dd>
-                                </a>
-                            </div>
-                        </dl>
+                            <dl class="space-y-3">
+                                <div class="rounded-lg bg-slate-50 p-3">
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Pendientes</dt>
+                                    <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalPendientesCantidad ?? 0 }}</dd>
+                                </div>
+                                <div class="rounded-lg bg-slate-50 p-3">
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Efectivos</dt>
+                                    <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalEfectivosCantidad ?? 0 }}</dd>
+                                </div>
+                                <div class="rounded-lg bg-slate-50 p-3">
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Rechazados</dt>
+                                    <dd class="mt-1 text-lg font-semibold text-slate-900">{{ $totalRechazadosCantidad ?? 0 }}</dd>
+                                </div>
+                            </dl>
+                        </div>
                     </aside>
                 </div>
 
