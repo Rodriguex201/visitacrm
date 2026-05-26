@@ -62,6 +62,7 @@
         <div class="min-h-screen md:flex">
             <div
 
+                x-cloak
                 x-show="sidebarOpen"
                 x-transition.opacity
                 class="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
