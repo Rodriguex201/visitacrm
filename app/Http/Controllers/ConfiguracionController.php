@@ -370,7 +370,9 @@ class ConfiguracionController extends Controller
     public function storeOfrecer(Request $request): JsonResponse
     {
         $validated = $this->validarOfrecer($request);
-        $validated['imagen'] = $this->procesarImagenOfrecer($request->file('imagen'));
+        $validated['imagen'] = $this->normalizarRutaPublica(
+            $this->procesarImagenOfrecer($request->file('imagen'))
+        );
 
         $item = HerramientaOfrecer::query()->create($validated + [
             'orden' => $validated['orden'] ?? 0,
@@ -389,10 +391,12 @@ class ConfiguracionController extends Controller
         $imagenAnterior = $herramientaOfrecer->imagen;
 
         if ($request->hasFile('imagen')) {
-            $validated['imagen'] = $this->procesarImagenOfrecer($request->file('imagen'));
+            $validated['imagen'] = $this->normalizarRutaPublica(
+                $this->procesarImagenOfrecer($request->file('imagen'))
+            );
 
             if ($imagenAnterior) {
-                Storage::disk('public')->delete($imagenAnterior);
+                Storage::disk('public')->delete($this->normalizarRutaPublica($imagenAnterior));
             }
         }
 
@@ -425,7 +429,7 @@ class ConfiguracionController extends Controller
     public function destroyOfrecer(HerramientaOfrecer $herramientaOfrecer): JsonResponse
     {
         if ($herramientaOfrecer->imagen) {
-            Storage::disk('public')->delete($herramientaOfrecer->imagen);
+            Storage::disk('public')->delete($this->normalizarRutaPublica($herramientaOfrecer->imagen));
         }
 
         $herramientaOfrecer->delete();
@@ -603,6 +607,25 @@ class ConfiguracionController extends Controller
         Storage::disk('public')->put($rutaRelativa, $contenido);
 
         return $rutaRelativa;
+    }
+
+    private function normalizarRutaPublica(?string $ruta): ?string
+    {
+        if (! $ruta) {
+            return null;
+        }
+
+        $ruta = ltrim($ruta, '/');
+
+        if (str_starts_with($ruta, 'storage/')) {
+            $ruta = substr($ruta, strlen('storage/'));
+        }
+
+        if (str_starts_with($ruta, 'public/')) {
+            $ruta = substr($ruta, strlen('public/'));
+        }
+
+        return $ruta;
     }
 
     private function bancosListado()

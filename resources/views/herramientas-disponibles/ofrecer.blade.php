@@ -19,9 +19,10 @@
                     <article class="group overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                         @if($item->imagen)
                             <img
-                                src="{{ asset('storage/' . $item->imagen) }}"
+                                src="{{ Storage::url($item->imagen) }}"
+                                alt="Imagen ofrecer"
                                 class="h-64 w-full cursor-pointer rounded-xl bg-white object-contain"
-                               @click="open = true; imagen = '{{ asset('storage/' . $item->imagen) }}'"
+                               @click="open = true; imagen = '{{ Storage::url($item->imagen) }}'"
                             >
 
                         @endif

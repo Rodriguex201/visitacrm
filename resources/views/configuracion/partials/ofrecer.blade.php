@@ -6,7 +6,6 @@
     activateUrlTemplate: @js(route('configuracion.ofrecer.activate', ['herramientaOfrecer' => '__ID__'])),
     deactivateUrlTemplate: @js(route('configuracion.ofrecer.deactivate', ['herramientaOfrecer' => '__ID__'])),
     destroyUrlTemplate: @js(route('configuracion.ofrecer.destroy', ['herramientaOfrecer' => '__ID__'])),
-    storageBaseUrl: @js(asset('storage')),
 })">
     <div class="flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-slate-900">Ofrecer</h2>
@@ -29,7 +28,9 @@
                 <template x-for="item in items" :key="item.id">
                     <tr>
                         <td class="px-4 py-3">
-                            <img :src="storageImageUrl(item.imagen)" alt="Imagen ofrecer" class="h-16 w-24 rounded-lg bg-white object-contain ring-1 ring-slate-200">
+                            <template x-if="item.imagen">
+                                <img :src="item.imagen_url" alt="Imagen ofrecer" class="h-16 w-24 rounded-lg bg-white object-contain ring-1 ring-slate-200">
+                            </template>
                         </td>
                         <td class="px-4 py-3 font-medium text-slate-800" x-text="item.titulo || 'Sin título'"></td>
                         <td class="px-4 py-3 text-slate-600" x-text="item.descripcion || 'Sin descripción'"></td>
@@ -98,13 +99,12 @@
 </section>
 
 <script>
-function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, activateUrlTemplate, deactivateUrlTemplate, destroyUrlTemplate, storageBaseUrl }) {
+function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, activateUrlTemplate, deactivateUrlTemplate, destroyUrlTemplate }) {
     return {
         items: initialItems ?? [],
         showModal: false,
         editingId: null,
         loading: false,
-        storageBaseUrl,
         errorMessage: '',
         validationErrors: {},
         form: { titulo: '', descripcion: '', imagenFile: null, imagenPreview: '', imagenActual: '', orden: 0, activo: true },
@@ -122,7 +122,7 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
                 descripcion: item.descripcion ?? '',
                 imagenFile: null,
                 imagenPreview: '',
-                imagenActual: item.imagen ? this.storageImageUrl(item.imagen) : '',
+                imagenActual: item.imagen_url ?? '',
                 orden: item.orden ?? 0,
                 activo: Boolean(item.activo),
             }
@@ -133,11 +133,6 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
         closeModal() { this.showModal = false; this.editingId = null },
         fieldError(field) { return this.validationErrors[field]?.[0] || '' },
         csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
-        storageImageUrl(path) {
-            const base = (this.storageBaseUrl || '').replace(/\/$/, '')
-            const cleanPath = (path || '').replace(/^\//, '')
-            return `${base}/${cleanPath}`
-        },
         onImageSelected(event) {
             const file = event?.target?.files?.[0] || null
             this.form.imagenFile = file
