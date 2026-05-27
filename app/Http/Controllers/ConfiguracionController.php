@@ -19,9 +19,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use RuntimeException;
+use Throwable;
 
 class ConfiguracionController extends Controller
 {
@@ -302,40 +304,21 @@ class ConfiguracionController extends Controller
         $validated = $request->validated();
         $archivo = $validated['logo'];
 
-        $directorioRelativo = 'imagenes/logo';
-        $directorioAbsoluto = public_path($directorioRelativo);
+        try {
+            $rutaRelativa = $this->guardarLogoSidebar($archivo);
 
-        if (! File::exists($directorioAbsoluto)) {
-            File::ensureDirectoryExists($directorioAbsoluto);
+            return redirect()
+                ->route('configuracion.index', ['tab' => 'logo'])
+                ->with('success', 'Logo actualizado correctamente.');
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('configuracion.index', ['tab' => 'logo'])
+                ->withErrors([
+                    'logo' => 'No se pudo guardar el nuevo logo. Verifica permisos de la carpeta public/imagenes/logo e inténtalo nuevamente.',
+                ], 'updateLogoSidebar');
         }
-
-        $logoAnterior = ConfiguracionSistema::valor('logo_sidebar');
-        $extension = strtolower($archivo->getClientOriginalExtension() ?: $archivo->extension() ?: 'png');
-        $nombreArchivo = 'sidebar-logo-' . now()->format('YmdHis') . '-' . str()->random(8) . '.' . $extension;
-
-        $archivo->move($directorioAbsoluto, $nombreArchivo);
-
-        $rutaRelativa = $directorioRelativo . '/' . $nombreArchivo;
-
-        ConfiguracionSistema::query()->updateOrCreate(
-            ['clave' => 'logo_sidebar'],
-            [
-                'valor' => $rutaRelativa,
-                'descripcion' => 'Ruta del logo principal mostrado en el sidebar',
-            ]
-        );
-
-        if ($logoAnterior) {
-            $rutaAnterior = public_path($logoAnterior);
-
-            if (str_starts_with($logoAnterior, $directorioRelativo . '/') && File::exists($rutaAnterior)) {
-                File::delete($rutaAnterior);
-            }
-        }
-
-        return redirect()
-            ->route('configuracion.index', ['tab' => 'logo'])
-            ->with('success', 'Logo actualizado correctamente.');
     }
 
     public function updateEstadoReferidoColor(Request $request): \Illuminate\Http\RedirectResponse
@@ -531,6 +514,67 @@ class ConfiguracionController extends Controller
         $rutaRelativa = 'herramientas/' . $nombreArchivo;
 
         Storage::disk('public')->put($rutaRelativa, $contenido);
+
+        return $rutaRelativa;
+    }
+
+    private function guardarLogoSidebar(UploadedFile $archivo): string
+    {
+        $directorioRelativo = 'imagenes/logo';
+        $directorioAbsoluto = public_path($directorioRelativo);
+
+        if (! File::exists($directorioAbsoluto)) {
+            File::ensureDirectoryExists($directorioAbsoluto);
+        }
+
+        $logoAnterior = ConfiguracionSistema::valor('logo_sidebar');
+        $extension = strtolower($archivo->getClientOriginalExtension() ?: $archivo->extension() ?: 'png');
+        $nombreArchivo = 'sidebar-logo-' . now()->format('YmdHis') . '-' . str()->random(8) . '.' . $extension;
+        $rutaRelativa = $directorioRelativo . '/' . $nombreArchivo;
+        $rutaAbsoluta = public_path($rutaRelativa);
+
+        Log::info('LOGO NUEVO', [
+            'nombre' => $nombreArchivo,
+            'rutaRelativa' => $rutaRelativa,
+            'rutaAbsoluta' => $rutaAbsoluta,
+        ]);
+
+        $archivo->move(
+            $directorioAbsoluto,
+            $nombreArchivo
+        );
+
+        if (! File::exists($rutaAbsoluta)) {
+            throw new RuntimeException(
+                'El archivo del logo no quedó guardado.'
+            );
+        }
+
+        ConfiguracionSistema::query()->updateOrCreate(
+            ['clave' => 'logo_sidebar'],
+            [
+                'valor' => $rutaRelativa,
+                'descripcion' => 'Ruta del logo principal mostrado en el sidebar',
+            ]
+        );
+
+        if ($logoAnterior) {
+            $rutaAnterior = public_path($logoAnterior);
+
+            if ($rutaAnterior !== $rutaAbsoluta
+                && str_starts_with($logoAnterior, $directorioRelativo . '/')
+                && File::exists($rutaAnterior)) {
+                Log::info('LOGO ELIMINANDO', [
+                    'logoAnterior' => $logoAnterior,
+                    'rutaAnterior' => $rutaAnterior,
+                    'rutaNueva' => $rutaAbsoluta,
+                ]);
+
+                File::delete($rutaAnterior);
+
+                Log::info('LOGO DELETE EJECUTADO');
+            }
+        }
 
         return $rutaRelativa;
     }
