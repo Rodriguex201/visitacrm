@@ -15,6 +15,8 @@
 /node_modules
 /public/build
 /public/hot
+/public/ofrecer/*
+!/public/ofrecer/.gitignore
 /public/storage
 /storage/*.key
 /storage/pail

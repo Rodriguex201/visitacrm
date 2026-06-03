@@ -1,39 +1,25 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        $db = DB::connection()->getDatabaseName();
-
-        $hasTelefono = DB::selectOne(
-            "SELECT COUNT(*) AS c
-             FROM INFORMATION_SCHEMA.COLUMNS
-             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'telefono'",
-            [$db]
-        )->c;
-
-        if ((int)$hasTelefono === 0) {
-            DB::statement("ALTER TABLE `users` ADD COLUMN `telefono` VARCHAR(255) NULL AFTER `name`");
+        if (! Schema::hasColumn('users', 'telefono')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('telefono')->nullable()->after('name');
+            });
         }
 
-        $hasTipo = DB::selectOne(
-            "SELECT COUNT(*) AS c
-             FROM INFORMATION_SCHEMA.COLUMNS
-             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'tipo_usuario'",
-            [$db]
-        )->c;
-
-        if ((int)$hasTipo === 0) {
-            DB::statement(
-                "ALTER TABLE `users`
-                 ADD COLUMN `tipo_usuario` ENUM('freelance','vinculado','administracion')
-                 NOT NULL DEFAULT 'freelance'
-                 AFTER `password`"
-            );
+        if (! Schema::hasColumn('users', 'tipo_usuario')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->enum('tipo_usuario', ['freelance', 'vinculado', 'administracion'])
+                    ->default('freelance')
+                    ->after('password');
+            });
         }
     }
 

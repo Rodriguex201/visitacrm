@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class HerramientaOfrecer extends Model
@@ -43,6 +44,14 @@ class HerramientaOfrecer extends Model
 
         if (str_starts_with($ruta, 'public/')) {
             $ruta = substr($ruta, strlen('public/'));
+        }
+
+        if (File::exists(public_path('storage/' . $ruta))) {
+            return Storage::url($ruta);
+        }
+
+        if (File::exists(public_path($ruta))) {
+            return asset($ruta);
         }
 
         return Storage::url($ruta);

@@ -379,7 +379,7 @@ class ConfiguracionController extends Controller
             );
 
             if ($imagenAnterior) {
-                Storage::disk('public')->delete($this->normalizarRutaPublica($imagenAnterior));
+                $this->eliminarImagenOfrecer($imagenAnterior);
             }
         }
 
@@ -412,7 +412,7 @@ class ConfiguracionController extends Controller
     public function destroyOfrecer(HerramientaOfrecer $herramientaOfrecer): JsonResponse
     {
         if ($herramientaOfrecer->imagen) {
-            Storage::disk('public')->delete($this->normalizarRutaPublica($herramientaOfrecer->imagen));
+            $this->eliminarImagenOfrecer($herramientaOfrecer->imagen);
         }
 
         $herramientaOfrecer->delete();
@@ -592,65 +592,169 @@ class ConfiguracionController extends Controller
 
     private function procesarImagenOfrecer(UploadedFile $imagen): string
     {
-        $origen = @imagecreatefromstring($imagen->get());
+        $origen = null;
+        $destino = null;
+        $debeRedimensionar = false;
 
-        if (! $origen) {
-            throw new RuntimeException('No se pudo procesar la imagen cargada.');
+        try {
+            Log::info('OFRECER IMAGEN INICIO', [
+                'original_name' => $imagen->getClientOriginalName(),
+                'mime_type' => $imagen->getMimeType(),
+                'size_bytes' => $imagen->getSize(),
+                'temp_path' => $imagen->getRealPath(),
+            ]);
+
+            $origen = @imagecreatefromstring($imagen->get());
+
+            if (! $origen) {
+                throw new RuntimeException('No se pudo procesar la imagen cargada.');
+            }
+
+            $anchoOrigen = imagesx($origen);
+            $altoOrigen = imagesy($origen);
+            $maxAncho = 1200;
+            $debeRedimensionar = $anchoOrigen > $maxAncho;
+
+            if ($debeRedimensionar) {
+                $anchoDestino = $maxAncho;
+                $altoDestino = (int) round(($altoOrigen * $anchoDestino) / $anchoOrigen);
+                $destino = imagecreatetruecolor($anchoDestino, $altoDestino);
+
+                imagecopyresampled(
+                    $destino,
+                    $origen,
+                    0,
+                    0,
+                    0,
+                    0,
+                    $anchoDestino,
+                    $altoDestino,
+                    $anchoOrigen,
+                    $altoOrigen
+                );
+            } else {
+                $destino = $origen;
+            }
+
+            $mime = strtolower((string) $imagen->getMimeType());
+            $extension = 'jpg';
+            ob_start();
+
+            if (str_contains($mime, 'png')) {
+                $extension = 'png';
+                imagepng($destino, null, 6);
+            } elseif (str_contains($mime, 'webp') && function_exists('imagewebp')) {
+                $extension = 'webp';
+                imagewebp($destino, null, 95);
+            } else {
+                imagejpeg($destino, null, 95);
+            }
+
+            $contenido = ob_get_clean();
+
+            $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
+            $rutaRelativa = 'ofrecer/' . $nombreArchivo;
+            $rutaStorageCompleta = storage_path('app/public/' . $rutaRelativa);
+
+            Log::info('OFRECER IMAGEN ANTES STORAGE::PUT', [
+                'ruta_relativa' => $rutaRelativa,
+                'ruta_destino_completa' => $rutaStorageCompleta,
+                'disk' => 'public',
+                'contenido_bytes' => strlen((string) $contenido),
+            ]);
+
+            $resultadoStoragePut = Storage::disk('public')->put($rutaRelativa, $contenido);
+
+            Log::info('OFRECER IMAGEN DESPUES STORAGE::PUT', [
+                'ruta_relativa' => $rutaRelativa,
+                'ruta_destino_completa' => $rutaStorageCompleta,
+                'resultado_storeAs_move' => $resultadoStoragePut,
+                'file_exists' => File::exists($rutaStorageCompleta),
+                'file_size' => File::exists($rutaStorageCompleta) ? File::size($rutaStorageCompleta) : null,
+            ]);
+
+            if (! $resultadoStoragePut) {
+                throw new RuntimeException('No se pudo guardar la imagen en storage/app/public/ofrecer.');
+            }
+
+            $this->guardarImagenOfrecerPublica($rutaRelativa, $contenido);
+
+            Log::info('OFRECER IMAGEN FIN', [
+                'ruta_relativa' => $rutaRelativa,
+                'storage_path' => $rutaStorageCompleta,
+                'public_path' => public_path($rutaRelativa),
+            ]);
+
+            return $rutaRelativa;
+        } catch (Throwable $exception) {
+            Log::error('OFRECER IMAGEN ERROR', [
+                'original_name' => $imagen->getClientOriginalName(),
+                'ruta_storage_completa' => isset($rutaStorageCompleta) ? $rutaStorageCompleta : null,
+                'ruta_publica_completa' => isset($rutaRelativa) ? public_path($rutaRelativa) : null,
+                'exception_class' => $exception::class,
+                'exception_message' => $exception->getMessage(),
+                'exception_file' => $exception->getFile(),
+                'exception_line' => $exception->getLine(),
+            ]);
+
+            throw $exception;
+        } finally {
+            if (is_resource($origen) || $origen instanceof \GdImage) {
+                imagedestroy($origen);
+            }
+
+            if ($debeRedimensionar && (is_resource($destino) || $destino instanceof \GdImage)) {
+                imagedestroy($destino);
+            }
+        }
+    }
+
+    private function guardarImagenOfrecerPublica(string $rutaRelativa, string $contenido): void
+    {
+        $rutaPublica = public_path($rutaRelativa);
+        $directorio = dirname($rutaPublica);
+
+        Log::info('OFRECER IMAGEN ANTES PUBLIC COPY', [
+            'ruta_relativa' => $rutaRelativa,
+            'ruta_destino_completa' => $rutaPublica,
+            'directorio_destino' => $directorio,
+            'directorio_exists' => File::exists($directorio),
+        ]);
+
+        if (! File::exists($directorio)) {
+            File::ensureDirectoryExists($directorio);
         }
 
-        $anchoOrigen = imagesx($origen);
-        $altoOrigen = imagesy($origen);
-        $maxAncho = 1200;
-        $debeRedimensionar = $anchoOrigen > $maxAncho;
+        $resultadoFilePut = File::put($rutaPublica, $contenido);
 
-        if ($debeRedimensionar) {
-            $anchoDestino = $maxAncho;
-            $altoDestino = (int) round(($altoOrigen * $anchoDestino) / $anchoOrigen);
-            $destino = imagecreatetruecolor($anchoDestino, $altoDestino);
+        Log::info('OFRECER IMAGEN DESPUES PUBLIC COPY', [
+            'ruta_relativa' => $rutaRelativa,
+            'ruta_destino_completa' => $rutaPublica,
+            'resultado_storeAs_move' => $resultadoFilePut,
+            'file_exists' => File::exists($rutaPublica),
+            'file_size' => File::exists($rutaPublica) ? File::size($rutaPublica) : null,
+        ]);
 
-            imagecopyresampled(
-                $destino,
-                $origen,
-                0,
-                0,
-                0,
-                0,
-                $anchoDestino,
-                $altoDestino,
-                $anchoOrigen,
-                $altoOrigen
-            );
-        } else {
-            $destino = $origen;
+        if ($resultadoFilePut === false) {
+            throw new RuntimeException('No se pudo guardar la imagen pública en public/ofrecer.');
+        }
+    }
+
+    private function eliminarImagenOfrecer(?string $ruta): void
+    {
+        $rutaNormalizada = $this->normalizarRutaPublica($ruta);
+
+        if (! $rutaNormalizada) {
+            return;
         }
 
-        $mime = strtolower((string) $imagen->getMimeType());
-        $extension = 'jpg';
-        ob_start();
+        Storage::disk('public')->delete($rutaNormalizada);
 
-        if (str_contains($mime, 'png')) {
-            $extension = 'png';
-            imagepng($destino, null, 6);
-        } elseif (str_contains($mime, 'webp') && function_exists('imagewebp')) {
-            $extension = 'webp';
-            imagewebp($destino, null, 95);
-        } else {
-            imagejpeg($destino, null, 95);
+        $rutaPublica = public_path($rutaNormalizada);
+
+        if (File::exists($rutaPublica)) {
+            File::delete($rutaPublica);
         }
-
-        $contenido = ob_get_clean();
-
-        imagedestroy($origen);
-        if ($debeRedimensionar) {
-            imagedestroy($destino);
-        }
-
-        $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.' . $extension;
-        $rutaRelativa = 'ofrecer/' . $nombreArchivo;
-
-        Storage::disk('public')->put($rutaRelativa, $contenido);
-
-        return $rutaRelativa;
     }
 
     private function normalizarRutaPublica(?string $ruta): ?string
