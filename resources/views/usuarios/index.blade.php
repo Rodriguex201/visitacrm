@@ -6,6 +6,7 @@
             openCreateModal: false,
             openEditModal: false,
             openTipoColorsModal: false,
+            codigoPrefixes: @js($codigoPrefixes),
             createCiudad: @js(old('ciudad', '')),
             createTipoUsuario: @js(old('tipo_usuario', 'freelance')),
             createBancoId: @js(old('banco_id', '')),
@@ -80,9 +81,9 @@
             },
 
             codigoPreviewByTipo(tipoUsuario) {
-                if (tipoUsuario === 'vinculado') return 'V-####';
-                if (tipoUsuario === 'freelance') return 'F-####';
-                if (tipoUsuario === 'administracion') return 'A-####';
+                const prefix = this.codigoPrefixes?.[tipoUsuario];
+
+                if (prefix) return `${prefix}####`;
 
                 return '';
             },

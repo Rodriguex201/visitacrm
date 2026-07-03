@@ -683,6 +683,7 @@ class ConfiguracionController extends Controller
                 'ruta_relativa' => $rutaRelativa,
                 'storage_path' => $rutaStorageCompleta,
                 'public_path' => public_path($rutaRelativa),
+                'external_public_path' => $this->rutaPublicaDominioExterno($rutaRelativa),
             ]);
 
             return $rutaRelativa;
@@ -712,11 +713,23 @@ class ConfiguracionController extends Controller
     private function guardarImagenOfrecerPublica(string $rutaRelativa, string $contenido): void
     {
         $rutaPublica = public_path($rutaRelativa);
-        $directorio = dirname($rutaPublica);
+        $this->guardarArchivoOfrecerEnRuta($rutaRelativa, $contenido, $rutaPublica, 'local_public');
+
+        $rutaDominioExterno = $this->rutaPublicaDominioExterno($rutaRelativa);
+
+        if ($rutaDominioExterno) {
+            $this->guardarArchivoOfrecerEnRuta($rutaRelativa, $contenido, $rutaDominioExterno, 'external_public_domain');
+        }
+    }
+
+    private function guardarArchivoOfrecerEnRuta(string $rutaRelativa, string $contenido, string $rutaDestinoCompleta, string $canal): void
+    {
+        $directorio = dirname($rutaDestinoCompleta);
 
         Log::info('OFRECER IMAGEN ANTES PUBLIC COPY', [
+            'canal' => $canal,
             'ruta_relativa' => $rutaRelativa,
-            'ruta_destino_completa' => $rutaPublica,
+            'ruta_destino_completa' => $rutaDestinoCompleta,
             'directorio_destino' => $directorio,
             'directorio_exists' => File::exists($directorio),
         ]);
@@ -725,18 +738,19 @@ class ConfiguracionController extends Controller
             File::ensureDirectoryExists($directorio);
         }
 
-        $resultadoFilePut = File::put($rutaPublica, $contenido);
+        $resultadoFilePut = File::put($rutaDestinoCompleta, $contenido);
 
         Log::info('OFRECER IMAGEN DESPUES PUBLIC COPY', [
+            'canal' => $canal,
             'ruta_relativa' => $rutaRelativa,
-            'ruta_destino_completa' => $rutaPublica,
+            'ruta_destino_completa' => $rutaDestinoCompleta,
             'resultado_storeAs_move' => $resultadoFilePut,
-            'file_exists' => File::exists($rutaPublica),
-            'file_size' => File::exists($rutaPublica) ? File::size($rutaPublica) : null,
+            'file_exists' => File::exists($rutaDestinoCompleta),
+            'file_size' => File::exists($rutaDestinoCompleta) ? File::size($rutaDestinoCompleta) : null,
         ]);
 
-        if ($resultadoFilePut === false) {
-            throw new RuntimeException('No se pudo guardar la imagen pública en public/ofrecer.');
+        if ($resultadoFilePut === false || ! File::exists($rutaDestinoCompleta)) {
+            throw new RuntimeException("No se pudo guardar la imagen publica en {$canal}.");
         }
     }
 
@@ -755,6 +769,25 @@ class ConfiguracionController extends Controller
         if (File::exists($rutaPublica)) {
             File::delete($rutaPublica);
         }
+
+        $rutaDominioExterno = $this->rutaPublicaDominioExterno($rutaNormalizada);
+
+        if ($rutaDominioExterno && File::exists($rutaDominioExterno)) {
+            File::delete($rutaDominioExterno);
+        }
+    }
+
+    private function rutaPublicaDominioExterno(string $rutaRelativa): ?string
+    {
+        $publicDomainPath = trim((string) config('app.public_domain_path', ''));
+
+        if ($publicDomainPath === '') {
+            return null;
+        }
+
+        return rtrim($publicDomainPath, DIRECTORY_SEPARATOR . '/\\')
+            . DIRECTORY_SEPARATOR
+            . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($rutaRelativa, '/\\'));
     }
 
     private function normalizarRutaPublica(?string $ruta): ?string

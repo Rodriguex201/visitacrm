@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'public_domain_path' => env('PUBLIC_DOMAIN_PATH'),
+
 
 
     /*

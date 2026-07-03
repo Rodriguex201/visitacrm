@@ -33,6 +33,7 @@ class UsuarioController extends Controller
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
+        $codigoPrefixes = User::codigoPrefixes();
 
         $usuariosQuery = User::query()
             ->with(['banco', 'usuarioDe:id,codigo,name'])
@@ -69,7 +70,7 @@ class UsuarioController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista', 'usuariosPadre'));
+        return view('usuarios.index', compact('usuarios', 'bancos', 'tipos', 'tiposLista', 'usuariosPadre', 'codigoPrefixes'));
     }
 
 
@@ -150,7 +151,7 @@ class UsuarioController extends Controller
             'direccion' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
-            'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'tipo_usuario' => ['required', Rule::in(User::tiposUsuarioDisponibles())],
             'banco_id' => ['nullable', 'exists:bancos,id'],
             'usuario_de_id' => ['nullable', 'exists:users,id'],
             'cta_banco' => ['nullable', 'string', 'max:60'],
@@ -203,7 +204,7 @@ class UsuarioController extends Controller
                 'required',
                 'string',
                 'max:20',
-                'regex:/^(A|V)-\d{4}$/',
+                'regex:' . User::codigoRegex(),
                 Rule::unique('users', 'codigo')->ignore($user->id),
             ],
             'name' => ['required', 'string', 'max:255'],
@@ -211,7 +212,7 @@ class UsuarioController extends Controller
             'direccion' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:6'],
-            'tipo_usuario' => ['required', 'in:freelance,vinculado,administracion'],
+            'tipo_usuario' => ['required', Rule::in(User::tiposUsuarioDisponibles())],
             'banco_id' => ['nullable', 'exists:bancos,id'],
             'usuario_de_id' => ['nullable', 'exists:users,id', Rule::notIn([$user->id])],
             'cta_banco' => ['nullable', 'string', 'max:60'],
@@ -267,7 +268,7 @@ class UsuarioController extends Controller
 
     private function generateCodigo(string $tipoUsuario): string
     {
-        $prefix = $this->codigoPrefix($tipoUsuario);
+        $prefix = User::codigoPrefixForTipo($tipoUsuario);
 
         $lockName = "users_codigo_{$prefix}";
         DB::select('SELECT GET_LOCK(?, 10)', [$lockName]);
@@ -289,16 +290,6 @@ class UsuarioController extends Controller
         } finally {
             DB::select('SELECT RELEASE_LOCK(?)', [$lockName]);
         }
-    }
-
-    private function codigoPrefix(string $tipoUsuario): string
-    {
-        return match ($tipoUsuario) {
-            'vinculado' => 'V-',
-            'freelance' => 'F-',
-            'administracion' => 'A-',
-            default => 'F-',
-        };
     }
 
     private function isDuplicateKeyException(QueryException $exception): bool
