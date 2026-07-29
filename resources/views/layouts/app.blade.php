@@ -45,6 +45,7 @@
         @keydown.escape.window="sidebarOpen = false"
 
     >
+        @include('layouts.partials.initial-loader')
 
         @php
             $isDashboard = request()->routeIs('dashboard');
@@ -59,7 +60,7 @@
             $isAdmin = auth()->user()?->tipo_usuario === 'administracion';
         @endphp
 
-        <div class="min-h-screen md:flex">
+        <div class="min-h-screen md:flex" data-app-shell>
             <div
 
                 x-cloak

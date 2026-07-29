@@ -1,3 +1,10 @@
+@php
+    use App\Support\VisitaCatalogos;
+
+    $estadoOptions = VisitaCatalogos::formOptions('estados');
+    $visitaCatalogos = VisitaCatalogos::frontendPayload();
+@endphp
+
 <template x-if="openVisitModal">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="closeVisitModal()">
         <div class="absolute inset-0 bg-slate-900/45"></div>
@@ -52,18 +59,12 @@
                     <div>
                         <label class="mb-1 block text-sm font-medium text-slate-700">Estado</label>
                         <select x-model="visitForm.estado" required class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                            <option value="programada">Programada</option>
-                            <option value="realizada">Realizada</option>
-                            <option value="cancelada">Cancelada</option>
+                            @foreach ($estadoOptions as $estadoOption)
+                                <option value="{{ $estadoOption['value'] }}">{{ $estadoOption['label'] }}</option>
+                            @endforeach
                         </select>
                         <p class="mt-1 text-xs text-rose-600" x-text="visitErrors.estado || ''"></p>
                     </div>
-                </div>
-
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">Resultado</label>
-                    <input type="text" x-model="visitForm.resultado" class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                    <p class="mt-1 text-xs text-rose-600" x-text="visitErrors.resultado || ''"></p>
                 </div>
 
                 <div>
@@ -96,6 +97,8 @@
 
 <script>
     window.createNuevaVisitaModalState = function (config = {}) {
+        const visitaCatalogos = @js($visitaCatalogos);
+
         return {
             openVisitModal: false,
             empresaQuery: '',
@@ -110,8 +113,7 @@
             visitToast: '',
             visitForm: {
                 fecha_hora: '',
-                estado: 'programada',
-                resultado: '',
+                estado: visitaCatalogos.default_estado,
                 notas: '',
             },
             initNuevaVisitaModal() {
@@ -187,8 +189,7 @@
             resetVisitForm() {
                 this.visitForm = {
                     fecha_hora: '',
-                    estado: 'programada',
-                    resultado: '',
+                    estado: visitaCatalogos.default_estado,
                     notas: '',
                 };
 
@@ -215,7 +216,6 @@
                             empresa_id: this.empresaId,
                             fecha_hora: this.visitForm.fecha_hora,
                             estado: this.visitForm.estado,
-                            resultado: this.visitForm.resultado || null,
                             notas: this.visitForm.notas || null,
                         }),
                     });

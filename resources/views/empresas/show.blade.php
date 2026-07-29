@@ -668,10 +668,9 @@
                             <label for="resultado" class="mb-1 block text-sm font-medium text-slate-700">Resultado de la visita*</label>
                             <select id="resultado" x-model="form.resultado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" required>
                                 <option value="">Selecciona resultado</option>
-                                <option value="venta_realizada">Venta realizada</option>
-                                <option value="en_seguimiento">En seguimiento</option>
-                                <option value="sin_interes">Sin interés</option>
-                                <option value="no_disponible">No disponible</option>
+                                @foreach (\App\Support\VisitaCatalogos::formOptions('resultados') as $resultadoOption)
+                                    <option value="{{ $resultadoOption['value'] }}">{{ $resultadoOption['label'] }}</option>
+                                @endforeach
                             </select>
                             <p x-show="errors.resultado" class="mt-1 text-xs text-rose-600" x-text="errors.resultado"></p>
                         </div>
@@ -682,13 +681,19 @@
                                 id="nivel_interes"
                                 x-model="form.nivel_interes"
                                 class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500"
-                                :disabled="form.resultado === 'sin_interes'"
+                                :disabled="form.resultado === visitaCatalogos.resultado_sin_interes"
                             >
                                 <option value="">Sin definir</option>
-                                <option value="alto" :disabled="form.resultado === 'sin_interes'">Alto</option>
-                                <option value="medio" :disabled="form.resultado === 'sin_interes'">Medio</option>
-                                <option value="bajo" :disabled="form.resultado === 'sin_interes'">Bajo</option>
-                                <option value="sin_interes" :disabled="['venta_realizada','en_seguimiento'].includes(form.resultado)">Sin interés</option>
+                                @foreach (\App\Support\VisitaCatalogos::formOptions('niveles_interes') as $nivelInteresOption)
+                                    <option
+                                        value="{{ $nivelInteresOption['value'] }}"
+                                        @if ($nivelInteresOption['value'] === \App\Support\VisitaCatalogos::nivelInteresSinInteres())
+                                            :disabled="visitaCatalogos.resultados_con_interes_positivo.includes(form.resultado)"
+                                        @else
+                                            :disabled="form.resultado === visitaCatalogos.resultado_sin_interes"
+                                        @endif
+                                    >{{ $nivelInteresOption['label'] }}</option>
+                                @endforeach
                             </select>
                             <p x-show="errors.nivel_interes" class="mt-1 text-xs text-rose-600" x-text="errors.nivel_interes"></p>
                             <p class="mt-1 text-xs text-slate-500">Si seleccionas "Sin interés", se guardará automáticamente ese nivel.</p>
@@ -1080,6 +1085,7 @@
                 empresaUser: @js($empresa->responsable ? ['id' => $empresa->responsable->id, 'codigo' => $empresa->responsable->codigo, 'name' => $empresa->responsable->name ?? $empresa->responsable->nombre, 'nombre' => $empresa->responsable->nombre ?? $empresa->responsable->name, 'telefono' => $empresa->responsable->telefono] : null),
                 empresaReferidaAt: @js($empresa->referida_at?->toIso8601String()),
                 usuarioSuccess: '',
+                visitaCatalogos: @js(\App\Support\VisitaCatalogos::frontendPayload()),
                 actividadPartialUrl: @js(route('empresas.actividad.partial', $empresa)),
                 visitasPartialUrl: @js(route('empresas.visitas.partial', $empresa)),
                 usuarioQuery: '',
@@ -1171,15 +1177,18 @@
                     this.bindActividadActions();
 
                     this.$watch('form.resultado', (value) => {
-                        if (value === 'sin_interes') {
-                            this.form.nivel_interes = 'sin_interes';
+                        if (value === this.visitaCatalogos.resultado_sin_interes) {
+                            this.form.nivel_interes = this.visitaCatalogos.nivel_interes_sin_interes;
                         }
 
-                        if (value === 'no_disponible') {
+                        if (value === this.visitaCatalogos.resultado_no_disponible) {
                             this.form.nivel_interes = '';
                         }
 
-                        if (['venta_realizada', 'en_seguimiento'].includes(value) && this.form.nivel_interes === 'sin_interes') {
+                        if (
+                            this.visitaCatalogos.resultados_con_interes_positivo.includes(value)
+                            && this.form.nivel_interes === this.visitaCatalogos.nivel_interes_sin_interes
+                        ) {
                             this.form.nivel_interes = '';
                         }
                     });

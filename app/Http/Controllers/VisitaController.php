@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empresa;
 use App\Models\Visita;
+use App\Support\VisitaCatalogos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +16,7 @@ class VisitaController extends Controller
         $data = $request->validate([
             'empresa_id' => ['required', 'exists:empresas,id'],
             'fecha_hora' => ['required', 'date'],
-            'estado' => ['required', 'in:programada,realizada,cancelada'],
-            'resultado' => ['nullable', 'string', 'max:255'],
+            'estado' => ['required', VisitaCatalogos::estadoRule()],
             'notas' => ['nullable', 'string'],
         ]);
 
@@ -52,13 +52,13 @@ class VisitaController extends Controller
         }
 
         $validated = $request->validate([
-            'resultado' => ['required', 'in:venta_realizada,en_seguimiento,sin_interes,no_disponible'],
-            'nivel_interes' => ['nullable', 'in:alto,medio,bajo,sin_interes'],
+            'resultado' => ['required', VisitaCatalogos::resultadoRule()],
+            'nivel_interes' => ['nullable', VisitaCatalogos::nivelInteresRule()],
         ]);
 
         if (
-            in_array($validated['resultado'], ['venta_realizada', 'en_seguimiento'], true)
-            && (($validated['nivel_interes'] ?? null) === 'sin_interes')
+            VisitaCatalogos::resultadoRequiereNivelDistintoDeSinInteres($validated['resultado'])
+            && (($validated['nivel_interes'] ?? null) === VisitaCatalogos::nivelInteresSinInteres())
         ) {
             return response()->json([
                 'message' => 'El nivel de interés no puede ser "sin interés" para este resultado.',
@@ -70,11 +70,11 @@ class VisitaController extends Controller
 
         $nivelInteres = $validated['nivel_interes'] ?? null;
 
-        if ($validated['resultado'] === 'sin_interes') {
-            $nivelInteres = 'sin_interes';
+        if (VisitaCatalogos::resultadoImponeNivelSinInteres($validated['resultado'])) {
+            $nivelInteres = VisitaCatalogos::nivelInteresSinInteres();
         }
 
-        if ($validated['resultado'] === 'no_disponible') {
+        if (VisitaCatalogos::resultadoLimpiaNivelInteres($validated['resultado'])) {
             $nivelInteres = null;
         }
 
@@ -98,34 +98,17 @@ class VisitaController extends Controller
 
     private function resultadoLabel(?string $resultado): ?string
     {
-        return match ($resultado) {
-            'venta_realizada' => 'Venta realizada',
-            'en_seguimiento' => 'En seguimiento',
-            'sin_interes' => 'Sin interés',
-            'no_disponible' => 'No disponible',
-            default => null,
-        };
+        return VisitaCatalogos::resultadoLabel($resultado);
     }
 
     private function nivelInteresLabel(?string $nivelInteres): ?string
     {
-        return match ($nivelInteres) {
-            'alto' => 'Alto',
-            'medio' => 'Medio',
-            'bajo' => 'Bajo',
-            'sin_interes' => 'Sin interés',
-            default => null,
-        };
+        return VisitaCatalogos::nivelInteresLabel($nivelInteres);
     }
 
     private function resultadoBadgeClass(?string $resultado): string
     {
-        return match ($resultado) {
-            'venta_realizada' => 'bg-emerald-100 text-emerald-700',
-            'en_seguimiento' => 'bg-amber-100 text-amber-700',
-            'sin_interes' => 'bg-rose-100 text-rose-700',
-            'no_disponible' => 'bg-slate-200 text-slate-700',
-            default => 'bg-slate-100 text-slate-700',
-        };
+        return VisitaCatalogos::resultadoBadgeClass($resultado);
     }
 }
+

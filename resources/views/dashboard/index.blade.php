@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        use App\Support\VisitaCatalogos;
+    @endphp
     <section x-data="{ ...createNuevaVisitaModalState(), init() { this.initNuevaVisitaModal() } }" class="space-y-5">
         <div class="flex items-start justify-between gap-3">
             <div>
@@ -104,13 +107,8 @@
                     <div class="mt-3 space-y-2.5">
                         @foreach ($proximasVisitas as $visita)
                             @php
-                                $badgeClass = match ($visita->estado) {
-                                    'realizada' => 'bg-emerald-100 text-emerald-700',
-                                    'cancelada' => 'bg-rose-100 text-rose-700',
-                                    'programada' => 'bg-blue-100 text-blue-700',
-                                    default => 'bg-gray-200 text-gray-700',
-                                };
-                                $badgeText = $visita->estado ? ucfirst($visita->estado) : 'No disponible';
+                                $badgeClass = VisitaCatalogos::estadoBadgeClass($visita->estado, 'bg-gray-200 text-gray-700');
+                                $badgeText = VisitaCatalogos::estadoLabel($visita->estado) ?? 'No disponible';
                             @endphp
                             <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">
                                 <div>
@@ -134,29 +132,12 @@
                         @foreach ($visitasRecientes as $visita)
                             @php
                                 $badgeClass = $visita->resultado
-                                    ? match ($visita->resultado) {
-                                        'venta_realizada' => 'bg-emerald-100 text-emerald-700',
-                                        'en_seguimiento' => 'bg-amber-100 text-amber-700',
-                                        'sin_interes' => 'bg-rose-100 text-rose-700',
-                                        'no_disponible' => 'bg-slate-200 text-slate-700',
-                                        default => 'bg-slate-100 text-slate-700',
-                                    }
-                                    : match ($visita->estado) {
-                                        'realizada' => 'bg-emerald-100 text-emerald-700',
-                                        'cancelada' => 'bg-rose-100 text-rose-700',
-                                        'programada' => 'bg-blue-100 text-blue-700',
-                                        default => 'bg-gray-200 text-gray-700',
-                                    };
+                                    ? VisitaCatalogos::resultadoBadgeClass($visita->resultado)
+                                    : VisitaCatalogos::estadoBadgeClass($visita->estado, 'bg-gray-200 text-gray-700');
 
                                 $badgeText = $visita->resultado
-                                    ? match ($visita->resultado) {
-                                        'venta_realizada' => 'Venta realizada',
-                                        'en_seguimiento' => 'En seguimiento',
-                                        'sin_interes' => 'Sin interés',
-                                        'no_disponible' => 'No disponible',
-                                        default => str($visita->resultado)->replace('_', ' ')->title(),
-                                    }
-                                    : ($visita->estado ? ucfirst($visita->estado) : 'No disponible');
+                                    ? (VisitaCatalogos::resultadoLabel($visita->resultado) ?? str($visita->resultado)->replace('_', ' ')->title())
+                                    : (VisitaCatalogos::estadoLabel($visita->estado) ?? 'No disponible');
                             @endphp
 
                             <article class="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5 md:px-3.5">
@@ -176,3 +157,4 @@
         @include('visitas.partials.nueva_visita_modal')
     </section>
 @endsection
+

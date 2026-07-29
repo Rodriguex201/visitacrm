@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empresa;
 use App\Models\Visita;
+use App\Support\VisitaCatalogos;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
@@ -36,7 +37,7 @@ class DashboardController extends Controller
                 $join->on('visitas.empresa_id', '=', 'latest_visitas.empresa_id')
                     ->whereRaw('COALESCE(visitas.resultado_at, visitas.fecha_hora) = latest_visitas.latest_result_at');
             })
-            ->where('visitas.resultado', 'en_seguimiento')
+            ->where('visitas.resultado', VisitaCatalogos::resultadoEnSeguimiento())
             ->distinct()
             ->count('visitas.empresa_id');
 

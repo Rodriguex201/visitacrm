@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Empresa;
 use App\Models\User;
 use App\Models\Visita;
+use App\Support\VisitaCatalogos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AgendaController extends Controller
@@ -34,6 +34,8 @@ class AgendaController extends Controller
             'empresas' => $empresas,
             'responsables' => $responsables,
             'isAdmin' => $isAdmin,
+            'visitaCatalogos' => VisitaCatalogos::frontendPayload(),
+            'estadoOptions' => VisitaCatalogos::formOptions('estados'),
         ]);
     }
 
@@ -43,7 +45,7 @@ class AgendaController extends Controller
             'start' => ['required', 'date'],
             'end' => ['required', 'date'],
             'empresa' => ['nullable', 'string', 'max:255'],
-            'estado' => ['nullable', Rule::in(['programada', 'realizada', 'cancelada', 'en_seguimiento'])],
+            'estado' => ['nullable', VisitaCatalogos::estadoRule()],
             'responsable_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
@@ -159,7 +161,7 @@ class AgendaController extends Controller
         return $request->validate([
             'empresa_id' => ['required', 'integer', 'exists:empresas,id'],
             'fecha_hora' => ['required', 'date'],
-            'estado' => ['required', Rule::in(['programada', 'realizada', 'cancelada', 'en_seguimiento'])],
+            'estado' => ['required', VisitaCatalogos::estadoRule()],
             'notas' => ['nullable', 'string'],
             'duracion_min' => ['nullable', 'integer', 'min:1', 'max:1440'],
         ]);

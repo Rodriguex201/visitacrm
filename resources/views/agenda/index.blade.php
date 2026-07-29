@@ -24,10 +24,9 @@
                 <label for="filtro-estado" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</label>
                 <select id="filtro-estado" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">Todos</option>
-                    <option value="programada">Programada</option>
-                    <option value="en_seguimiento">En seguimiento</option>
-                    <option value="realizada">Realizada</option>
-                    <option value="cancelada">Cancelada</option>
+                    @foreach ($estadoOptions as $estadoOption)
+                        <option value="{{ $estadoOption['value'] }}">{{ $estadoOption['label'] }}</option>
+                    @endforeach
                 </select>
             </div>
             @if ($isAdmin)
@@ -75,10 +74,9 @@
                     <div>
                         <label for="estado" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</label>
                         <select id="estado" required class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="programada">Programada</option>
-                            <option value="en_seguimiento">En seguimiento</option>
-                            <option value="realizada">Realizada</option>
-                            <option value="cancelada">Cancelada</option>
+                            @foreach ($estadoOptions as $estadoOption)
+                                <option value="{{ $estadoOption['value'] }}">{{ $estadoOption['label'] }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -121,13 +119,10 @@
             const filtroEmpresa = document.getElementById('filtro-empresa');
             const filtroEstado = document.getElementById('filtro-estado');
             const filtroResponsable = document.getElementById('filtro-responsable');
-
-            const estadoColor = {
-                programada: { backgroundColor: '#DBEAFE', borderColor: '#93C5FD', textColor: '#1E3A8A' },
-                en_seguimiento: { backgroundColor: '#FEF3C7', borderColor: '#FCD34D', textColor: '#78350F' },
-                realizada: { backgroundColor: '#DCFCE7', borderColor: '#86EFAC', textColor: '#14532D' },
-                cancelada: { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5', textColor: '#7F1D1D' },
-            };
+            const visitaCatalogos = @js($visitaCatalogos);
+            const estadoColor = Object.fromEntries(
+                Object.entries(visitaCatalogos.estados).map(([value, config]) => [value, config.calendar])
+            );
 
             const closeModal = () => {
                 modal.classList.add('hidden');
@@ -149,7 +144,7 @@
             const resetForm = () => {
                 form.reset();
                 visitaIdInput.value = '';
-                estadoInput.value = 'programada';
+                estadoInput.value = visitaCatalogos.default_estado;
                 duracionInput.value = '60';
                 btnEliminar.classList.add('hidden');
                 modalTitle.textContent = 'Nueva visita';
@@ -189,7 +184,7 @@
                 },
                 eventDidMount(info) {
                     const estado = info.event.extendedProps.estado;
-                    const color = estadoColor[estado] || estadoColor.programada;
+                    const color = estadoColor[estado] || estadoColor[visitaCatalogos.default_estado];
                     info.el.style.backgroundColor = color.backgroundColor;
                     info.el.style.borderColor = color.borderColor;
                     info.el.style.color = color.textColor;
@@ -204,7 +199,7 @@
                     visitaIdInput.value = event.id;
                     empresaInput.value = event.extendedProps.empresa_id || '';
                     fechaHoraInput.value = toLocalDatetimeValue(event.start);
-                    estadoInput.value = event.extendedProps.estado || 'programada';
+                    estadoInput.value = event.extendedProps.estado || visitaCatalogos.default_estado;
                     notasInput.value = event.extendedProps.notas || '';
                     duracionInput.value = event.extendedProps.duracion_min || 60;
                     modalTitle.textContent = 'Editar visita';
