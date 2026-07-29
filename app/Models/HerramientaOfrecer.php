@@ -17,6 +17,7 @@ class HerramientaOfrecer extends Model
         'titulo',
         'descripcion',
         'imagen',
+        'video',
         'orden',
         'activo',
     ];
@@ -28,15 +29,75 @@ class HerramientaOfrecer extends Model
 
     protected $appends = [
         'imagen_url',
+        'video_url',
+        'has_demo_video',
+        'demo_video',
     ];
 
     public function getImagenUrlAttribute(): ?string
     {
-        if (! $this->imagen) {
+        return $this->resolvePublicAssetUrl($this->imagen);
+    }
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        return $this->videoUrl();
+    }
+
+    public function getHasDemoVideoAttribute(): bool
+    {
+        return $this->hasDemoVideo();
+    }
+
+    public function getDemoVideoAttribute(): ?array
+    {
+        return $this->demoVideo();
+    }
+
+    public function videoUrl(): ?string
+    {
+        return $this->resolvePublicAssetUrl($this->video);
+    }
+
+    public function hasDemoVideo(): bool
+    {
+        return $this->videoUrl() !== null;
+    }
+
+    public function demoVideo(): ?array
+    {
+        $videoUrl = $this->videoUrl();
+
+        if (! $videoUrl) {
             return null;
         }
 
-        $ruta = ltrim((string) $this->imagen, '/');
+        return [
+            'url' => $videoUrl,
+            'mime_type' => 'video/mp4',
+        ];
+    }
+
+    private function rutaPublicaDominioExterno(string $rutaRelativa): ?string
+    {
+        $publicDomainPath = trim((string) config('app.public_domain_path', ''));
+
+        if ($publicDomainPath === '') {
+            return null;
+        }
+
+        return rtrim($publicDomainPath, DIRECTORY_SEPARATOR . '/\\')
+            . DIRECTORY_SEPARATOR
+            . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($rutaRelativa, '/\\'));
+    }
+
+    private function resolvePublicAssetUrl(?string $rutaOriginal): ?string
+    {
+        if (! $rutaOriginal) {
+            return null;
+        }
+
+        $ruta = ltrim((string) $rutaOriginal, '/');
 
         if (str_starts_with($ruta, 'storage/')) {
             $ruta = substr($ruta, strlen('storage/'));
@@ -61,18 +122,5 @@ class HerramientaOfrecer extends Model
         }
 
         return Storage::url($ruta);
-    }
-
-    private function rutaPublicaDominioExterno(string $rutaRelativa): ?string
-    {
-        $publicDomainPath = trim((string) config('app.public_domain_path', ''));
-
-        if ($publicDomainPath === '') {
-            return null;
-        }
-
-        return rtrim($publicDomainPath, DIRECTORY_SEPARATOR . '/\\')
-            . DIRECTORY_SEPARATOR
-            . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($rutaRelativa, '/\\'));
     }
 }

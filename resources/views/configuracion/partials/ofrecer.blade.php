@@ -17,8 +17,9 @@
             <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                     <th class="px-4 py-3">Imagen</th>
-                    <th class="px-4 py-3">Título</th>
-                    <th class="px-4 py-3">Descripción</th>
+                    <th class="px-4 py-3">Titulo</th>
+                    <th class="px-4 py-3">Descripcion</th>
+                    <th class="px-4 py-3">Demo</th>
                     <th class="px-4 py-3">Orden</th>
                     <th class="px-4 py-3">Estado</th>
                     <th class="px-4 py-3 text-right">Acciones</th>
@@ -32,8 +33,11 @@
                                 <img :src="item.imagen_url" alt="Imagen ofrecer" class="h-16 w-24 rounded-lg bg-white object-contain ring-1 ring-slate-200">
                             </template>
                         </td>
-                        <td class="px-4 py-3 font-medium text-slate-800" x-text="item.titulo || 'Sin título'"></td>
-                        <td class="px-4 py-3 text-slate-600" x-text="item.descripcion || 'Sin descripción'"></td>
+                        <td class="px-4 py-3 font-medium text-slate-800" x-text="item.titulo || 'Sin titulo'"></td>
+                        <td class="px-4 py-3 text-slate-600" x-text="item.descripcion || 'Sin descripcion'"></td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full px-2 py-1 text-xs font-semibold" :class="item.has_demo_video ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'" x-text="item.has_demo_video ? 'Disponible' : 'Sin video'"></span>
+                        </td>
                         <td class="px-4 py-3 text-slate-600" x-text="item.orden"></td>
                         <td class="px-4 py-3">
                             <span class="rounded-full px-2 py-1 text-xs font-semibold" :class="item.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'" x-text="item.activo ? 'Activo' : 'Inactivo'"></span>
@@ -52,7 +56,7 @@
     </div>
 
     <div x-cloak x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4" @click.self="closeModal()">
-        <form class="bg-white w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col rounded-2xl shadow-xl" @submit.prevent="saveItem()">
+        <form class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl" @submit.prevent="saveItem()">
             <div class="border-b border-slate-200 px-5 py-4">
                 <h3 class="text-lg font-semibold text-slate-900" x-text="editingId ? 'Editar elemento' : 'Nuevo elemento'"></h3>
             </div>
@@ -61,13 +65,13 @@
                 <div x-show="errorMessage" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="errorMessage"></div>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Título</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Titulo</label>
                     <input type="text" x-model="form.titulo" maxlength="255" class="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm">
                     <p class="mt-1 text-xs text-rose-600" x-text="fieldError('titulo')"></p>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripcion</label>
                     <textarea x-model="form.descripcion" rows="3" maxlength="1000" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></textarea>
                     <p class="mt-1 text-xs text-rose-600" x-text="fieldError('descripcion')"></p>
                 </div>
@@ -79,6 +83,23 @@
                     <p class="mt-1 text-xs text-rose-600" x-text="fieldError('imagen')"></p>
 
                     <img x-show="form.imagenPreview || form.imagenActual" x-cloak :src="form.imagenPreview || form.imagenActual" alt="Vista previa imagen" class="mt-3 h-40 w-full rounded-xl bg-white object-contain ring-1 ring-slate-200">
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Video demostrativo (MP4, max. 50 MB)</label>
+                    <input type="file" accept="video/mp4" @change="onVideoSelected($event)" class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700">
+                    <p class="mt-1 text-xs text-slate-500">El video es opcional y se mostrara como demostracion del producto.</p>
+                    <p class="mt-1 text-xs text-rose-600" x-text="fieldError('video')"></p>
+
+                    <div x-show="form.videoNombre || form.videoActual" x-cloak class="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                        <p x-show="form.videoNombre">
+                            Archivo seleccionado:
+                            <span class="font-medium text-slate-800" x-text="form.videoNombre"></span>
+                        </p>
+                        <p x-show="!form.videoNombre && form.videoActual">
+                            Ya existe un video demostrativo asociado a este elemento.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-2">
@@ -107,10 +128,32 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
         loading: false,
         errorMessage: '',
         validationErrors: {},
-        form: { titulo: '', descripcion: '', imagenFile: null, imagenPreview: '', imagenActual: '', orden: 0, activo: true },
+        form: {
+            titulo: '',
+            descripcion: '',
+            imagenFile: null,
+            imagenPreview: '',
+            imagenActual: '',
+            videoFile: null,
+            videoActual: '',
+            videoNombre: '',
+            orden: 0,
+            activo: true,
+        },
         openCreateModal() {
             this.editingId = null
-            this.form = { titulo: '', descripcion: '', imagenFile: null, imagenPreview: '', imagenActual: '', orden: 0, activo: true }
+            this.form = {
+                titulo: '',
+                descripcion: '',
+                imagenFile: null,
+                imagenPreview: '',
+                imagenActual: '',
+                videoFile: null,
+                videoActual: '',
+                videoNombre: '',
+                orden: 0,
+                activo: true,
+            }
             this.errorMessage = ''
             this.validationErrors = {}
             this.showModal = true
@@ -123,6 +166,9 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
                 imagenFile: null,
                 imagenPreview: '',
                 imagenActual: item.imagen_url ?? '',
+                videoFile: null,
+                videoActual: item.video_url ?? '',
+                videoNombre: '',
                 orden: item.orden ?? 0,
                 activo: Boolean(item.activo),
             }
@@ -130,9 +176,16 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
             this.validationErrors = {}
             this.showModal = true
         },
-        closeModal() { this.showModal = false; this.editingId = null },
-        fieldError(field) { return this.validationErrors[field]?.[0] || '' },
-        csrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+        closeModal() {
+            this.showModal = false
+            this.editingId = null
+        },
+        fieldError(field) {
+            return this.validationErrors[field]?.[0] || ''
+        },
+        csrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
         onImageSelected(event) {
             const file = event?.target?.files?.[0] || null
             this.form.imagenFile = file
@@ -144,6 +197,11 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
             reader.onload = (e) => { this.form.imagenPreview = e.target?.result || '' }
             reader.readAsDataURL(file)
         },
+        onVideoSelected(event) {
+            const file = event?.target?.files?.[0] || null
+            this.form.videoFile = file
+            this.form.videoNombre = file?.name || ''
+        },
         payload(editing) {
             const data = new FormData()
             data.append('titulo', (this.form.titulo || '').trim())
@@ -151,6 +209,7 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
             data.append('orden', this.form.orden === '' ? 0 : Number(this.form.orden))
             data.append('activo', Boolean(this.form.activo) ? 1 : 0)
             if (this.form.imagenFile instanceof File) data.append('imagen', this.form.imagenFile)
+            if (this.form.videoFile instanceof File) data.append('video', this.form.videoFile)
             if (editing) data.append('_method', 'PATCH')
             return data
         },
@@ -167,7 +226,14 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
             const endpoint = editing ? updateUrlTemplate.replace('__ID__', this.editingId) : storeUrl
 
             try {
-                const response = await fetch(endpoint, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' }, body: this.payload(editing) })
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        Accept: 'application/json',
+                    },
+                    body: this.payload(editing),
+                })
                 if (!response.ok) {
                     const body = await response.json().catch(() => ({}))
                     this.validationErrors = body.errors || {}
@@ -186,7 +252,7 @@ function ofrecerManager({ initialItems, indexUrl, storeUrl, updateUrlTemplate, a
             if (response.ok) await this.refreshList()
         },
         async destroyItem(item) {
-            if (!confirm(`¿Eliminar "${item.titulo || 'este elemento'}"?`)) return
+            if (!confirm(`Eliminar "${item.titulo || 'este elemento'}"?`)) return
             const response = await fetch(destroyUrlTemplate.replace('__ID__', item.id), { method: 'DELETE', headers: { 'X-CSRF-TOKEN': this.csrfToken(), Accept: 'application/json' } })
             if (response.ok) await this.refreshList()
         },

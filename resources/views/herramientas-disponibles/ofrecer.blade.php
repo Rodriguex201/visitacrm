@@ -3,18 +3,27 @@
 @section('content')
 <div
     x-data="{
-        open: false,
+        imageOpen: false,
         imagen: '',
         sharePageUrl: @js(route('herramientas.ofrecer')),
+        openImageModal(imageUrl) {
+            this.imagen = imageUrl || ''
+            this.imageOpen = Boolean(this.imagen)
+        },
+        closeImageModal() {
+            this.imageOpen = false
+            this.imagen = ''
+        },
         shareOffer(item) {
             const title = (item?.titulo || '').trim();
             const description = this.summarizeDescription((item?.descripcion || '').trim());
             const imageUrl = this.getPublicImageUrl(item?.imagen_url);
-            const shareText = this.buildShareText({ title, description, imageUrl });
+            const videoUrl = this.getPublicAssetUrl(item?.video_url);
+            const shareText = this.buildShareText({ title, description, imageUrl, videoUrl });
 
             window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
         },
-        buildShareText({ title, description, imageUrl }) {
+        buildShareText({ title, description, imageUrl, videoUrl }) {
             const parts = [
                 'Hola.',
                 '',
@@ -34,8 +43,8 @@
                 parts.push('Imagen:', imageUrl, '');
             }
 
-            if (this.sharePageUrl) {
-                parts.push('Ver mas:', this.sharePageUrl, '');
+            if (videoUrl) {
+                parts.push('Ver demostracion:', videoUrl, '');
             }
 
             parts.push('Si deseas mas informacion, con gusto podemos ayudarte.');
@@ -56,6 +65,9 @@
             return `${normalized.slice(0, 277).trimEnd()}...`;
         },
         getPublicImageUrl(rawUrl) {
+            return this.getPublicAssetUrl(rawUrl);
+        },
+        getPublicAssetUrl(rawUrl) {
             if (!rawUrl || typeof rawUrl !== 'string') {
                 return null;
             }
@@ -84,7 +96,6 @@
             <p class="mt-1 text-sm text-slate-600 md:text-base">Galer&iacute;a de soluciones y servicios disponibles.</p>
         </header>
 
-
         @if ($ofrecerItems->isEmpty())
             <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
                 A&uacute;n no hay elementos activos para ofrecer.
@@ -93,15 +104,15 @@
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                 @foreach ($ofrecerItems as $item)
                     <article class="group overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                        @if($item->imagen)
+                        @if ($item->imagen)
                             <img
                                 src="{{ $item->imagen_url }}"
                                 alt="Imagen ofrecer"
                                 class="h-64 w-full cursor-pointer rounded-xl bg-white object-contain"
-                                @click="open = true; imagen = '{{ $item->imagen_url }}'"
+                                @click="openImageModal('{{ $item->imagen_url }}')"
                             >
-
                         @endif
+
                         <div class="space-y-3 p-4">
                             <div class="flex items-start justify-between gap-3">
                                 @if ($item->titulo)
@@ -115,6 +126,7 @@
                                         'titulo' => $item->titulo,
                                         'descripcion' => $item->descripcion,
                                         'imagen_url' => $item->imagen_url,
+                                        'video_url' => $item->video_url,
                                     ]))"
                                     aria-label="Compartir por WhatsApp"
                                     title="Compartir por WhatsApp"
@@ -128,6 +140,18 @@
                             @if ($item->descripcion)
                                 <p class="text-sm text-slate-600">{{ $item->descripcion }}</p>
                             @endif
+
+                            @if ($item->has_demo_video)
+                                <a
+                                    href="{{ $item->video_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                >
+                                    <span class="text-xs leading-none">&#9654;</span>
+                                    <span>Ver demostracion</span>
+                                </a>
+                            @endif
                         </div>
                     </article>
                 @endforeach
@@ -136,24 +160,24 @@
     </section>
 
     <div
-        x-show="open"
+        x-show="imageOpen"
         x-transition
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-        @click.self="open = false"
-        @keydown.escape.window="open = false"
+        @click.self="closeImageModal()"
+        @keydown.escape.window="closeImageModal()"
     >
         <div class="relative w-full max-w-5xl p-4">
             <button
                 type="button"
-                @click="open = false"
+                @click="closeImageModal()"
                 class="absolute right-6 top-6 rounded-full bg-white px-3 py-1 shadow"
             >
                 &times;
             </button>
             <img
                 :src="imagen"
-                class="w-full max-h-[90vh] rounded-lg bg-white object-contain"
+                class="max-h-[90vh] w-full rounded-lg bg-white object-contain"
             >
         </div>
     </div>

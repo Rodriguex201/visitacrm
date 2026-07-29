@@ -357,6 +357,12 @@ class ConfiguracionController extends Controller
             $this->procesarImagenOfrecer($request->file('imagen'))
         );
 
+        if ($request->hasFile('video')) {
+            $validated['video'] = $this->normalizarRutaPublica(
+                $this->procesarVideoOfrecer($request->file('video'))
+            );
+        }
+
         $item = HerramientaOfrecer::query()->create($validated + [
             'orden' => $validated['orden'] ?? 0,
             'activo' => $validated['activo'] ?? true,
@@ -372,6 +378,7 @@ class ConfiguracionController extends Controller
     {
         $validated = $this->validarOfrecer($request, true);
         $imagenAnterior = $herramientaOfrecer->imagen;
+        $videoAnterior = $herramientaOfrecer->video;
 
         if ($request->hasFile('imagen')) {
             $validated['imagen'] = $this->normalizarRutaPublica(
@@ -380,6 +387,16 @@ class ConfiguracionController extends Controller
 
             if ($imagenAnterior) {
                 $this->eliminarImagenOfrecer($imagenAnterior);
+            }
+        }
+
+        if ($request->hasFile('video')) {
+            $validated['video'] = $this->normalizarRutaPublica(
+                $this->procesarVideoOfrecer($request->file('video'))
+            );
+
+            if ($videoAnterior) {
+                $this->eliminarArchivoOfrecer($videoAnterior);
             }
         }
 
@@ -413,6 +430,10 @@ class ConfiguracionController extends Controller
     {
         if ($herramientaOfrecer->imagen) {
             $this->eliminarImagenOfrecer($herramientaOfrecer->imagen);
+        }
+
+        if ($herramientaOfrecer->video) {
+            $this->eliminarArchivoOfrecer($herramientaOfrecer->video);
         }
 
         $herramientaOfrecer->delete();
@@ -585,6 +606,7 @@ class ConfiguracionController extends Controller
             'titulo' => ['nullable', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string', 'max:1000'],
             'imagen' => [$actualizacion ? 'nullable' : 'required', 'image', 'max:4096'],
+            'video' => ['nullable', 'file', 'mimetypes:video/mp4', 'mimes:mp4', 'max:51200'],
             'orden' => ['nullable', 'integer', 'min:0'],
             'activo' => ['nullable', 'boolean'],
         ]);
@@ -713,16 +735,16 @@ class ConfiguracionController extends Controller
     private function guardarImagenOfrecerPublica(string $rutaRelativa, string $contenido): void
     {
         $rutaPublica = public_path($rutaRelativa);
-        $this->guardarArchivoOfrecerEnRuta($rutaRelativa, $contenido, $rutaPublica, 'local_public');
+        $this->guardarContenidoOfrecerEnRuta($rutaRelativa, $contenido, $rutaPublica, 'local_public');
 
         $rutaDominioExterno = $this->rutaPublicaDominioExterno($rutaRelativa);
 
         if ($rutaDominioExterno) {
-            $this->guardarArchivoOfrecerEnRuta($rutaRelativa, $contenido, $rutaDominioExterno, 'external_public_domain');
+            $this->guardarContenidoOfrecerEnRuta($rutaRelativa, $contenido, $rutaDominioExterno, 'external_public_domain');
         }
     }
 
-    private function guardarArchivoOfrecerEnRuta(string $rutaRelativa, string $contenido, string $rutaDestinoCompleta, string $canal): void
+    private function guardarContenidoOfrecerEnRuta(string $rutaRelativa, string $contenido, string $rutaDestinoCompleta, string $canal): void
     {
         $directorio = dirname($rutaDestinoCompleta);
 
@@ -755,6 +777,59 @@ class ConfiguracionController extends Controller
     }
 
     private function eliminarImagenOfrecer(?string $ruta): void
+    {
+        $this->eliminarArchivoOfrecer($ruta);
+    }
+
+    private function procesarVideoOfrecer(UploadedFile $video): string
+    {
+        $nombreArchivo = now()->format('YmdHis') . '-' . str()->random(10) . '.mp4';
+        $rutaRelativa = 'ofrecer/videos/' . $nombreArchivo;
+
+        Storage::disk('public')->putFileAs('ofrecer/videos', $video, $nombreArchivo);
+        $this->publicarArchivoOfrecerDesdeStorage($rutaRelativa);
+
+        return $rutaRelativa;
+    }
+
+    private function publicarArchivoOfrecerDesdeStorage(string $rutaRelativa): void
+    {
+        $rutaNormalizada = $this->normalizarRutaPublica($rutaRelativa);
+
+        if (! $rutaNormalizada) {
+            throw new RuntimeException('No se pudo normalizar la ruta del archivo a publicar.');
+        }
+
+        $rutaStorage = Storage::disk('public')->path($rutaNormalizada);
+
+        if (! File::exists($rutaStorage)) {
+            throw new RuntimeException('No se encontro el archivo base en storage/app/public para publicarlo.');
+        }
+
+        $rutaPublica = public_path($rutaNormalizada);
+        $this->copiarArchivoOfrecerEnRuta($rutaNormalizada, $rutaStorage, $rutaPublica, 'local_public');
+
+        $rutaDominioExterno = $this->rutaPublicaDominioExterno($rutaNormalizada);
+
+        if ($rutaDominioExterno) {
+            $this->copiarArchivoOfrecerEnRuta($rutaNormalizada, $rutaStorage, $rutaDominioExterno, 'external_public_domain');
+        }
+    }
+
+    private function copiarArchivoOfrecerEnRuta(string $rutaRelativa, string $rutaOrigenCompleta, string $rutaDestinoCompleta, string $canal): void
+    {
+        $directorio = dirname($rutaDestinoCompleta);
+
+        if (! File::exists($directorio)) {
+            File::ensureDirectoryExists($directorio);
+        }
+
+        if (! File::copy($rutaOrigenCompleta, $rutaDestinoCompleta) || ! File::exists($rutaDestinoCompleta)) {
+            throw new RuntimeException("No se pudo copiar el archivo publico en {$canal}.");
+        }
+    }
+
+    private function eliminarArchivoOfrecer(?string $ruta): void
     {
         $rutaNormalizada = $this->normalizarRutaPublica($ruta);
 
