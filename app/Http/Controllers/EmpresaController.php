@@ -237,7 +237,7 @@ class EmpresaController extends Controller
 
         $soloLectura = ! $esAdministracion;
 
-        $actRange = (string) $request->query('act_range', '7');
+        $actRange = (string) $request->query('act_range', 'todo');
         $visRange = (string) $request->query('vis_range', '7');
 
         $actRange = $this->normalizarRango($actRange);
@@ -356,7 +356,7 @@ class EmpresaController extends Controller
     {
         $this->authorize('view', $empresa);
 
-        $actRange = $this->normalizarRango((string) $request->query('act_range', '7'));
+        $actRange = $this->normalizarRango((string) $request->query('act_range', 'todo'));
         $actFrom = $this->rangoFecha($actRange);
 
         $acciones = EmpresaAccion::query()
